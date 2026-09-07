@@ -35,7 +35,8 @@ class BackendReturnRequestController extends Controller
     {
         $data = $request->validate([
             'decision' => 'required|in:approve,reject',
-            'refund_method' => 'required_if:decision,approve|nullable|in:money,gehna_coins',
+            'refund_method' => 'required_if:decision,approve|nullable|in:money,gehna_coins,bank_transfer',
+            'payout_reference' => 'required_if:refund_method,bank_transfer|nullable|string|max:120',
             'admin_note' => 'nullable|string|max:1000',
         ]);
 
@@ -61,7 +62,7 @@ class BackendReturnRequestController extends Controller
             $provider = PaymentProvider::find($order->payment_provider_id);
             $paymentTxn = $order->paymentTransactions->first(fn ($txn) => $txn->type === 'payment' && $txn->status === 'captured');
             if (! $provider || $provider->slug !== 'razorpay' || empty($provider->public_key) || empty($provider->secret_key) || ! $paymentTxn?->gateway_payment_id) {
-                return back()->with('error', 'Money refunds require a captured Razorpay payment. Choose Gehna Coins for this request.');
+                return back()->with('error', 'Money refunds require a captured Razorpay payment. Choose bank transfer or Gehna Coins for this request.');
             }
 
             $response = Http::withBasicAuth($provider->public_key, $provider->secret_key)
@@ -107,6 +108,7 @@ class BackendReturnRequestController extends Controller
                 'metadata' => ['return_request_id' => $requestRow->id, 'gateway' => $gatewayRefund[2] ?? null],
                 'processed_at' => now(),
                 'refund_method' => $data['refund_method'],
+                'payout_reference' => $data['payout_reference'] ?? null,
             ]);
 
             if ($data['refund_method'] === 'gehna_coins') {
@@ -117,6 +119,7 @@ class BackendReturnRequestController extends Controller
                 'status' => 'approved',
                 'amount' => $amount,
                 'refund_method' => $data['refund_method'],
+                'payout_reference' => $data['payout_reference'] ?? null,
                 'admin_note' => $data['admin_note'] ?? null,
                 'processed_at' => now(),
             ]);

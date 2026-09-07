@@ -8,12 +8,13 @@ class ReturnRequest extends Model
 {
     protected $fillable = [
         'order_id', 'user_id', 'type', 'status', 'reason', 'admin_note',
-        'amount', 'refund_method', 'processed_at',
+        'amount', 'refund_method', 'payout_method', 'payout_details', 'payout_reference', 'processed_at',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
         'processed_at' => 'datetime',
+        'payout_details' => 'encrypted:array',
     ];
 
     public function order() { return $this->belongsTo(Order::class); }

@@ -16,6 +16,20 @@
                 @endforeach
                 <div class="d-flex justify-content-between pt-3"><strong>Refund value</strong><strong>₹{{ number_format($returnRequest->amount, 2) }}</strong></div>
                 <p class="mt-3 mb-0"><strong>Reason:</strong> {{ $returnRequest->reason }}</p>
+                @if($returnRequest->payout_method)
+                    @php($payout = $returnRequest->payout_details ?? [])
+                    <div class="mt-3 p-3" style="background:var(--df-bg-secondary);">
+                        <strong>Refund destination: {{ strtoupper($returnRequest->payout_method) }}</strong>
+                        @if($returnRequest->payout_method === 'bank')
+                            <div>Account holder: {{ $payout['account_holder'] ?? '—' }}</div>
+                            <div>Bank: {{ $payout['bank_name'] ?? '—' }}</div>
+                            <div>Account: {{ $payout['account_number'] ?? '—' }}</div>
+                            <div>IFSC: {{ $payout['ifsc'] ?? '—' }}</div>
+                        @else
+                            <div>UPI ID: {{ $payout['upi_id'] ?? '—' }}</div>
+                        @endif
+                    </div>
+                @endif
             </div>
         </div>
     </div>
@@ -25,7 +39,9 @@
                 <form method="POST" action="{{ route('admin.return-requests.update', $returnRequest) }}">
                     @csrf @method('PUT')
                     <label class="df-form-label">Refund method</label>
-                    <select name="refund_method" class="df-form-select mb-3"><option value="gehna_coins">Gehna Coins (available immediately)</option><option value="money">Money to original Razorpay payment</option></select>
+                    <select name="refund_method" class="df-form-select mb-3"><option value="gehna_coins">Gehna Coins (available immediately)</option><option value="bank_transfer">Manual bank/UPI transfer</option><option value="money">Money to original Razorpay payment</option></select>
+                    <label class="df-form-label">Transfer reference <span class="text-muted">(required for bank/UPI)</span></label>
+                    <input name="payout_reference" class="df-form-control mb-3" placeholder="Bank UTR or UPI reference number">
                     <label class="df-form-label">Admin note</label>
                     <textarea name="admin_note" class="df-form-control mb-3" rows="3"></textarea>
                     <div class="d-flex gap-2"><button name="decision" value="approve" class="df-btn df-btn-primary flex-fill" onclick="return confirm('Approve and issue this refund?')">Approve & Refund</button><button name="decision" value="reject" class="df-btn df-btn-danger" onclick="return confirm('Reject this request?')">Reject</button></div>

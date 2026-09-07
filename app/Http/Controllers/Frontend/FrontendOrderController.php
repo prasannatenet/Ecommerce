@@ -68,6 +68,12 @@ class FrontendOrderController extends Controller
 
         $data = $request->validate([
             'reason' => 'required|string|max:500',
+            'payout_method' => 'required|in:bank,upi,gehna_coins',
+            'account_holder' => 'required_if:payout_method,bank|nullable|string|max:120',
+            'account_number' => 'required_if:payout_method,bank|nullable|string|max:40',
+            'ifsc' => 'required_if:payout_method,bank|nullable|string|max:20',
+            'bank_name' => 'nullable|string|max:120',
+            'upi_id' => 'required_if:payout_method,upi|nullable|string|max:120',
             'items' => 'required|array|min:1',
             'items.*' => 'integer|distinct',
             'quantities' => 'required|array',
@@ -100,6 +106,14 @@ class FrontendOrderController extends Controller
                 'type' => 'return',
                 'status' => 'requested',
                 'reason' => $data['reason'],
+                'payout_method' => $data['payout_method'],
+                'payout_details' => [
+                    'account_holder' => $data['account_holder'] ?? null,
+                    'account_number' => $data['account_number'] ?? null,
+                    'ifsc' => $data['ifsc'] ?? null,
+                    'bank_name' => $data['bank_name'] ?? null,
+                    'upi_id' => $data['upi_id'] ?? null,
+                ],
                 'amount' => $returnItems->sum(fn ($row) => $row['item']->unit_price * $row['quantity']),
             ]);
 

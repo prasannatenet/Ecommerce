@@ -16,6 +16,7 @@ class OrderRefund extends Model
         'metadata',
         'processed_at',
         'refund_method',
+        'payout_reference',
     ];
 
     protected $casts = [

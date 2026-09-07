@@ -68,6 +68,21 @@
                                             </label>
                                         @endforeach
                                         <textarea name="reason" required rows="2" class="form-control mb-2" placeholder="Reason for return"></textarea>
+                                        <select name="payout_method" required class="form-select mb-2" onchange="this.form.querySelector('.bank-payout').style.display = this.value === 'bank' ? 'block' : 'none'; this.form.querySelector('.upi-payout').style.display = this.value === 'upi' ? 'block' : 'none';">
+                                            <option value="">Choose refund destination</option>
+                                            <option value="gehna_coins">Gehna Coins</option>
+                                            <option value="bank">Bank account</option>
+                                            <option value="upi">UPI</option>
+                                        </select>
+                                        <div class="bank-payout" style="display:none;">
+                                            <input name="account_holder" class="form-control mb-2" placeholder="Account holder name">
+                                            <input name="bank_name" class="form-control mb-2" placeholder="Bank name">
+                                            <input name="account_number" class="form-control mb-2" placeholder="Account number">
+                                            <input name="ifsc" class="form-control mb-2" placeholder="IFSC code">
+                                        </div>
+                                        <div class="upi-payout" style="display:none;">
+                                            <input name="upi_id" class="form-control mb-2" placeholder="UPI ID, e.g. name@upi">
+                                        </div>
                                         <button class="btn btn-dark w-100" type="submit">Submit Return Request</button>
                                     </form>
                                 </div>
