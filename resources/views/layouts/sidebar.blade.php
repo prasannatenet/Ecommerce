@@ -208,6 +208,18 @@
                     <a href="{{ route('admin.sliders.index') }}" class="df-nav-link">All Sliders</a>
                     <a href="{{ route('admin.sliders.create') }}" class="df-nav-link">Add Slider</a>
                 </div>
+
+            <div class="df-nav-item has-submenu">
+                <a class="df-nav-link" href="#">
+                    <span class="nav-icon"><i class="bi bi-collection"></i></span>
+                    <span class="nav-text">Home Sections</span>
+                    <span class="nav-chevron"><i class="bi bi-chevron-right"></i></span>
+                </a>
+                <div class="df-submenu">
+                    <a href="{{ route('admin.home-sections.index') }}" class="df-nav-link">Manage Sections</a>
+                </div>
+            </div>
+
             </div>
 
             <div class="df-nav-item">

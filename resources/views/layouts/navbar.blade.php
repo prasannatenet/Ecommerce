@@ -1,55 +1,52 @@
 <style>
-    .frontend-site .site-header,
-    .frontend-site .site-nav-row {
-        background: #ffffff !important;
-        border-color: #e2e8f0 !important;
+
+
+    .frontend-site .site-nav-row  { background: var(--primary-500)}
+
+    .frontend-site .site-header{
+        background: #ffffff ;
+        border-color: #e2e8f0;
     }
 
+    
+
+
     .frontend-site .site-brand,
-    .frontend-site .site-category-links a,
     .frontend-site .site-icon-group a {
-        color: #0f172a !important;
+        color: #0f172a ;
     }
 
     .frontend-site .site-brand span {
-        color: #d4af37 !important;
+        color: #d4af37 ;
     }
 
-    .frontend-site .site-category-links a:hover,
-    .frontend-site .site-icon-group a:hover,
-    .frontend-site .site-category-links a.active {
-        color: #a67c00 !important;
-    }
+
 
     .frontend-site .site-category-links a.active::after {
-        background: #d4af37 !important;
+        background: #d4af37 ;
     }
 
     .frontend-site .site-location-btn,
     .frontend-site .site-search-box input {
-        border-color: #e2e8f0 !important;
-        background: #ffffff !important;
-        color: #0f172a !important;
+        border-color: #e2e8f0 ;
+        background: #ffffff ;
+        color: #0f172a ;
     }
 
     .frontend-site .site-location-btn > i:first-child,
     .frontend-site .site-search-box i {
-        color: #a67c00 !important;
+        color: #a67c00 ;
     }
 
-    .frontend-site .site-new-badge {
-        /* background: #064e3b !important; */
-        color: #ffffff !important;
-    }
 
     .frontend-site .site-cart-count {
-        background: #d4af37 !important;
-        color: #0f172a !important;
+        background: #d4af37 ;
+        color: #0f172a ;
     }
 
     .frontend-site .site-account-menu {
         min-width: 250px;
-        margin-top: 12px !important;
+        margin-top: 12px ;
         padding: 6px;
         border: 1px solid #e2e8f0;
         border-radius: 12px;
@@ -96,7 +93,6 @@
     .frontend-site .site-account-menu .dropdown-item {
         padding: 9px 12px;
         border-radius: 8px;
-        font-size: 0.88rem;
         font-weight: 600;
         color: #0f172a;
     }
@@ -108,7 +104,8 @@
     }
 
     .frontend-site .site-account-menu form {
-        margin: 0;
+        margin-top: 15px;
+        border-top: solid 1px var(--border);
     }
 
     .frontend-site .site-account-menu button.dropdown-item {
@@ -172,7 +169,7 @@
 
     .frontend-site .site-location-menu-head p {
         margin: 0 0 10px;
-        font-size: 0.75rem;
+        font-size: 15px;
         color: #64748b;
     }
 
@@ -272,6 +269,7 @@
 
     .frontend-site .site-location-apply-btn:hover {
         background: #1e293b;
+        color: white;
     }
 
     .frontend-site .site-location-apply-btn:disabled {
@@ -290,7 +288,7 @@
         border: 0;
         background: none;
         padding: 0;
-        font-size: 0.75rem;
+        font-size: 15px;
         font-weight: 700;
         color: #a67c00;
         cursor: pointer;
@@ -416,13 +414,221 @@
         color: #94a3b8;
         cursor: pointer;
         padding: 2px;
-        font-size: 0.75rem;
+        font-size: 15px;
         line-height: 1;
         flex-shrink: 0;
     }
 
     .frontend-site .site-location-remove:hover {
         color: #dc2626;
+    }
+
+    .frontend-site .site-mobile-header,
+    .frontend-site .site-mobile-drawer,
+    .frontend-site .site-mobile-overlay {
+        display: none;
+    }
+
+    @media (max-width: 991.98px) {
+        .frontend-site .site-desktop-header,
+        .frontend-site .site-nav-row {
+            display: none;
+        }
+
+        .frontend-site .site-mobile-header {
+            min-height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 10px 16px;
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .frontend-site .site-mobile-brand img {
+            display: block;
+            width: auto;
+            max-width: 136px;
+            height: 42px;
+            object-fit: contain;
+        }
+
+        .frontend-site .site-mobile-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .frontend-site .site-mobile-action,
+        .frontend-site .site-mobile-menu-toggle {
+            width: 42px;
+            height: 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #0f172a;
+            font-size: 1.15rem;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .frontend-site .site-mobile-action:hover,
+        .frontend-site .site-mobile-menu-toggle:hover {
+            border-color: #d4af37;
+            color: #a67c00;
+        }
+
+        .frontend-site .site-mobile-cart-count {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            min-width: 19px;
+            height: 19px;
+            padding: 0 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            background: #d4af37;
+            color: #ffffff;
+            font-size: 0.68rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .frontend-site .site-mobile-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1600;
+            background: rgba(15, 23, 42, 0.48);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s ease, visibility 0.25s ease;
+        }
+
+        .frontend-site .site-mobile-overlay.is-open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .frontend-site .site-mobile-drawer {
+            position: fixed;
+            inset: 0 auto 0 0;
+            z-index: 1610;
+            display: flex;
+            flex-direction: column;
+            width: min(86vw, 360px);
+            background: #ffffff;
+            box-shadow: 12px 0 35px rgba(15, 23, 42, 0.2);
+            transform: translateX(-102%);
+            transition: transform 0.28s ease;
+            visibility: hidden;
+        }
+
+        .frontend-site .site-mobile-drawer.is-open {
+            transform: translateX(0);
+            visibility: visible;
+        }
+
+        .frontend-site .site-mobile-drawer-head {
+            min-height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 18px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .frontend-site .site-mobile-drawer-head img {
+            width: auto;
+            height: 38px;
+            max-width: 132px;
+            object-fit: contain;
+        }
+
+        .frontend-site .site-mobile-close {
+            width: 38px;
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 0;
+            border-radius: 8px;
+            background: #f8fafc;
+            color: #0f172a;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .frontend-site .site-mobile-drawer-search {
+            display: flex;
+            gap: 8px;
+            margin: 16px 18px 8px;
+        }
+
+        .frontend-site .site-mobile-drawer-search input {
+            min-width: 0;
+            flex: 1;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 9px 11px;
+            color: #0f172a;
+        }
+
+        .frontend-site .site-mobile-drawer-search button {
+            width: 40px;
+            border: 0;
+            border-radius: 8px;
+            background: #0f172a;
+            color: #ffffff;
+        }
+
+        .frontend-site .site-mobile-links {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 18px 24px;
+        }
+
+        .frontend-site .site-mobile-links a,
+        .frontend-site .site-mobile-section-title {
+            display: flex;
+            align-items: center;
+            min-height: 46px;
+            padding: 10px 2px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #0f172a;
+            font-size: 0.92rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .frontend-site .site-mobile-links a:hover {
+            color: #a67c00;
+        }
+
+        .frontend-site .site-mobile-section-title {
+            margin-top: 8px;
+            color: #a67c00;
+            font-size: 0.75rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .frontend-site .site-mobile-category-link {
+            padding-left: 14px !important;
+            color: #475569 !important;
+            font-size: 0.86rem !important;
+            font-weight: 600 !important;
+        }
+
+        .frontend-site.site-mobile-menu-open {
+            overflow: hidden;
+        }
     }
 </style>
 
@@ -440,10 +646,26 @@
 @endphp
 
 <header class="site-header">
-    <div class="site-header-inner container-fluid px-4 px-xl-5">
+    <div class="site-mobile-header">
+        <button type="button" class="site-mobile-menu-toggle" id="siteMobileMenuToggle"
+            aria-label="Open navigation menu" aria-controls="siteMobileDrawer" aria-expanded="false">
+            <i class="bi bi-list"></i>
+        </button>
+        <a class="site-mobile-brand" href="{{ route('home') }}" aria-label="GEHNA home">
+            <img src="{{ asset('frontend/assets/main-logo.png') }}" alt="Logo">
+        </a>
+        <div class="site-mobile-actions">
+            <a href="{{ route('cart.index') }}" class="site-mobile-action" aria-label="Cart">
+                <i class="bi bi-cart3"></i>
+                <span class="site-mobile-cart-count">{{ $headerCartCount ?? 0 }}</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="site-header-inner site-desktop-header container-fluid px-4 px-xl-5">
         <div class="site-brand-wrap">
             <a class="site-brand" href="{{ route('home') }}">
-                GEHNA
+                <img src="{{ asset('frontend/assets/main-logo.png') }}" alt="Logo">
             </a>
         </div>
 
@@ -550,6 +772,12 @@
                             <a class="dropdown-item" href="{{ route('account.index') }}">
                                 <i class="bi bi-person-gear me-2"></i>My Account
                             </a>
+                            @if (Auth::user()->hasRole('admin') || Auth::user()->can('access admin'))
+                                <a class="dropdown-item" href="{{ route('admin.dashboard') }}" target="_blank" rel="noopener">
+                                    <i class="bi bi-speedometer2 me-2"></i>Admin Panel
+                                    <i class="bi bi-box-arrow-up-right ms-1 small"></i>
+                                </a>
+                            @endif
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="dropdown-item">
@@ -568,7 +796,7 @@
                     aria-label="Wishlist"
                     data-bs-toggle="offcanvas">
                     <i class="bi bi-heart"></i>
-                    <span class="site-cart-count nav-wishlist-count {{ ($headerWishlistCount ?? 0) > 0 ? '' : 'd-none' }}">{{ $headerWishlistCount ?? 0 }}</span>
+                    <span class="site-cart-count nav-wishlist-count {{ ($headerWishlistCount ?? 0) > 0 ? '' : 'd-none' }}" style="right: 1px;">{{ $headerWishlistCount ?? 0 }}</span>
                     <span>WISHLIST</span>
                 </a>
                 <a href="{{ route('cart.index') }}" aria-label="Cart" class="site-cart-link">
@@ -621,3 +849,77 @@
         </div>
     </div>
 </header>
+
+<div class="site-mobile-overlay" id="siteMobileOverlay"></div>
+<aside class="site-mobile-drawer" id="siteMobileDrawer" aria-hidden="true">
+    <div class="site-mobile-drawer-head">
+        <img src="{{ asset('frontend/assets/main-logo.png') }}" alt="Logo">
+        <button type="button" class="site-mobile-close" id="siteMobileMenuClose" aria-label="Close navigation menu">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+
+    <form class="site-mobile-drawer-search" action="{{ route('products.index') }}" method="GET" role="search">
+        <input type="search" name="search" placeholder="Search products..." aria-label="Search products">
+        <button type="submit" aria-label="Search"><i class="bi bi-search"></i></button>
+    </form>
+
+    <nav class="site-mobile-links" aria-label="Mobile navigation">
+        <a href="{{ route('home') }}"><i class="bi bi-house me-3"></i>Home</a>
+        <a href="{{ route('categories.index') }}"><i class="bi bi-grid-3x3-gap me-3"></i>Shop by Category</a>
+        <span class="site-mobile-section-title">Categories</span>
+        @forelse($navCategories as $cat)
+            <a class="site-mobile-category-link" href="{{ route('category.show', $cat->slug ?? $cat->id) }}">
+                {{ $cat->name }}
+                @if(($cat->products_count ?? 0) > 0)
+                    <span class="ms-auto text-muted">{{ $cat->products_count }}</span>
+                @endif
+            </a>
+        @empty
+            <span class="site-mobile-category-link">No categories yet.</span>
+        @endforelse
+        <span class="site-mobile-section-title">Explore</span>
+        <a href="{{ route('products.index') }}">Gifts for Him</a>
+        <a href="{{ route('products.index') }}">Gifts for Her</a>
+        <a href="{{ route('products.index') }}">GEHNA Gift Card</a>
+        <a href="{{ route('products.index') }}">Gift Store</a>
+        <a href="{{ route('products.index') }}">Exclusive Collections</a>
+        <a href="{{ route('products.index') }}">Smart Purchase Plan <span class="ms-auto site-new-badge">New</span></a>
+        <a href="{{ route('products.index') }}">More at GEHNA</a>
+        @auth
+            <a href="{{ route('account.index') }}"><i class="bi bi-person me-3"></i>My Account</a>
+        @else
+            <a href="{{ route('login') }}"><i class="bi bi-person me-3"></i>Login</a>
+        @endauth
+        <a href="#wishlistSidebar" data-bs-toggle="offcanvas"><i class="bi bi-heart me-3"></i>Wishlist</a>
+    </nav>
+</aside>
+
+<script>
+    (function () {
+        const toggle = document.getElementById('siteMobileMenuToggle');
+        const close = document.getElementById('siteMobileMenuClose');
+        const drawer = document.getElementById('siteMobileDrawer');
+        const overlay = document.getElementById('siteMobileOverlay');
+
+        if (!toggle || !close || !drawer || !overlay) return;
+
+        function setMobileMenu(open) {
+            drawer.classList.toggle('is-open', open);
+            overlay.classList.toggle('is-open', open);
+            document.body.classList.toggle('site-mobile-menu-open', open);
+            drawer.setAttribute('aria-hidden', String(!open));
+            toggle.setAttribute('aria-expanded', String(open));
+        }
+
+        toggle.addEventListener('click', function () { setMobileMenu(true); });
+        close.addEventListener('click', function () { setMobileMenu(false); });
+        overlay.addEventListener('click', function () { setMobileMenu(false); });
+        drawer.querySelectorAll('a').forEach(function (link) {
+            link.addEventListener('click', function () { setMobileMenu(false); });
+        });
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') setMobileMenu(false);
+        });
+    })();
+</script>

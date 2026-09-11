@@ -8,7 +8,7 @@
             ? round((($product->base_price - $product->sale_price) / $product->base_price) * 100)
             : 0;
     @endphp
-    <div class="col-6 col-md-3">
+    <div class="col-md-4">
         <div class="shop-card">
 
             {{-- Image --}}

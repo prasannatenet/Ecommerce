@@ -3,11 +3,7 @@
 @section('title', 'Login | GEHNA Fitness')
 
 @section('styles')
-<style>
-    .auth-page--login .auth-showcase {
-        background-image: linear-gradient(145deg, rgba(1, 72, 73, .94), rgba(1, 112, 117, .74));
-    }
-</style>
+
 @endsection
 
 @section('content')

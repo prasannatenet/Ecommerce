@@ -604,13 +604,57 @@ function renderPMProductCard(product) {
 function initPMHomepage() {
   // Hero Swiper - Full-width image slider with auto-play
   if (document.querySelector('.hero-swiper')) {
+
     new Swiper('.hero-swiper', {
+
       loop: true,
-      autoplay: { delay: 2000, disableOnInteraction: false },
+
+      /* =================================
+         20% LEFT + 60% CENTER + 20% RIGHT
+      ================================= */
+
+      slidesPerView: 'auto',
+      centeredSlides: true,
+      spaceBetween: 20,
+
+      autoplay: {
+        delay: 5000,
+        disableOnInteraction: false
+      },
+
       speed: 1000,
-      pagination: { el: '.swiper-pagination', clickable: true },
-      navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' }
+
+      pagination: {
+        el: '.swiper-pagination',
+        clickable: true
+      },
+
+      navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev'
+      },
+
+      /* =================================
+         RESPONSIVE
+      ================================= */
+
+      breakpoints: {
+
+        0: {
+          slidesPerView: 'auto',
+          centeredSlides: true,
+          spaceBetween: 10
+        },
+
+        768: {
+          slidesPerView: 'auto',
+          centeredSlides: true,
+          spaceBetween: 50
+        }
+      }
+
     });
+
   }
 
   // Product Category Section
@@ -685,7 +729,7 @@ function initCounters() {
 
         const duration = 2000;
         const isDecimal = el.hasAttribute('data-is-decimal');
-        
+
         const defaultSuffix = isDecimal ? '' : (target === 5 ? '' : '+');
         const suffix = el.hasAttribute('data-suffix') ? el.dataset.suffix : defaultSuffix;
 
@@ -874,10 +918,10 @@ function escapeHtmlSearch(text) {
 }
 
 function initSiteSearch() {
-  const box    = document.getElementById('siteSearchBox');
-  const input  = document.getElementById('siteSearchInput');
+  const box = document.getElementById('siteSearchBox');
+  const input = document.getElementById('siteSearchInput');
   const results = document.getElementById('siteSearchResults');
-  const form   = document.getElementById('siteSearchForm');
+  const form = document.getElementById('siteSearchForm');
   if (!box || !input || !results || !form) return;
 
   const searchUrl = '/search';
@@ -909,9 +953,9 @@ function initSiteSearch() {
   }
 
   function renderResults(data) {
-    const products   = data.products || [];
+    const products = data.products || [];
     const categories = data.categories || [];
-    const q          = data.query || '';
+    const q = data.query || '';
     let html = '';
     currentResults = [];
     activeIndex = -1;
@@ -927,11 +971,11 @@ function initSiteSearch() {
         const sub = p.category ? 'Category: ' + escapeHtmlSearch(p.category) : escapeHtmlSearch(p.name);
         currentResults.push({ type: 'product', slug: p.slug });
         html += '<a class="site-search-result" href="/product/' + escapeHtmlSearch(p.slug) + '" data-type="product">'
-              + '<span class="site-search-type site-search-type--product">Product</span>'
-              + img
-              + '<span class="site-search-text"><strong>' + escapeHtmlSearch(p.name) + '</strong><small>' + sub + '</small></span>'
-              + priceHtml(p.price)
-              + '</a>';
+          + '<span class="site-search-type site-search-type--product">Product</span>'
+          + img
+          + '<span class="site-search-text"><strong>' + escapeHtmlSearch(p.name) + '</strong><small>' + sub + '</small></span>'
+          + priceHtml(p.price)
+          + '</a>';
       });
     }
 
@@ -941,16 +985,16 @@ function initSiteSearch() {
         const countLabel = c.product_count + ' product' + (c.product_count === 1 ? '' : 's');
         currentResults.push({ type: 'category', slug: c.slug });
         html += '<a class="site-search-result" href="/category/' + escapeHtmlSearch(c.slug) + '" data-type="category">'
-              + '<span class="site-search-type site-search-type--category">Category</span>'
-              + thumbHtml(c.image, c.name)
-              + '<span class="site-search-text"><strong>' + escapeHtmlSearch(c.name) + '</strong><small>' + countLabel + '</small></span>'
-              + '</a>';
+          + '<span class="site-search-type site-search-type--category">Category</span>'
+          + thumbHtml(c.image, c.name)
+          + '<span class="site-search-text"><strong>' + escapeHtmlSearch(c.name) + '</strong><small>' + countLabel + '</small></span>'
+          + '</a>';
       });
     }
 
     if (products.length || categories.length) {
       html += '<a class="site-search-footer" href="/products?search=' + encodeURIComponent(q)
-            + '">View all results for \u201c' + escapeHtmlSearch(q) + '\u201d <i class="bi bi-arrow-right"></i></a>';
+        + '">View all results for \u201c' + escapeHtmlSearch(q) + '\u201d <i class="bi bi-arrow-right"></i></a>';
     }
 
     results.innerHTML = html;
@@ -1011,8 +1055,8 @@ function initSiteSearch() {
 // ===== SHOP BY CATEGORY DROPDOWN =====
 function initSiteCategoryDropdown() {
   const dropdown = document.getElementById('siteCatDropdown');
-  const trigger  = document.getElementById('siteCatTrigger');
-  const menu     = document.getElementById('siteCatMenu');
+  const trigger = document.getElementById('siteCatTrigger');
+  const menu = document.getElementById('siteCatMenu');
   if (!dropdown || !trigger || !menu) return;
 
   const HOVER_DELAY = 250;
@@ -1068,26 +1112,26 @@ function initSiteCategoryDropdown() {
 
 // ===== DELIVERY LOCATION (PINCODE) DROPDOWN =====
 function initSiteLocation() {
-  const wrap        = document.getElementById('siteLocationWrap');
-  const btn         = document.getElementById('siteLocationBtn');
-  const menu        = document.getElementById('siteLocationMenu');
+  const wrap = document.getElementById('siteLocationWrap');
+  const btn = document.getElementById('siteLocationBtn');
+  const menu = document.getElementById('siteLocationMenu');
   if (!wrap || !btn || !menu) return;
 
-  const titleEl     = document.getElementById('siteLocationTitle');
-  const subtitleEl  = document.getElementById('siteLocationSubtitle');
-  const choicesEl   = document.getElementById('siteLocationChoices');
-  const manualEl    = document.getElementById('siteLocationManual');
-  const manualForm  = document.getElementById('siteLocationManualForm');
+  const titleEl = document.getElementById('siteLocationTitle');
+  const subtitleEl = document.getElementById('siteLocationSubtitle');
+  const choicesEl = document.getElementById('siteLocationChoices');
+  const manualEl = document.getElementById('siteLocationManual');
+  const manualForm = document.getElementById('siteLocationManualForm');
   const manualInput = document.getElementById('siteLocationPincodeInput');
-  const manualErr   = document.getElementById('siteLocationPincodeError');
-  const manualSub   = document.getElementById('siteLocationManualSubmit');
-  const statusEl    = document.getElementById('siteLocationStatus');
-  const statusIcon  = document.getElementById('siteLocationStatusIcon');
-  const statusMsg   = document.getElementById('siteLocationStatusMsg');
-  const statusActs  = document.getElementById('siteLocationStatusActions');
-  const currentEl   = document.getElementById('siteLocationCurrent');
+  const manualErr = document.getElementById('siteLocationPincodeError');
+  const manualSub = document.getElementById('siteLocationManualSubmit');
+  const statusEl = document.getElementById('siteLocationStatus');
+  const statusIcon = document.getElementById('siteLocationStatusIcon');
+  const statusMsg = document.getElementById('siteLocationStatusMsg');
+  const statusActs = document.getElementById('siteLocationStatusActions');
+  const currentEl = document.getElementById('siteLocationCurrent');
   const currentText = document.getElementById('siteLocationCurrentText');
-  const removeBtn   = document.getElementById('siteLocationRemove');
+  const removeBtn = document.getElementById('siteLocationRemove');
 
   const csrfToken = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
   const DEFAULT_TITLE = 'Where to Deliver?';
@@ -1174,8 +1218,8 @@ function initSiteLocation() {
   const STATUS_ICONS = {
     loading: '<i class="bi bi-arrow-repeat"></i>',
     success: '<i class="bi bi-check-circle-fill"></i>',
-    error:   '<i class="bi bi-exclamation-triangle-fill"></i>',
-    info:    '<i class="bi bi-geo-alt"></i>',
+    error: '<i class="bi bi-exclamation-triangle-fill"></i>',
+    info: '<i class="bi bi-geo-alt"></i>',
   };
 
   function showStatus(mode, message, actionsHtml) {

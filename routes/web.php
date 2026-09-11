@@ -27,6 +27,7 @@ use App\Http\Controllers\Backend\BackendTagController;
 use App\Http\Controllers\Backend\BackendFaqController;
 use App\Http\Controllers\Backend\BackendTestimonialController;
 use App\Http\Controllers\Backend\BackendNewsletterSubscriberController;
+use App\Http\Controllers\Backend\BackendHomeSectionController;
 use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\FrontendProductController;
 use App\Http\Controllers\Frontend\FrontendCategoryController;
@@ -109,6 +110,9 @@ Route::middleware(['auth'])->group(function(){
     });
 
     Route::get('/checkout', [FrontendCheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/product/{product}/reviews', [FrontendProductController::class, 'storeReview'])->name('products.reviews.store');
+    Route::put('/product/{product}/reviews/{review}', [FrontendProductController::class, 'updateReview'])->name('products.reviews.update');
+    Route::delete('/product/{product}/reviews/{review}', [FrontendProductController::class, 'destroyReview'])->name('products.reviews.destroy');
     Route::post('/checkout/coupon', [FrontendCheckoutController::class, 'applyCoupon'])->name('checkout.coupon.apply');
     Route::delete('/checkout/coupon', [FrontendCheckoutController::class, 'removeCoupon'])->name('checkout.coupon.remove');
     Route::post('/checkout/place-order', [FrontendCheckoutController::class, 'placeOrder'])->name('checkout.place');
@@ -147,6 +151,12 @@ Route::prefix('admin')->middleware(['auth','admin'])->name('admin.')->group(func
     Route::resource('newsletter-subscribers', BackendNewsletterSubscriberController::class)->only(['index', 'destroy']);
     Route::resource('sliders', BackendSliderController::class);
     Route::post('sliders/reorder', [BackendSliderController::class, 'reorder'])->name('sliders.reorder');
+    Route::resource('sliders', BackendSliderController::class);
+    Route::post('sliders/reorder', [BackendSliderController::class, 'reorder'])->name('sliders.reorder');
+    Route::resource('home-sections', BackendHomeSectionController::class)->except(['create', 'store']);
+    Route::post('home-sections/reorder', [BackendHomeSectionController::class, 'reorder'])->name('home-sections.reorder');
+    Route::post('home-sections/ensure-defaults', [BackendHomeSectionController::class, 'ensureDefaults'])->name('home-sections.ensure-defaults');
+
     Route::resource('delivery-partners', BackendDeliveryPartnerController::class);
     Route::resource('orders', BackendOrderController::class)->only(['index','show','update']);
     Route::get('orders-export', [BackendOrderController::class, 'exportCsv'])->name('orders.export');

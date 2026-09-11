@@ -22,6 +22,7 @@
         rel="stylesheet">
     <!-- GEHNA Custom CSS -->
     <link rel="stylesheet" href="{{ asset('frontend/css/gehna.css') }}">
+    <link rel="stylesheet" href="{{ asset('frontend/css/custom.css') }}">
     <script src="{{ asset('frontend/js/load.js') }}"></script>
     <script src="{{ asset('frontend/js/app.js') }}"></script>
 

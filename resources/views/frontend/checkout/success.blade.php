@@ -4,7 +4,7 @@
 
 @section('content')
 
-<section style="background: linear-gradient(100deg, #131313 1.15%, #022C2B 100%); padding: 80px 0; min-height: 70vh; display:flex; align-items:center;">
+<section class="py-5">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-7 col-xl-6">
@@ -29,7 +29,7 @@
                                 </div>
                                 <div class="col-6">
                                     <p style="font-size:0.7rem; text-transform:uppercase; letter-spacing:1.5px; color:#6C757D; margin:0 0 4px;">Payment Method</p>
-                                    <p style="font-weight:700; color:#0D0D0D; margin:0; text-transform:uppercase;">{{ $order->payment_method ?? 'N/A' }}</p>
+                                    <p style="font-weight:700; color:#6C757D; margin:0; text-transform:uppercase;">{{ $order->payment_method ?? 'N/A' }}</p>
                                 </div>
                                 <div class="col-6">
                                     <p style="font-size:0.7rem; text-transform:uppercase; letter-spacing:1.5px; color:#6C757D; margin:0 0 4px;">Payment Status</p>

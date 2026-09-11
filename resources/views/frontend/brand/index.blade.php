@@ -10,16 +10,21 @@
 <div class="hero-dark-wrapper" style="padding-bottom: 0; ">
     <section class="page-header page-header-teal" style="padding-bottom:30px;">
         <div class="container position-relative" style="z-index:2">
-            <h1 class="page-header-title" style="color: white">Our Brands</h1>
-            <nav aria-label="breadcrumb">
-                <ul class="breadcrumb breadcrumb-gehna">
-                    <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                    <li class="breadcrumb-item active">Brands</li>
-                </ul>
-            </nav>
+            <h1 class="title-heading-h1" style="color: white">Our Brands</h1>
         </div>
     </section>
 </div>
+
+<section style="border: solid 1px #ccc; box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px; margin-bottom: 3px;">
+    <div class="container-fluid px-4">
+        <nav aria-label="breadcrumb" class="py-2">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
+                    <li class="breadcrumb-item active">Brands</li>
+            </ol>
+        </nav>
+    </div>
+</section>
 
     <section style="background:#f5f5f5; padding: 60px 0; min-height: 55vh;">
         <div class="container">
@@ -41,7 +46,7 @@
             @else
                 <div class="row g-4">
                     @foreach ($brands as $brand)
-                        <div class="col-6 col-md-4 col-lg-3">
+                        <div class="col-md-4 col-lg-3">
                             <a href="{{ route('brand.show', $brand->slug) }}"
                                 style="display:flex; flex-direction:column; align-items:center; justify-content:center; background:#fff; border-radius:12px; padding:28px 20px; box-shadow:0 4px 20px rgba(0,0,0,0.06); border:1.5px solid #f0f0f0; min-height:180px; text-decoration:none; position:relative; overflow:hidden; transition:all 0.3s;"
                                 onmouseover="this.style.borderColor='#017075'; this.style.boxShadow='0 8px 30px rgba(1,112,117,0.15)'; this.querySelector('.brand-accent').style.transform='scaleX(1)';"

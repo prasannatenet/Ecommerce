@@ -5,28 +5,33 @@
 @section('content')
 
     {{-- PAGE HEADER --}}
-    <section style="background:linear-gradient(135deg,#013a3c 0%,#017075 60%,#02AAB1 100%); padding:48px 50px 40px;">
-        <div class="container-fluid px-4">
-            <nav aria-label="breadcrumb" class="mb-3">
-                <ol class="breadcrumb mb-0" style="background:none; padding:0;">
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('home') }}" style="color:rgba(255,255,255,0.7); text-decoration:none;">Home</a>
-                    </li>
-                    <li class="breadcrumb-item active" style="color:#fff;">Categories</li>
-                </ol>
-            </nav>
-            <h1 style="color:#fff !IMPORTANT; font-size:2.2rem; font-weight:800; margin:0 0 6px;">
+    <section style="background:linear-gradient(135deg,#013a3c 0%,#017075 60%,#02AAB1 100%);">
+        <div class="container-fluid px-lg-5 py-5">
+            <h1 class="title-heading-h1">
                 Shop by <span style="color:#00e5ff;">Category</span>
             </h1>
-            <p style="color:rgba(255,255,255,0.75); margin:0; font-size:0.95rem;">
+            <p style="color:rgba(255,255,255,0.75); margin:0; font-size:14px;">
                 {{ $categories->count() }} {{ Str::plural('category', $categories->count()) }} available
             </p>
         </div>
     </section>
 
+    
+<section style="border: solid 1px #ccc; box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px; margin-bottom: 3px;">
+    <div class="container-fluid px-4">
+        <nav aria-label="breadcrumb" class="py-2">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Categories</li>
+
+            </ol>
+        </nav>
+    </div>
+</section>
+
     {{-- CATEGORIES GRID --}}
-    <section style="background:#f8f9fa; padding:50px 50px 70px;">
-        <div class="container-fluid px-4">
+    <section style="background:#f8f9fa;" class="py-5">
+        <div class="container-fluid">
 
             @if($categories->isEmpty())
                 <div style="background:#fff; border-radius:16px; padding:80px 40px; text-align:center; border:1px solid #e9ecef;">
@@ -129,7 +134,7 @@
     .cat-shop-img {
         width: 100%;
         height: 100%;
-        object-fit: contain;
+        object-fit: cover;
         padding: 16px;
         transition: transform 0.3s;
     }

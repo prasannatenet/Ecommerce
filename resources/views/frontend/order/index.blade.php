@@ -8,15 +8,20 @@
     <div class="page-header-teal">
         <div class="container">
             <h1 class="page-header-title" style="color: white !important;">My Orders</h1>
-            <nav aria-label="breadcrumb" style="color: white !important;">
-                <ol class="breadcrumb-gehna">
-                    <li><a href="{{ route('home') }}">Home</a></li>
-                    <li><a href="{{ route('account.index') }}">Account</a></li>
-                    <li>Orders</li>
-                </ol>
-            </nav>
         </div>
     </div>
+
+    <section style="border: solid 1px #ccc; box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px; margin-bottom: 3px;">
+    <div class="container px-4">
+        <nav aria-label="breadcrumb" class="py-2">
+            <ol class="breadcrumb mb-0">
+                 <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('account.index') }}">Account</a></li>
+                    <li class="breadcrumb-item active">Orders</li>
+            </ol>
+        </nav>
+    </div>
+</section>
 
     <section style="background:#f5f5f5; padding: 50px 0; min-height: 55vh;">
         <div class="container">

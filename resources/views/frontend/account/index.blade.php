@@ -7,15 +7,21 @@
     {{-- Page Header --}}
     <div class="page-header-teal">
         <div class="container">
-            <h1 class="page-header-title">My Account</h1>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb-gehna">
-                    <li><a href="{{ route('home') }}">Home</a></li>
-                    <li>Account</li>
-                </ol>
-            </nav>
+            <h1 class="page-header-title text-white">My Account</h1>
         </div>
     </div>
+
+    <section style="border: solid 1px #ccc; box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px; margin-bottom: 3px;">
+    <div class="container px-4">
+        <nav aria-label="breadcrumb" class="py-2">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
+            </ol>
+        </nav>
+    </div>
+</section>
+
+
 
     <section style="background:#f5f5f5; padding: 50px 0; min-height: 55vh;">
         <div class="container">
@@ -27,12 +33,12 @@
             @endif
 
             {{-- Welcome Bar --}}
-            <div style="background:linear-gradient(135deg, #022C2B 0%, #017075 100%); border-radius:12px; padding:28px 32px; margin-bottom:28px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+            <div class="heading-section d-flex mb-4 align-items-center justify-content-between flex-wrap gap-3" style="background:linear-gradient(135deg,#013a3c 0%,#017075 60%,#02AAB1 100%); border-radius:12px; padding:20px 28px;">
                 <div>
-                    <p style="color:rgba(255,255,255,0.6); font-size:0.8rem; text-transform:uppercase; letter-spacing:2px; margin:0 0 4px;">Welcome back</p>
+                    <p class="mb-0 text-white-50">Welcome back</p>
                     <h2 style="color:#fff; font-size:1.5rem; font-weight:900; margin:0;">{{ $user->name }}</h2>
                 </div>
-                <a href="{{ route('products.index') }}" class="btn-gehna btn-teal-gehna" style="background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.3); color:#fff;">
+                <a href="{{ route('products.index') }}" class="btn-gehna btn-teal-gehna">
                     <i class="bi bi-bag me-2"></i> Continue Shopping
                 </a>
             </div>
@@ -40,30 +46,36 @@
             {{-- Stats --}}
             <div class="row g-4 mb-4">
                 <div class="col-md-4">
-                    <div style="background:#fff; border-radius:12px; padding:24px; box-shadow:0 4px 20px rgba(0,0,0,0.06); text-align:center;">
-                        <div style="width:56px; height:56px; border-radius:50%; background:rgba(1,112,117,0.1); display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
+                    <div class="d-flex gap-3" style="background:#fff; border-radius:12px; padding:24px; box-shadow:0 4px 20px rgba(0,0,0,0.06); text-align:center;">
+                        <div style="width:56px; height:56px; border-radius:50%; background:rgba(1,112,117,0.1); display:flex; align-items:center; justify-content:center; ">
                             <i class="bi bi-bag-check" style="font-size:1.6rem; color:#017075;"></i>
                         </div>
-                        <p style="font-size:2rem; font-weight:900; color:#0D0D0D; margin:0;">{{ $stats['total_orders'] }}</p>
-                        <p style="color:#6C757D; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; margin:4px 0 0;">Total Orders</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div style="background:#fff; border-radius:12px; padding:24px; box-shadow:0 4px 20px rgba(0,0,0,0.06); text-align:center;">
-                        <div style="width:56px; height:56px; border-radius:50%; background:rgba(255,193,7,0.1); display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
-                            <i class="bi bi-clock-history" style="font-size:1.6rem; color:#ffc107;"></i>
+                        <div>
+                            <span style="font-size:2rem; font-weight:900; color:#0D0D0D; margin:0;">{{ $stats['total_orders'] }}</span> &nbsp;
+                            <span style="color:#6C757D; font-size:16px; text-transform:uppercase; letter-spacing:1px; margin:4px 0 0;">Total Orders</span>
                         </div>
-                        <p style="font-size:2rem; font-weight:900; color:#0D0D0D; margin:0;">{{ $stats['pending_orders'] }}</p>
-                        <p style="color:#6C757D; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; margin:4px 0 0;">Active Orders</p>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div style="background:#fff; border-radius:12px; padding:24px; box-shadow:0 4px 20px rgba(0,0,0,0.06); text-align:center;">
-                        <div style="width:56px; height:56px; border-radius:50%; background:rgba(25,135,84,0.1); display:flex; align-items:center; justify-content:center; margin:0 auto 12px;">
+                    <div class="d-flex gap-3" style="background:#fff; border-radius:12px; padding:24px; box-shadow:0 4px 20px rgba(0,0,0,0.06); text-align:center;">
+                        <div style="width:56px; height:56px; border-radius:50%; background:rgba(1,112,117,0.1); display:flex; align-items:center; justify-content:center; ">
+                            <i class="bi bi-bag-check" style="font-size:1.6rem; color:#017075;"></i>
+                        </div>
+                        <div>
+                            <span style="font-size:2rem; font-weight:900; color:#0D0D0D; margin:0;">{{ $stats['pending_orders'] }}</span> &nbsp;
+                            <span style="color:#6C757D; font-size:16px; text-transform:uppercase; letter-spacing:1px; margin:4px 0 0;">Active Orders</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex gap-3" style="background:#fff; border-radius:12px; padding:24px; box-shadow:0 4px 20px rgba(0,0,0,0.06); text-align:center;">
+                        <div style="width:56px; height:56px; border-radius:50%; background:rgba(25,135,84,0.1); display:flex; align-items:center; justify-content:center; ">
                             <i class="bi bi-check2-circle" style="font-size:1.6rem; color:#198754;"></i>
                         </div>
-                        <p style="font-size:2rem; font-weight:900; color:#0D0D0D; margin:0;">{{ $stats['completed_orders'] }}</p>
-                        <p style="color:#6C757D; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; margin:4px 0 0;">Delivered</p>
+                        <div>
+                            <span style="font-size:2rem; font-weight:900; color:#0D0D0D; margin:0;">{{ $stats['completed_orders'] }}</span> &nbsp;
+                            <span style="color:#6C757D; font-size:16px; text-transform:uppercase; letter-spacing:1px; margin:4px 0 0;">Delivered</span>
+                        </div>
                     </div>
                 </div>
             </div>

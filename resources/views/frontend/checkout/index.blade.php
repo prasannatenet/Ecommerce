@@ -5,21 +5,27 @@
 @section('content')
 
 {{-- Page Header --}}
-<div class="page-header-teal" style="color: white">
-    <div class="container-fluid">
-        <h1 class="page-header-title">Checkout</h1>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb breadcrumb-gehna">
-                <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('cart.index') }}">Cart</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Checkout</li>
-            </ol>
-        </nav>
+<div class="page-header-teal" style="background:linear-gradient(135deg,#013a3c 0%,#017075 60%,#000 100%); position:relative; overflow:hidden;">
+    <div class="container">
+        <h1 class="page-header-title text-white">Checkout</h1>
     </div>
 </div>
 
+<section style="border: solid 1px #ccc; box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px; margin-bottom: 3px;">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="py-2">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('cart.index') }}">Cart</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Checkout</li>
+
+            </ol>
+        </nav>
+    </div>
+</section>
+
 <section style="background:#f5f5f5; padding: 50px 50px;">
-    <div class="container-fluid">
+    <div class="container">
         <div class="row g-4">
 
             {{-- Left: Forms --}}
@@ -54,9 +60,9 @@
 
                         {{-- Billing Address --}}
                         <div style="background:#fff; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.06); overflow:hidden; margin-bottom:20px;">
-                            <div style="padding:18px 28px; border-bottom:1px solid #f0f0f0; background:linear-gradient(135deg, #022C2B 0%, #017075 100%);">
+                            <div style="padding:18px 28px; border-bottom:1px solid #f0f0f0; background:linear-gradient(135deg, var(--primary-500) 0%, #017075 100%);">
                                 <h3 style="color:#fff; font-size:1rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin:0;">
-                                    <i class="bi bi-geo-alt me-2" style="color:#00e5ff;"></i> Billing Address
+                                    <i class="bi bi-geo-alt me-2" style="color:#fff;"></i> Billing Address
                                 </h3>
                             </div>
                             <div style="padding:28px;">
@@ -103,13 +109,13 @@
 
                         {{-- Shipping Address --}}
                         <div style="background:#fff; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.06); overflow:hidden; margin-bottom:20px;">
-                            <div style="padding:18px 28px; border-bottom:1px solid #f0f0f0; background:linear-gradient(135deg, #022C2B 0%, #017075 100%); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                            <div style="padding:18px 28px; border-bottom:1px solid #f0f0f0; background:linear-gradient(135deg, var(--primary-500) 0%, #017075 100%); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
                                 <h3 style="color:#fff; font-size:1rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin:0;">
-                                    <i class="bi bi-truck me-2" style="color:#00e5ff;"></i> Shipping Address
+                                    <i class="bi bi-truck me-2" style="color:#fff;"></i> Shipping Address
                                 </h3>
                                 <label style="display:flex; align-items:center; gap:8px; color:rgba(255,255,255,0.85); font-size:0.85rem; cursor:pointer; margin:0;">
                                     <input id="shipping_same_as_billing" type="checkbox" name="shipping_same_as_billing" value="1" checked
-                                           style="accent-color:#00e5ff; width:15px; height:15px;">
+                                           style="accent-color:#fff; width:15px; height:15px;">
                                     Same as billing
                                 </label>
                             </div>
@@ -152,9 +158,9 @@
 
                         {{-- Payment Method --}}
                         <div style="background:#fff; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.06); overflow:hidden; margin-bottom:20px;">
-                            <div style="padding:18px 28px; border-bottom:1px solid #f0f0f0; background:linear-gradient(135deg, #022C2B 0%, #017075 100%);">
+                            <div style="padding:18px 28px; border-bottom:1px solid #f0f0f0; background:linear-gradient(135deg, var(--primary-500) 0%, #017075 100%);">
                                 <h3 style="color:#fff; font-size:1rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin:0;">
-                                    <i class="bi bi-credit-card me-2" style="color:#00e5ff;"></i> Payment Method
+                                    <i class="bi bi-credit-card me-2" style="color:#fff;"></i> Payment Method
                                 </h3>
                             </div>
                             <div style="padding:24px 28px; display:flex; flex-direction:column; gap:12px;">
@@ -198,9 +204,9 @@
             {{-- Right: Order Summary --}}
             <div class="col-lg-4">
                 <div style="background:#fff; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.06); overflow:hidden; position:sticky; top:100px;">
-                    <div style="padding:18px 28px; border-bottom:1px solid #f0f0f0; background:linear-gradient(135deg, #022C2B 0%, #017075 100%);">
+                    <div style="padding:18px 28px; border-bottom:1px solid #f0f0f0; background:linear-gradient(135deg, var(--primary-500) 0%, #017075 100%);">
                         <h3 style="color:#fff; font-size:1rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin:0;">
-                            <i class="bi bi-receipt me-2" style="color:#00e5ff;"></i> Order Summary
+                            <i class="bi bi-receipt me-2" style="color:#fff;"></i> Order Summary
                         </h3>
                     </div>
                     <div style="padding:24px 28px;">

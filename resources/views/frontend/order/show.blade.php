@@ -8,16 +8,21 @@
         <div class="page-header-teal">
             <div class="container">
                 <h1 class="page-header-title" style="color: white !important;">Order #{{ $order->id }}</h1>
-                <nav aria-label="breadcrumb" style="color: white !important;">
-                    <ol class="breadcrumb breadcrumb-gehna">
-                        <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
+            </div>
+        </div>
+
+<section style="border: solid 1px #ccc; box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px; margin-bottom: 3px;">
+    <div class="container px-4">
+        <nav aria-label="breadcrumb" class="py-2">
+            <ol class="breadcrumb mb-0">
+               <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
                         <li class="breadcrumb-item"><a href="{{ route('account.index') }}">Account</a></li>
                         <li class="breadcrumb-item"><a href="{{ route('account.orders') }}">Orders</a></li>
                         <li class="breadcrumb-item active" aria-current="page">#{{ $order->id }}</li>
-                    </ol>
-                </nav>
-            </div>
-        </div>
+            </ol>
+        </nav>
+    </div>
+</section>
 
         <section style="background:#f5f5f5; padding: 50px 0; min-height: 55vh;">
             <div class="container">
@@ -37,9 +42,9 @@
                     {{-- Order Items --}}
                     <div class="col-lg-8">
                         <div style="background:#fff; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.06); overflow:hidden;">
-                            <div style="padding:20px 28px; border-bottom:1px solid #f0f0f0; background:linear-gradient(135deg, #022C2B 0%, #017075 100%);">
+                            <div class="heading-section">
                                 <h3 style="color:#fff; font-size:1rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin:0;">
-                                    <i class="bi bi-bag-check me-2" style="color:#00e5ff;"></i> Order Items
+                                    <i class="bi bi-bag-check me-2" style="color:#fff;"></i> Order Items
                                 </h3>
                             </div>
                             <div style="padding:0;">
@@ -104,9 +109,9 @@
                     {{-- Order Summary --}}
                     <div class="col-lg-4">
                         <div style="background:#fff; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.06); overflow:hidden; position:sticky; top:100px;">
-                            <div style="padding:20px 28px; border-bottom:1px solid #f0f0f0; background:linear-gradient(135deg, #022C2B 0%, #017075 100%);">
+                            <div class="heading-section">
                                 <h3 style="color:#fff; font-size:1rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin:0;">
-                                    <i class="bi bi-receipt me-2" style="color:#00e5ff;"></i> Summary
+                                    <i class="bi bi-receipt me-2" style="color:#fff;"></i> Summary
                                 </h3>
                             </div>
                             <div style="padding:24px 28px;">

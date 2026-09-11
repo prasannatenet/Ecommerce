@@ -1,8 +1,11 @@
+
+
+
 <!-- Wishlist Offcanvas -->
 <div class="offcanvas offcanvas-end" tabindex="-1" id="wishlistSidebar" aria-labelledby="wishlistSidebarLabel">
     <div class="offcanvas-header border-bottom py-3">
         <h5 class="offcanvas-title fw-bold" id="wishlistSidebarLabel" style="font-size: 1.25rem;">
-            <i class="bi bi-heart text-danger me-2"></i>My Wishlist
+            <i class="bi bi-heart-fill text-danger me-2"></i> &nbsp; My Wishlist
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
@@ -47,7 +50,7 @@
             <div class="wishlist-items-list flex-grow-1 overflow-auto pe-2">
                 @foreach($wishlistItems as $item)
                     @if($item->product)
-                        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-3">
+                        <div class="d-flex flex-column align-items-center justify-content-between mb-3 border-bottom pb-3">
                             <!-- Left: Image + Info -->
                             <div class="d-flex align-items-center">
                                 <div class="form-check me-2 mb-0">
@@ -67,7 +70,7 @@
                                         @php
                                             $attrs = collect($item->variation->attributes ?? [])->map(fn($v,$k) => ucfirst($k).': '.$v)->implode(' | ');
                                         @endphp
-                                        <div style="font-size:0.75rem; color:#6C757D; margin-bottom:2px;">{{ $attrs }}</div>
+                                        <div style="font-size: 14px; color:#6C757D; margin-bottom:2px;">{{ $attrs }}</div>
                                     @endif
                                     <div class="fw-bold" style="color: #017075;">
                                         ₹{{ number_format($item->product->sale_price ?? $item->product->base_price, 2) }}
@@ -76,15 +79,15 @@
                             </div>
 
                             <!-- Right: Buttons -->
-                            <div class="d-flex flex-column gap-2 ms-2">
-                                <form action="{{ route('cart.add') }}" method="POST" class="m-0">
+                            <div class="w-100 d-flex gap-2 ms-2 mt-3">
+                                <form action="{{ route('cart.add') }}" method="POST" class="m-0 flex-grow-1">
                                     @csrf
                                     <input type="hidden" name="product_id" value="{{ $item->product->id }}">
                                     @if($item->variation)
                                         <input type="hidden" name="product_variation_id" value="{{ $item->variation->id }}">
                                     @endif
                                     <input type="hidden" name="quantity" value="1">
-                                    <button class="btn btn-sm btn-primary-gehna" type="submit" style="font-size: 0.75rem; white-space: nowrap;">
+                                    <button class="btn btn-sm btn-primary-gehna w-100 py-2 text-dark" type="submit" style="font-size: 16px; border: none; background-color: #e0f1ee; white-space: nowrap;">
                                         <i class="bi bi-cart-plus"></i> Add
                                     </button>
                                 </form>
@@ -95,7 +98,7 @@
                                     @if($item->variation)
                                         <input type="hidden" name="product_variation_id" value="{{ $item->variation->id }}">
                                     @endif
-                                    <button class="btn btn-sm btn-outline-danger w-100" type="submit" style="font-size: 0.75rem;">
+                                    <button class="btn btn-sm btn-outline-danger w-100 py-2" type="submit" style="font-size: 16px;">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
@@ -106,7 +109,7 @@
             </div>
 
             <div class="wishlist-action-buttons mt-3 pt-3 border-top">
-                <button type="button" class="btn btn-primary-gehna w-100 mb-2" onclick="moveCheckedToCart()">
+                <button type="button" class="btn btn-primary-gehna w-100 mb-2 text-white border-0 py-3" onclick="moveCheckedToCart()">
                     <i class="bi bi-cart-check me-2"></i>Move Selected to Cart
                 </button>
                 <button type="button" class="btn btn-outline-danger w-100" onclick="clearWishlistItems()">
