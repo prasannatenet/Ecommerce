@@ -39,6 +39,7 @@ class BackendShipmentController extends Controller
         return $request->validate([
             'delivery_partner_id' => 'nullable|exists:delivery_partners,id',
             'tracking_number' => 'nullable|string|max:255',
+            'tracking_url' => 'nullable|url|max:500',
             'status' => 'required|string|max:50',
             'shipped_at' => 'nullable|date',
             'delivered_at' => 'nullable|date|after_or_equal:shipped_at',

@@ -12,6 +12,7 @@ class Shipment extends Model
         'order_id',
         'delivery_partner_id',
         'tracking_number',
+        'tracking_url',
         'status',
         'shipped_at',
         'delivered_at',

@@ -65,7 +65,10 @@
     
                     <!-- RIGHT BOTTOM CARD -->
                     <div class="featured-small">
-                        @if ($featuredProducts->isEmpty())
+                        @php
+                            $featuredSectionProducts = $sectionProducts['featured'] ?? collect();
+                        @endphp
+                        @if ($featuredSectionProducts->isEmpty())
                             <p class="text-center text-muted py-5">New jewellery is coming soon.</p>
                         @else
                             <div class="pm-products-carousel pm-earring-products-carousel">
@@ -77,7 +80,7 @@
                                 <div class="pm-products-scroller" id="earringProductsScroller" data-visible-count="2" tabindex="0"
                                     aria-label="Featured jewellery carousel">
                                     <div class="pm-products-track">
-                                        @foreach ($featuredProducts->take(8) as $product)
+                                        @foreach ($featuredSectionProducts as $product)
                                             <div class="pm-product-slide">
                                                 @include('frontend.partials.product-card', ['product' => $product])
                                             </div>
@@ -106,7 +109,7 @@
                 <div class="pm-title-line mx-auto"></div>
             </div>
 
-            @if ($featuredProducts->isEmpty())
+            @if ($allProducts->isEmpty())
                 <p class="text-center text-muted py-5">New jewellery is coming soon.</p>
             @else
                 <div class="pm-products-carousel">
@@ -118,7 +121,7 @@
                     <div class="pm-products-scroller" id="pmProductsScroller" tabindex="0"
                         aria-label="Featured jewellery carousel">
                         <div class="pm-products-track">
-                            @foreach ($featuredProducts->take(8) as $product)
+                            @foreach ($allProducts as $product)
                                 <div class="pm-product-slide">
                                     @include('frontend.partials.product-card', ['product' => $product])
                                 </div>
@@ -150,10 +153,13 @@
             </div>
         </div>
         <div class="g-section-products">
-            @if ($featuredProducts->isEmpty())
+            @php
+                $largeImageSectionProducts = $sectionProducts['large-image'] ?? collect();
+            @endphp
+            @if ($largeImageSectionProducts->isEmpty())
                 <p class="text-center text-muted py-5">New jewellery is coming soon.</p>
             @else
-                @foreach ($featuredProducts->take(8) as $product)
+                @foreach ($largeImageSectionProducts as $product)
                     <div class="pm-product-slide">
                         @include('frontend.partials.product-card', ['product' => $product])
                     </div>

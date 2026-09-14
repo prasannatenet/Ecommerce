@@ -135,6 +135,7 @@
                         <th>Section</th>
                         <th style="width:180px;">Preview</th>
                         <th>Details</th>
+                        <th style="width:120px;">Category</th>
                         <th style="width:100px;">Status</th>
                         <th style="width:150px;">Actions</th>
                     </tr>
@@ -181,6 +182,9 @@
                             </td>
                             <td>
                                 <ul class="home-section-details-list">
+                                    @if($section->category_name)
+                                        <li><strong>Category:</strong> <span class="df-badge df-badge-info">{{ $section->category_name }}</span></li>
+                                    @endif
                                     @if($section->title)
                                         <li><strong>Title:</strong> {{ $section->title }}</li>
                                     @endif
@@ -333,3 +337,4 @@
 @endpush
 
 @endsection
+

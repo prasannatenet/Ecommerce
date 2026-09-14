@@ -1,6 +1,8 @@
 @extends('layouts.frontend')
 
-@section('title', 'Order #{{ $order->id }} | GEHNA')
+@section('title')
+Order #{{ $order->id }} | GEHNA
+@endsection
 
 @section('content')
 
@@ -60,6 +62,9 @@
                                     </div>
                                 @endforeach
                             </div>
+
+                            @include('frontend.order._delivery_tracking')
+
                             @if($order->status === 'delivered')
                                 <div style="padding:20px 28px; background:#fffaf2; border-top:1px solid #f0f0f0;">
                                     <h4 style="font-size:1rem; font-weight:800; margin-bottom:12px;">Request a return</h4>

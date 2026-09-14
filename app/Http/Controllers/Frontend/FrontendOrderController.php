@@ -32,7 +32,7 @@ class FrontendOrderController extends Controller
     {
         abort_if($order->user_id !== Auth::id(), 403);
 
-        $order->load(['items', 'paymentProvider', 'paymentTransactions', 'refunds', 'returnRequests.items']);
+        $order->load(['items', 'paymentProvider', 'paymentTransactions', 'refunds', 'returnRequests.items', 'shipments.deliveryPartner']);
 
         return view('frontend.order.show', compact('order'));
     }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Review;
 use App\Models\Wishlist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -100,7 +101,89 @@ class FrontendProductController extends Controller
             ->with('variations', 'images', 'brand', 'category')
             ->firstOrFail();
 
-        return view('frontend.product.show', compact('product'));
+        $reviews = $product->reviews()->with('user')->latest()->get();
+        $reviewsCount = $reviews->count();
+        $averageRating = $reviewsCount > 0 ? round((float) $reviews->avg('rating'), 1) : 0.0;
+
+        return view('frontend.product.show', compact(
+            'product',
+            'reviews',
+            'reviewsCount',
+            'averageRating'
+        ));
+    }
+
+    public function storeReview(Request $request, Product $product)
+    {
+        $data = $request->validate([
+            'rating'  => 'required|integer|min:1|max:5',
+            'comment' => 'required|string|max:2000',
+        ]);
+
+        // One review per user per product — re-submitting updates their review.
+        $product->reviews()->updateOrCreate(
+            ['user_id' => Auth::id()],
+            [
+                'rating'  => (int) $data['rating'],
+                'comment' => trim($data['comment']),
+            ]
+        );
+
+        return $this->reviewListResponse($product, $request, 'Thanks! Your review has been posted.');
+    }
+
+    public function updateReview(Request $request, Product $product, Review $review)
+    {
+        abort_unless($review->product_id === $product->id, 404);
+        abort_unless($review->user_id === Auth::id(), 403, 'You can only edit your own review.');
+
+        $data = $request->validate([
+            'rating'  => 'required|integer|min:1|max:5',
+            'comment' => 'required|string|max:2000',
+        ]);
+
+        $review->update([
+            'rating'  => (int) $data['rating'],
+            'comment' => trim($data['comment']),
+        ]);
+
+        return $this->reviewListResponse($product, $request, 'Your review has been updated.');
+    }
+
+    public function destroyReview(Request $request, Product $product, Review $review)
+    {
+        abort_unless($review->product_id === $product->id, 404);
+        abort_unless($review->user_id === Auth::id(), 403, 'You can only delete your own review.');
+
+        $review->delete();
+
+        return $this->reviewListResponse($product, $request, 'Your review has been deleted.');
+    }
+
+    /**
+     * Build the standard review response — freshly rendered review list plus
+     * counts. AJAX requests get JSON (so the new state appears immediately
+     * without a reload); normal requests redirect back to the Reviews tab.
+     */
+    private function reviewListResponse(Product $product, Request $request, string $message)
+    {
+        $reviews = $product->reviews()->with('user')->latest()->get();
+        $reviewsCount = $reviews->count();
+        $averageRating = $reviewsCount > 0 ? round((float) $reviews->avg('rating'), 1) : 0.0;
+
+        if ($request->ajax() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json([
+                'success'        => true,
+                'message'        => $message,
+                'reviews_html'   => view('frontend.product.review-list', compact('reviews', 'product'))->render(),
+                'reviews_count'  => $reviewsCount,
+                'average_rating' => $averageRating,
+            ]);
+        }
+
+        return redirect()
+            ->to(route('product.show', $product->slug) . '#tabReviews')
+            ->with('review_success', $message);
     }
 
     public function quickView($id)

@@ -213,6 +213,10 @@
                                 <input type="text" name="tracking_number" class="df-form-control" placeholder="e.g. TRK123456">
                             </div>
                             <div class="col-md-4">
+                                <label class="df-form-label">Tracking URL</label>
+                                <input type="url" name="tracking_url" class="df-form-control" placeholder="https://tracking.example.com/TRK123456">
+                            </div>
+                            <div class="col-md-4">
                                 <label class="df-form-label">Status <span class="text-danger">*</span></label>
                                 <select name="status" class="df-form-select" required>
                                     @foreach(['pending','shipped','in_transit','delivered','cancelled'] as $status)
@@ -245,6 +249,7 @@
                             <tr>
                                 <th>Partner</th>
                                 <th>Tracking</th>
+                                <th>Tracking URL</th>
                                 <th>Status</th>
                                 <th>Shipped</th>
                                 <th>Delivered</th>
@@ -258,6 +263,15 @@
                                     <td>
                                         @if($shipment->tracking_number)
                                             <code style="font-size:0.82rem; color:var(--df-text-secondary);">{{ $shipment->tracking_number }}</code>
+                                        @else
+                                            <span style="color:var(--df-text-secondary);">—</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($shipment->tracking_url)
+                                            <a href="{{ $shipment->tracking_url }}" target="_blank" rel="noopener noreferrer" style="font-size:0.82rem; color:var(--df-primary);">
+                                                <i class="bi bi-box-arrow-up-right me-1"></i>Track
+                                            </a>
                                         @else
                                             <span style="color:var(--df-text-secondary);">—</span>
                                         @endif
@@ -288,6 +302,7 @@
                                                 @method('PUT')
                                                 <input type="hidden" name="delivery_partner_id" value="{{ $shipment->delivery_partner_id }}">
                                                 <input type="hidden" name="tracking_number" value="{{ $shipment->tracking_number }}">
+                                                <input type="hidden" name="tracking_url" value="{{ $shipment->tracking_url }}">
                                                 <input type="hidden" name="shipped_at" value="{{ $shipment->shipped_at }}">
                                                 <input type="hidden" name="delivered_at" value="{{ $shipment->delivered_at }}">
                                                 <select name="status" class="df-form-select" style="width:auto; min-width:110px; padding:4px 8px; font-size:0.8rem;">
@@ -301,6 +316,9 @@
                                                     <i class="bi bi-check2"></i>
                                                 </button>
                                             </form>
+                                            <button class="df-action-btn primary" type="button" title="Edit" data-bs-toggle="modal" data-bs-target="#editShipment{{ $shipment->id }}">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
                                             <form action="{{ route('admin.shipments.destroy', $shipment) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this shipment?');">
                                                 @csrf
                                                 @method('DELETE')
@@ -311,9 +329,70 @@
                                         </div>
                                     </td>
                                 </tr>
+
+                                {{-- Edit Shipment Modal --}}
+                                <div class="modal fade" id="editShipment{{ $shipment->id }}" tabindex="-1" aria-labelledby="editShipmentLabel{{ $shipment->id }}" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <form method="POST" action="{{ route('admin.shipments.update', $shipment) }}">
+                                                @csrf
+                                                @method('PUT')
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="editShipmentLabel{{ $shipment->id }}">
+                                                        <i class="bi bi-truck me-2"></i>Edit Shipment
+                                                    </h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="mb-3">
+                                                        <label class="df-form-label">Delivery Partner</label>
+                                                        <select name="delivery_partner_id" class="df-form-select">
+                                                            <option value="">Select partner</option>
+                                                            @foreach($deliveryPartners as $partner)
+                                                                <option value="{{ $partner->id }}" {{ $shipment->delivery_partner_id === $partner->id ? 'selected' : '' }}>{{ $partner->name }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="df-form-label">Tracking Number</label>
+                                                        <input type="text" name="tracking_number" class="df-form-control" value="{{ $shipment->tracking_number }}" placeholder="e.g. TRK123456">
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="df-form-label">Tracking URL</label>
+                                                        <input type="url" name="tracking_url" class="df-form-control" value="{{ $shipment->tracking_url }}" placeholder="https://tracking.example.com/TRK123456">
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="df-form-label">Status <span class="text-danger">*</span></label>
+                                                        <select name="status" class="df-form-select" required>
+                                                            @foreach(['pending','shipped','in_transit','delivered','cancelled'] as $status)
+                                                                <option value="{{ $status }}" {{ $shipment->status === $status ? 'selected' : '' }}>{{ ucfirst(str_replace('_', ' ', $status)) }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-6 mb-3">
+                                                            <label class="df-form-label">Shipped At</label>
+                                                            <input type="datetime-local" name="shipped_at" class="df-form-control" value="{{ $shipment->shipped_at ? $shipment->shipped_at->format('Y-m-d\TH:i') : '' }}">
+                                                        </div>
+                                                        <div class="col-md-6 mb-3">
+                                                            <label class="df-form-label">Delivered At</label>
+                                                            <input type="datetime-local" name="delivered_at" class="df-form-control" value="{{ $shipment->delivered_at ? $shipment->delivered_at->format('Y-m-d\TH:i') : '' }}">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="df-btn df-btn-light" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="df-btn df-btn-primary">
+                                                        <i class="bi bi-check2-circle me-1"></i>Save Changes
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
                             @empty
                                 <tr>
-                                    <td colspan="6">
+                                    <td colspan="7">
                                         <div class="df-empty-state">
                                             <div class="empty-icon"><i class="bi bi-truck"></i></div>
                                             <p>No shipments yet. Click "Add Shipment" to create one.</p>
