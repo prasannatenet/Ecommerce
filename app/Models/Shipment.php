@@ -13,15 +13,31 @@ class Shipment extends Model
         'delivery_partner_id',
         'tracking_number',
         'tracking_url',
+        'provider_shipment_id',
+        'label_url',
         'status',
         'shipped_at',
         'delivered_at',
+        'booking_requested_at',
+        'booked_at',
+        'last_synced_at',
+        'last_sync_error',
+        'meta',
     ];
 
     protected $casts = [
         'shipped_at' => 'datetime',
         'delivered_at' => 'datetime',
+        'booking_requested_at' => 'datetime',
+        'booked_at' => 'datetime',
+        'last_synced_at' => 'datetime',
+        'meta' => 'array',
     ];
+
+    public function trackingEvents()
+    {
+        return $this->hasMany(ShipmentTrackingEvent::class);
+    }
 
     public function order()
     {

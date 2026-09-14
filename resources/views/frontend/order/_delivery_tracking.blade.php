@@ -50,10 +50,29 @@
                             <p style="font-weight:600; color:#198754; margin:0; font-size:0.9rem;"><i class="bi bi-check-circle me-1"></i>{{ $shipment->delivered_at->format('M d, Y h:i A') }}</p>
                         </div>
                     @endif
-                    @if($shipment->tracking_url)
+                                        @if($shipment->tracking_url)
                         <a href="{{ $shipment->tracking_url }}" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:8px; padding:10px 20px; background:#017075; color:#fff; font-size:0.85rem; font-weight:600; text-decoration:none; border-radius:8px; transition:all 0.2s;" onmouseover="this.style.background='#015a5e';" onmouseout="this.style.background='#017075';">
                             <i class="bi bi-box-arrow-up-right"></i> Track Delivery
                         </a>
+                    @endif
+
+                    @if($shipment->trackingEvents->isNotEmpty())
+                        <div style="margin-top:16px;">
+                            <h6 style="font-weight:700; color:#0D0D0D; margin-bottom:12px; font-size:0.9rem;">Tracking History</h6>
+                            <div class="timeline-container">
+                                @foreach($shipment->trackingEvents as $event)
+                                    <div class="tracking-event-item">
+                                        <div class="tracking-event-bullet"></div>
+                                        <div class="tracking-event-content">
+                                            <p class="tracking-event-status">{{ $event->status_label ?: ucfirst(str_replace('_', ' ', $event->status_code)) }}</p>
+                                            <p class="tracking-event-meta">{{ $event->location ?: 'Location not specified' }}
+                                                @if($event->scanned_at) — {{ \Carbon\Carbon::parse($event->scanned_at)->format('M d, Y h:i A') }}@endif
+                                            </p>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
                     @endif
                 </div>
             @endforeach

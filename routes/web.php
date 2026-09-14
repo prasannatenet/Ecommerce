@@ -155,10 +155,17 @@ Route::prefix('admin')->middleware(['auth','admin'])->name('admin.')->group(func
     Route::post('sliders/reorder', [BackendSliderController::class, 'reorder'])->name('sliders.reorder');
     Route::resource('home-sections', BackendHomeSectionController::class)->except(['create', 'store']);
     Route::post('home-sections/reorder', [BackendHomeSectionController::class, 'reorder'])->name('home-sections.reorder');
-    Route::post('home-sections/ensure-defaults', [BackendHomeSectionController::class, 'ensureDefaults'])->name('home-sections.ensure-defaults');
+        Route::post('home-sections/ensure-defaults', [BackendHomeSectionController::class, 'ensureDefaults'])->name('home-sections.ensure-defaults');
 
     Route::resource('delivery-partners', BackendDeliveryPartnerController::class);
-    Route::resource('orders', BackendOrderController::class)->only(['index','show','update']);
+    Route::post('delivery-partners/{deliveryPartner}/test-connection', [BackendDeliveryPartnerController::class, 'testConnection'])->name('delivery-partners.test-connection');
+    Route::post('shipments/{shipment}/book', [BackendShipmentController::class, 'book'])->name('shipments.book');
+    Route::post('shipments/{shipment}/sync', [BackendShipmentController::class, 'sync'])->name('shipments.sync');
+    Route::get('shipments/{shipment}/label', [BackendShipmentController::class, 'label'])->name('shipments.label');
+    Route::post('webhooks/delivery/{partnerCode}', [App\Http\Controllers\Backend\BackendDeliveryWebhookController::class, '__invoke'])
+        ->name('webhooks.delivery')
+        ->withoutMiddleware(['auth', 'admin']);
+    Route::resource('orders', BackendOrderController::class)->only(['index', 'show', 'update']);
     Route::get('orders-export', [BackendOrderController::class, 'exportCsv'])->name('orders.export');
     Route::post('orders/{order}/cancel', [BackendOrderController::class, 'cancel'])->name('orders.cancel');
     Route::post('orders/{order}/refund', [BackendOrderController::class, 'refund'])->name('orders.refund');

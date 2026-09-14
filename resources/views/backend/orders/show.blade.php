@@ -228,15 +228,22 @@
                                 <label class="df-form-label">Shipped At</label>
                                 <input type="datetime-local" name="shipped_at" class="df-form-control">
                             </div>
-                            <div class="col-md-6">
+                                                        <div class="col-md-6">
                                 <label class="df-form-label">Delivered At</label>
                                 <input type="datetime-local" name="delivered_at" class="df-form-control">
                             </div>
-                            <div class="col-12 d-flex justify-content-end gap-2">
-                                <button type="button" class="df-btn df-btn-light" data-bs-toggle="collapse" data-bs-target="#newShipment">Cancel</button>
-                                <button class="df-btn df-btn-primary" type="submit">
-                                    <i class="bi bi-check2-circle"></i> Create Shipment
-                                </button>
+                                                        <div class="col-12 d-flex justify-content-between align-items-center gap-2">
+                                <label class="d-flex align-items-center gap-2 mb-0" style="cursor:pointer;">
+                                    <input type="checkbox" name="book_now" value="1"
+                                           style="width:18px; height:18px; accent-color:var(--df-primary);">
+                                    <span class="df-form-label mb-0">Book with courier automatically</span>
+                                </label>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="df-btn df-btn-light" data-bs-toggle="collapse" data-bs-target="#newShipment">Cancel</button>
+                                    <button class="df-btn df-btn-primary" type="submit">
+                                        <i class="bi bi-check2-circle"></i> Create Shipment
+                                    </button>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -247,12 +254,13 @@
                     <table class="df-table">
                         <thead>
                             <tr>
-                                <th>Partner</th>
+                                                                <th>Partner</th>
                                 <th>Tracking</th>
                                 <th>Tracking URL</th>
                                 <th>Status</th>
                                 <th>Shipped</th>
                                 <th>Delivered</th>
+                                <th>Tracking Events</th>
                                 <th style="width:180px;">Actions</th>
                             </tr>
                         </thead>
@@ -297,37 +305,84 @@
                                     </td>
                                     <td>
                                         <div class="df-actions" style="flex-wrap:nowrap;">
-                                            <form action="{{ route('admin.shipments.update', $shipment) }}" method="POST" class="d-inline-flex align-items-center gap-1">
+                                                                                        <form action="{{ route('admin.shipments.update', $shipment) }}" method="POST" class="d-inline-flex align-items-center gap-1">
                                                 @csrf
                                                 @method('PUT')
                                                 <input type="hidden" name="delivery_partner_id" value="{{ $shipment->delivery_partner_id }}">
                                                 <input type="hidden" name="tracking_number" value="{{ $shipment->tracking_number }}">
                                                 <input type="hidden" name="tracking_url" value="{{ $shipment->tracking_url }}">
+                                                <input type="hidden" name="provider_shipment_id" value="{{ $shipment->provider_shipment_id }}">
+                                                <input type="hidden" name="label_url" value="{{ $shipment->label_url }}">
                                                 <input type="hidden" name="shipped_at" value="{{ $shipment->shipped_at }}">
                                                 <input type="hidden" name="delivered_at" value="{{ $shipment->delivered_at }}">
+                                                <input type="hidden" name="booking_requested_at" value="{{ $shipment->booking_requested_at }}">
+                                                <input type="hidden" name="booked_at" value="{{ $shipment->booked_at }}">
+                                                <input type="hidden" name="last_synced_at" value="{{ $shipment->last_synced_at }}">
+                                                <input type="hidden" name="last_sync_error" value="{{ $shipment->last_sync_error }}">
                                                 <select name="status" class="df-form-select" style="width:auto; min-width:110px; padding:4px 8px; font-size:0.8rem;">
-                                                    @foreach(['pending','shipped','in_transit','delivered','cancelled'] as $status)
-                                                        <option value="{{ $status }}" {{ $shipment->status === $status ? 'selected' : '' }}>
-                                                            {{ ucfirst(str_replace('_', ' ', $status)) }}
-                                                        </option>
+                                                    @foreach(\App\Services\Delivery\DeliveryStatus::labels() as $status => $label)
+                                                        <option value="{{ $status }}" {{ $shipment->status === $status ? 'selected' : '' }}>{{ $label }}</option>
                                                     @endforeach
                                                 </select>
                                                 <button class="df-action-btn info" type="submit" title="Update Status">
                                                     <i class="bi bi-check2"></i>
                                                 </button>
                                             </form>
+                                            @if($shipment->deliveryPartner && $shipment->deliveryPartner->isIntegrated())
+                                                @if(! $shipment->tracking_number)
+                                                    <form action="{{ route('admin.shipments.book', $shipment) }}" method="POST" class="d-inline" onsubmit="return confirm('Book this shipment with {{ $shipment->deliveryPartner->name }}?');">
+                                                        @csrf
+                                                        <button class="df-action-btn success" type="submit" title="Book with {{ $shipment->deliveryPartner->name }}">
+                                                            <i class="bi bi-rocket"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                                @if($shipment->tracking_number)
+                                                    <form action="{{ route('admin.shipments.label', $shipment) }}" method="GET" class="d-inline">
+                                                        <button class="df-action-btn info" type="submit" title="Download Label">
+                                                            <i class="bi bi-file-earmark-pdf"></i>
+                                                        </button>
+                                                    </form>
+                                                    <form action="{{ route('admin.shipments.sync', $shipment) }}" method="POST" class="d-inline">
+                                                        @csrf
+                                                        <button class="df-action-btn warning" type="submit" title="Sync Tracking">
+                                                            <i class="bi bi-arrow-clockwise"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            @endif
                                             <button class="df-action-btn primary" type="button" title="Edit" data-bs-toggle="modal" data-bs-target="#editShipment{{ $shipment->id }}">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
                                             <form action="{{ route('admin.shipments.destroy', $shipment) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this shipment?');">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="df-action-btn danger" type="submit" title="Delete">
+                                                                                            <button class="df-action-btn danger" type="submit" title="Delete">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
                                             </form>
                                         </div>
-                                    </td>
+                                        <td>
+                                            @if($shipment->trackingEvents->isNotEmpty())
+                                                <div style="max-width:220px;">
+                                                    @foreach($shipment->trackingEvents->take(3) as $event)
+                                                        <div style="font-size:0.72rem; margin-bottom:4px;">
+                                                            <strong>{{ $event->status_label ?: ucfirst(str_replace('_', ' ', $event->status_code)) }}</strong>
+                                                            @if($event->scanned_at)
+                                                                <span style="color:var(--df-text-secondary);">— {{ \Carbon\Carbon::parse($event->scanned_at)->format('M d, h:i A') }}</span>
+                                                            @endif
+                                                        </div>
+                                                    @endforeach
+                                                    @if($shipment->trackingEvents->count() > 3)
+                                                        <div style="font-size:0.68rem; color:var(--df-text-secondary);">
+                                                            +{{ $shipment->trackingEvents->count() - 3 }} more
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            @else
+                                                <span style="color:var(--df-text-secondary); font-size:0.8rem;">No scans yet</span>
+                                            @endif
+                                        </td>
                                 </tr>
 
                                 {{-- Edit Shipment Modal --}}

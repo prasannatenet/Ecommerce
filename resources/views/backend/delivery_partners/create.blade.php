@@ -32,14 +32,6 @@
                     @csrf
                     @include('backend.delivery_partners.partials.form', ['partner' => null])
 
-                    <div class="d-flex gap-2 mt-4">
-                        <button type="submit" class="df-btn df-btn-primary">
-                            <i class="bi bi-check2-circle"></i> Create Partner
-                        </button>
-                        <a href="{{ route('admin.delivery-partners.index') }}" class="df-btn df-btn-light">
-                            <i class="bi bi-arrow-left"></i> Cancel
-                        </a>
-                    </div>
                 </form>
             </div>
         </div>

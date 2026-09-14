@@ -11,6 +11,7 @@ use App\Models\OrderRefund;
 use App\Models\PaymentProvider;
 use App\Models\PaymentTransaction;
 use App\Services\OrderInventoryService;
+use App\Services\Delivery\DeliveryManager;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -84,12 +85,20 @@ class BackendOrderController extends Controller
 
 	public function show(Order $order)
 	{
-		$order->load(['user', 'paymentProvider', 'items.product', 'paymentTransactions', 'refunds', 'shipments.deliveryPartner']);
+			$order->load([
+		'user',
+		'paymentProvider',
+		'items.product',
+		'paymentTransactions',
+		'refunds',
+		'shipments.deliveryPartner',
+		'shipments.trackingEvents',
+	]);
 		$deliveryPartners = DeliveryPartner::where('is_active', true)->orderBy('name')->get();
 		return view('backend.orders.show', compact('order', 'deliveryPartners'));
 	}
 
-	public function update(Request $request, Order $order)
+		public function update(Request $request, Order $order, DeliveryManager $deliveryManager)
 	{
 		$data = $request->validate([
 			'status' => 'required|string|max:50',
@@ -119,6 +128,11 @@ class BackendOrderController extends Controller
 			&& ! $order->stock_deducted
 		) {
 			$this->inventoryService->deductForOrder($order);
+		}
+
+		// Auto-book the courier when the order reaches the partner's configured trigger status.
+		if ($order->status !== $previousStatus) {
+			$deliveryManager->maybeAutoBook($order);
 		}
 
 		return redirect()->route('admin.orders.show', $order)->with('success', 'Order status updated.');

@@ -26,8 +26,18 @@
     <script src="{{ asset('frontend/js/load.js') }}"></script>
     <script src="{{ asset('frontend/js/app.js') }}"></script>
 
-    @yield('styles')
+        @yield('styles')
     @stack('styles')
+
+    <style>
+        .timeline-container { border-left: 2px solid #e9ecef; padding-left: 16px; }
+        .tracking-event-item { position: relative; padding-left: 16px; margin-bottom: 14px; }
+        .tracking-event-item:last-child { margin-bottom: 0; }
+        .tracking-event-item:before { content: ''; position: absolute; left: -8px; top: 0; width: 14px; height: 14px; border-radius: 50%; border: 2px solid #017075; background: #fff; }
+        .tracking-event-item:last-child:before { background: #017075; }
+        .tracking-event-status { font-weight: 600; color: #0D0D0D; margin: 0; font-size: 0.85rem; }
+        .tracking-event-meta { color: #6C757D; font-size: 0.8rem; margin: 2px 0 0; }
+    </style>
 </head>
 
 <body class="frontend-site {{ request()->routeIs('home') ? 'home-page' : '' }}">
