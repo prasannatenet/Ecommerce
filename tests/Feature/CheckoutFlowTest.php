@@ -100,7 +100,7 @@ it('verifies Razorpay signature and marks payment as paid', function () {
             'currency' => 'INR',
             'status' => 'created',
         ], 200),
-    ]);
+    ]); 
 
     actingAs($user);
     $placeResponse = post(route('checkout.place'), checkoutPayload(['payment_method' => 'razorpay']));
