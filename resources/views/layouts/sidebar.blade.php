@@ -154,7 +154,18 @@
                 <div class="df-submenu">
                     <a href="{{ route('admin.delivery-partners.index') }}" class="df-nav-link">All Partners</a>
                     <a href="{{ route('admin.delivery-partners.create') }}" class="df-nav-link">Add Partner</a>
+                    @php $navDeliveryPartner = \App\Models\DeliveryPartner::orderByDesc('is_default')->orderBy('id')->first(); @endphp
+                    @if($navDeliveryPartner)
+                        <a href="{{ route('admin.delivery-partners.edit', $navDeliveryPartner) }}" class="df-nav-link">Delivery Settings</a>
+                    @endif
                 </div>
+            </div>
+
+            <div class="df-nav-item">
+                <a href="{{ route('admin.shipments.index') }}" class="df-nav-link">
+                    <span class="nav-icon"><i class="bi bi-box-seam"></i></span>
+                    <span class="nav-text">Shipments</span>
+                </a>
             </div>
         </div>
 
@@ -220,6 +231,13 @@
                 </div>
             </div>
 
+            </div>
+
+            <div class="df-nav-item">
+                <a href="{{ route('admin.users.index') }}" class="df-nav-link">
+                    <span class="nav-icon"><i class="bi bi-people"></i></span>
+                    <span class="nav-text">Registered Users</span>
+                </a>
             </div>
 
             <div class="df-nav-item">

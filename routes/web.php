@@ -115,6 +115,8 @@ Route::middleware(['auth'])->group(function(){
     Route::delete('/product/{product}/reviews/{review}', [FrontendProductController::class, 'destroyReview'])->name('products.reviews.destroy');
     Route::post('/checkout/coupon', [FrontendCheckoutController::class, 'applyCoupon'])->name('checkout.coupon.apply');
     Route::delete('/checkout/coupon', [FrontendCheckoutController::class, 'removeCoupon'])->name('checkout.coupon.remove');
+    Route::post('/checkout/coins', [FrontendCheckoutController::class, 'applyCoins'])->name('checkout.coins.apply');
+    Route::delete('/checkout/coins', [FrontendCheckoutController::class, 'removeCoins'])->name('checkout.coins.remove');
     Route::post('/checkout/place-order', [FrontendCheckoutController::class, 'placeOrder'])->name('checkout.place');
     Route::post('/checkout/razorpay/verify', [FrontendCheckoutController::class, 'verifyRazorpay'])->name('checkout.razorpay.verify');
     Route::get('/checkout/success/{order}', [FrontendCheckoutController::class, 'success'])->name('checkout.success');
@@ -158,7 +160,10 @@ Route::prefix('admin')->middleware(['auth','admin'])->name('admin.')->group(func
         Route::post('home-sections/ensure-defaults', [BackendHomeSectionController::class, 'ensureDefaults'])->name('home-sections.ensure-defaults');
 
     Route::resource('delivery-partners', BackendDeliveryPartnerController::class);
-    Route::post('delivery-partners/{deliveryPartner}/test-connection', [BackendDeliveryPartnerController::class, 'testConnection'])->name('delivery-partners.test-connection');
+    Route::match(['get', 'post'], 'delivery-partners/{deliveryPartner}/test-connection', [BackendDeliveryPartnerController::class, 'testConnection'])->name('delivery-partners.test-connection');
+    Route::post('delivery-partners/{deliveryPartner}/sync-now', [BackendDeliveryPartnerController::class, 'syncNow'])->name('delivery-partners.sync-now');
+    Route::post('delivery-partners/{deliveryPartner}/test-serviceability', [BackendDeliveryPartnerController::class, 'testServiceability'])->name('delivery-partners.test-serviceability');
+    Route::get('shipments', [BackendShipmentController::class, 'index'])->name('shipments.index');
     Route::post('shipments/{shipment}/book', [BackendShipmentController::class, 'book'])->name('shipments.book');
     Route::post('shipments/{shipment}/sync', [BackendShipmentController::class, 'sync'])->name('shipments.sync');
     Route::get('shipments/{shipment}/label', [BackendShipmentController::class, 'label'])->name('shipments.label');

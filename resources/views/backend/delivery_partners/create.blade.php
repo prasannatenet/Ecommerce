@@ -23,18 +23,10 @@
 
 <div class="row g-4">
     <div class="col-lg-8">
-        <div class="df-card">
-            <div class="df-card-header">
-                <h5 class="df-card-title"><i class="bi bi-truck"></i> Partner Details</h5>
-            </div>
-            <div class="df-card-body">
-                <form action="{{ route('admin.delivery-partners.store') }}" method="POST">
-                    @csrf
-                    @include('backend.delivery_partners.partials.form', ['partner' => null])
-
-                </form>
-            </div>
-        </div>
+        <form action="{{ route('admin.delivery-partners.store') }}" method="POST">
+            @csrf
+            @include('backend.delivery_partners.partials.form', ['partner' => null])
+        </form>
     </div>
     <div class="col-lg-4">
         <div class="df-card">

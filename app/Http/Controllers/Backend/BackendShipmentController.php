@@ -3,13 +3,79 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
+use App\Models\DeliveryPartner;
 use App\Models\Shipment;
 use App\Models\Order;
 use App\Services\Delivery\DeliveryManager;
+use App\Services\Delivery\DeliveryStatus;
 use Illuminate\Http\Request;
 
 class BackendShipmentController extends Controller
 {
+    /**
+     * Shipment Management dashboard: totals across all orders, with filters.
+     */
+    public function index(Request $request)
+    {
+        $status = trim((string) $request->query('status', ''));
+        $partnerId = $request->query('partner');
+        $search = trim((string) $request->query('q', ''));
+        $perPage = (int) $request->query('per_page', 15);
+        $perPage = in_array($perPage, [10, 15, 25, 50, 100], true) ? $perPage : 15;
+
+        $stats = [
+            'total' => Shipment::query()->count(),
+            'in_transit' => Shipment::query()->inTransit()->count(),
+            'delivered' => Shipment::query()->delivered()->count(),
+            'exceptions' => Shipment::query()->exceptions()->count(),
+        ];
+
+        $shipments = Shipment::query()
+            ->with(['deliveryPartner:id,name,driver', 'trackingEvents', 'order:id,user_id,status,total,payment_method,payment_status,shipping_address'])
+            ->when($status !== '', function ($query) use ($status) {
+                if ($status === 'exceptions') {
+                    $query->exceptions();
+
+                    return;
+                }
+
+                if ($status === 'in_transit') {
+                    $query->inTransit();
+
+                    return;
+                }
+
+                $query->where('status', $status);
+            })
+            ->when($partnerId, fn ($query) => $query->where('delivery_partner_id', $partnerId))
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($inner) use ($search) {
+                    $inner->where('tracking_number', 'like', '%' . $search . '%')
+                        ->orWhere('provider_shipment_id', 'like', '%' . $search . '%');
+
+                    if (ctype_digit($search)) {
+                        $inner->orWhere('order_id', (int) $search);
+                    }
+                });
+            })
+            ->orderByDesc('id')
+            ->paginate($perPage)
+            ->withQueryString();
+
+        return view('backend.shipments.index', [
+            'shipments' => $shipments,
+            'stats' => $stats,
+            'partners' => DeliveryPartner::orderBy('name')->get(['id', 'name', 'driver', 'is_active']),
+            'statusOptions' => DeliveryStatus::labels(),
+            'filters' => [
+                'status' => $status,
+                'partner' => $partnerId,
+                'q' => $search,
+                'per_page' => $perPage,
+            ],
+        ]);
+    }
+
     public function store(Request $request, Order $order, DeliveryManager $manager)
     {
         $data = $this->validateData($request);

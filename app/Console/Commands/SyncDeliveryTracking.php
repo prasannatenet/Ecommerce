@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\Log;
 class SyncDeliveryTracking extends Command
 {
     protected $signature = 'delivery:sync-tracking
-        {--limit=50 : Maximum number of shipments to sync in one run}';
+        {--limit=50 : Maximum number of shipments to sync in one run}
+        {--partner= : Only sync shipments for this delivery partner id}';
 
     protected $description = 'Sync tracking for active shipments from configured delivery partners';
 
@@ -23,14 +24,32 @@ class SyncDeliveryTracking extends Command
             return self::FAILURE;
         }
 
-        $partners = DeliveryPartner::where('is_active', true)
+        $partnerId = $this->option('partner');
+
+        $partners = DeliveryPartner::query()
+            ->where('is_active', true)
             ->where('driver', '!=', 'manual')
-            ->whereNotNull('api_key')
+            ->where(function ($query) {
+                $query->whereNotNull('api_key')->orWhere('use_b2c_one', true);
+            })
+            ->when($partnerId, fn ($query) => $query->whereKey($partnerId))
             ->get();
 
         if ($partners->isEmpty()) {
             $this->info('No active delivery partners found.');
             return self::SUCCESS;
+        }
+
+        // Rule: "Automatic tracking updates" - the scheduled run only touches
+        // partners that have the rule enabled. An explicit --partner request
+        // (the admin "Sync now" button) always runs.
+        if (! $partnerId) {
+            $partners = $partners->filter(fn (DeliveryPartner $partner) => (bool) $partner->auto_sync_tracking);
+
+            if ($partners->isEmpty()) {
+                $this->info('Automatic tracking updates are disabled for all delivery partners.');
+                return self::SUCCESS;
+            }
         }
 
         $count = 0;
@@ -105,6 +124,6 @@ class SyncDeliveryTracking extends Command
             $errors
         ));
 
-        return $errors > 0 ? self::SUCCESS : self::SUCCESS;
+        return self::SUCCESS;
     }
 }

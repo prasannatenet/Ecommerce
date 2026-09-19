@@ -864,3 +864,205 @@ it('credits gehna coins to the user when placing an order with a coins coupon', 
     $order = Order::latest('id')->first();
     expect(data_get($order->payment_meta, 'coupon.reward_coins'))->toBe(100);
 });
+
+it('lets users redeem gehna coins to reduce the checkout total', function () {
+    /** @var User $user */
+    $user = User::factory()->create(['gehna_coins' => 1000]);
+
+    $product = Product::create([
+        'name' => 'Treadmill',
+        'slug' => 'treadmill-' . uniqid(),
+        'base_price' => 6000,
+        'is_active' => true,
+    ]);
+
+    PaymentProvider::updateOrCreate(
+        ['slug' => 'cod'],
+        ['name' => 'Cash on Delivery', 'is_active' => true]
+    );
+
+    Cart::create([
+        'user_id' => $user->id,
+        'product_id' => $product->id,
+        'product_variation_id' => null,
+        'quantity' => 1,
+        'price' => 6000,
+    ]);
+
+    actingAs($user);
+
+    post(route('checkout.coins.apply'), ['coins' => 1000])
+        ->assertSessionHas('checkout_coins.coins', 1000);
+
+    get(route('checkout.index'))
+        ->assertOk()
+        ->assertSee('Rs ' . number_format(5000, 2));
+
+    post(route('checkout.place'), checkoutPayloadForCommerceTest())
+        ->assertRedirect();
+
+    $order = Order::latest('id')->first();
+
+    expect((float) $order->total)->toBe(5000.0);
+    expect((int) $user->refresh()->gehna_coins)->toBe(0);
+    expect((int) data_get($order->payment_meta, 'pricing.coins_used'))->toBe(1000);
+    expect((float) data_get($order->payment_meta, 'pricing.coins_discount'))->toBe(1000.0);
+    expect((int) Cart::where('user_id', $user->id)->count())->toBe(0);
+});
+
+it('clamps gehna coin redemption to the available coin balance', function () {
+    /** @var User $user */
+    $user = User::factory()->create(['gehna_coins' => 300]);
+
+    $product = Product::create([
+        'name' => 'Elliptical',
+        'slug' => 'elliptical-' . uniqid(),
+        'base_price' => 6000,
+        'is_active' => true,
+    ]);
+
+    PaymentProvider::updateOrCreate(
+        ['slug' => 'cod'],
+        ['name' => 'Cash on Delivery', 'is_active' => true]
+    );
+
+    Cart::create([
+        'user_id' => $user->id,
+        'product_id' => $product->id,
+        'product_variation_id' => null,
+        'quantity' => 1,
+        'price' => 6000,
+    ]);
+
+    actingAs($user);
+
+    post(route('checkout.coins.apply'), ['coins' => 5000])
+        ->assertSessionHas('checkout_coins.coins', 300);
+
+    get(route('checkout.index'))
+        ->assertOk()
+        ->assertSee('Rs ' . number_format(5700, 2));
+
+    post(route('checkout.place'), checkoutPayloadForCommerceTest())
+        ->assertRedirect();
+
+    $order = Order::latest('id')->first();
+
+    expect((float) $order->total)->toBe(5700.0);
+    expect((int) $user->refresh()->gehna_coins)->toBe(0);
+});
+
+it('validates and removes applied gehna coins from the checkout session', function () {
+    /** @var User $user */
+    $user = User::factory()->create(['gehna_coins' => 500]);
+
+    $product = Product::create([
+        'name' => 'Jump Rope',
+        'slug' => 'jump-rope-' . uniqid(),
+        'base_price' => 800,
+        'is_active' => true,
+    ]);
+
+    Cart::create([
+        'user_id' => $user->id,
+        'product_id' => $product->id,
+        'product_variation_id' => null,
+        'quantity' => 1,
+        'price' => 800,
+    ]);
+
+    actingAs($user);
+
+    post(route('checkout.coins.apply'), ['coins' => 0])
+        ->assertSessionHasErrors('coins');
+
+    post(route('checkout.coins.apply'), ['coins' => 200])
+        ->assertSessionHas('checkout_coins.coins', 200);
+
+    delete(route('checkout.coins.remove'))
+        ->assertSessionHas('success');
+
+    expect(session('checkout_coins'))->toBeNull();
+});
+
+it('rejects razorpay payment when gehna coins cover the entire order', function () {
+    /** @var User $user */
+    $user = User::factory()->create(['gehna_coins' => 6000]);
+
+    $product = Product::create([
+        'name' => 'Spin Bike',
+        'slug' => 'spin-bike-' . uniqid(),
+        'base_price' => 6000,
+        'is_active' => true,
+    ]);
+
+    PaymentProvider::updateOrCreate(
+        ['slug' => 'razorpay'],
+        ['name' => 'Razorpay', 'is_active' => true, 'public_key' => 'rzp_test_key', 'secret_key' => 'rzp_test_secret']
+    );
+
+    Cart::create([
+        'user_id' => $user->id,
+        'product_id' => $product->id,
+        'product_variation_id' => null,
+        'quantity' => 1,
+        'price' => 6000,
+    ]);
+
+    actingAs($user);
+
+    post(route('checkout.coins.apply'), ['coins' => 6000])
+        ->assertSessionHas('checkout_coins.coins', 6000);
+
+    post(route('checkout.place'), checkoutPayloadForCommerceTest(['payment_method' => 'razorpay']))
+        ->assertSessionHasErrors('payment_method');
+
+    expect(Order::count())->toBe(0);
+    expect((int) $user->refresh()->gehna_coins)->toBe(6000);
+});
+
+it('returns redeemed gehna coins when the order is cancelled', function () {
+    /** @var User $user */
+    $user = User::factory()->create(['gehna_coins' => 1000]);
+
+    $product = Product::create([
+        'name' => 'Yoga Mat',
+        'slug' => 'yoga-mat-' . uniqid(),
+        'base_price' => 6000,
+        'is_active' => true,
+    ]);
+
+    PaymentProvider::updateOrCreate(
+        ['slug' => 'cod'],
+        ['name' => 'Cash on Delivery', 'is_active' => true]
+    );
+
+    Cart::create([
+        'user_id' => $user->id,
+        'product_id' => $product->id,
+        'product_variation_id' => null,
+        'quantity' => 1,
+        'price' => 6000,
+    ]);
+
+    actingAs($user);
+
+    post(route('checkout.coins.apply'), ['coins' => 1000])->assertSessionHas('checkout_coins.coins', 1000);
+
+    post(route('checkout.place'), checkoutPayloadForCommerceTest())->assertRedirect();
+
+    $order = Order::latest('id')->first();
+    expect((int) $user->refresh()->gehna_coins)->toBe(0);
+
+    post(route('orders.cancel', $order), ['reason' => 'Changed my mind'])
+        ->assertRedirect();
+
+    expect((int) $user->refresh()->gehna_coins)->toBe(1000);
+    expect(data_get($order->fresh()->payment_meta, 'coins_restored_at'))->not->toBeNull();
+
+    // Cancelling again must not duplicate the coin refund.
+    post(route('orders.cancel', $order), ['reason' => 'Second cancel attempt'])
+        ->assertRedirect();
+
+    expect((int) $user->refresh()->gehna_coins)->toBe(1000);
+});

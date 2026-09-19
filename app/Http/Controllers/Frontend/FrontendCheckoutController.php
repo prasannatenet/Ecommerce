@@ -48,7 +48,11 @@ class FrontendCheckoutController extends Controller
 		$discount = (float) ($appliedCoupon['discount'] ?? 0);
 		$freeItems = collect($appliedCoupon['free_items'] ?? []);
 		$shippingCharge = (float) $subtotal >= 5000 ? 0.0 : 199.0;
-		$grandTotal = max(0, (float) $subtotal - $discount) + $shippingCharge;
+		$orderTotal = max(0, (float) $subtotal - $discount) + $shippingCharge;
+		$appliedCoins = $this->getAppliedCoinsSummary($orderTotal);
+		$coinsDiscount = (float) ($appliedCoins['discount'] ?? 0);
+		$coinsBalance = (int) ($appliedCoins['balance'] ?? 0);
+		$grandTotal = max(0, $orderTotal - $coinsDiscount);
 		$availableCoupons = Coupon::query()
 			->where('is_active', true)
 			->orderByDesc('id')
@@ -95,6 +99,8 @@ class FrontendCheckoutController extends Controller
 			'shippingCharge' => $shippingCharge,
 			'grandTotal' => $grandTotal,
 			'appliedCoupon' => $appliedCoupon,
+			'appliedCoins' => $appliedCoins,
+			'coinsBalance' => $coinsBalance,
 			'availableCoupons' => $availableCoupons,
 			'codProvider' => $providers->get('cod'),
 			'razorpayProvider' => $providers->get('razorpay'),
@@ -142,6 +148,52 @@ class FrontendCheckoutController extends Controller
 		return back()->with('success', 'Coupon removed.');
 	}
 
+	public function applyCoins(Request $request): RedirectResponse
+	{
+		$data = $request->validate([
+			'coins' => 'required|integer|min:1',
+		]);
+
+		$cartItems = $this->loadUserCart();
+		if ($cartItems->isEmpty()) {
+			return redirect()->route('products.index')->with('error', 'Your cart is empty.');
+		}
+
+		$balance = (int) (Auth::user()->gehna_coins ?? 0);
+		if ($balance < 1) {
+			return back()->with('error', 'You do not have any Gehna Coins to redeem yet.');
+		}
+
+		$subtotal = (float) $cartItems->sum(fn ($item) => $item->quantity * (float) $item->price);
+		$appliedCoupon = $this->getAppliedCouponSummary($cartItems);
+		$discount = (float) ($appliedCoupon['discount'] ?? 0);
+		$shippingCharge = $subtotal >= 5000 ? 0.0 : 199.0;
+		$orderTotal = max(0, $subtotal - $discount) + $shippingCharge;
+
+		$maxUsable = max(0, min($balance, (int) floor($orderTotal)));
+		if ($maxUsable < 1) {
+			return back()->with('error', 'Gehna Coins cannot be applied to this order right now.');
+		}
+
+		$requested = (int) $data['coins'];
+		$used = min($requested, $maxUsable);
+
+		session(['checkout_coins' => ['coins' => $used]]);
+
+		if ($used < $requested) {
+			return back()->with('success', 'Gehna Coins applied: ' . $used . ' coins (limited by your coin balance and order total).');
+		}
+
+		return back()->with('success', 'Gehna Coins applied: ' . $used . ' coins = Rs ' . number_format((float) $used, 2) . ' off your order.');
+	}
+
+	public function removeCoins(): RedirectResponse
+	{
+		session()->forget('checkout_coins');
+
+		return back()->with('success', 'Gehna Coins removed.');
+	}
+
 	public function placeOrder(Request $request)
 	{
 		$data = $request->validate([
@@ -185,7 +237,17 @@ class FrontendCheckoutController extends Controller
 		$discount = (float) ($appliedCoupon['discount'] ?? 0);
 		$shippingCharge = $subtotal >= 5000 ? 0.0 : 199.0;
 		$orderTotal = max(0, $subtotal - $discount) + $shippingCharge;
+		$appliedCoins = $this->getAppliedCoinsSummary($orderTotal);
+		$coinsUsed = (int) ($appliedCoins['coins'] ?? 0);
+		$coinsDiscount = (float) $coinsUsed;
+		$orderTotal = max(0, $orderTotal - $coinsDiscount);
 		$shippingSame = $request->boolean('shipping_same_as_billing', true);
+
+		if ($data['payment_method'] === 'razorpay' && $orderTotal < 1) {
+			throw ValidationException::withMessages([
+				'payment_method' => 'Gehna Coins cover the entire order amount. Please choose Cash on Delivery or reduce the coins used.',
+			]);
+		}
 
 		$billingAddress = [
 			'name' => $data['billing_name'],
@@ -210,7 +272,15 @@ class FrontendCheckoutController extends Controller
 				'country' => $request->input('shipping_country'),
 			];
 
-		$order = DB::transaction(function () use ($provider, $subtotal, $discount, $shippingCharge, $orderTotal, $billingAddress, $shippingAddress, $data, $cartItems, $appliedCoupon) {
+		$order = DB::transaction(function () use ($provider, $subtotal, $discount, $coinsUsed, $coinsDiscount, $shippingCharge, $orderTotal, $billingAddress, $shippingAddress, $data, $cartItems, $appliedCoupon) {
+			$buyer = Auth::user() ? User::whereKey(Auth::id())->lockForUpdate()->first() : null;
+
+			if ($coinsUsed > 0 && (! $buyer || (int) $buyer->gehna_coins < $coinsUsed)) {
+				throw ValidationException::withMessages([
+					'coins' => 'You do not have enough Gehna Coins to complete this order.',
+				]);
+			}
+
 			$order = Order::create([
 				'user_id' => Auth::id(),
 				'payment_provider_id' => $provider->id,
@@ -226,6 +296,8 @@ class FrontendCheckoutController extends Controller
 					'pricing' => [
 						'subtotal' => $subtotal,
 						'discount' => $discount,
+						'coins_used' => $coinsUsed,
+						'coins_discount' => $coinsDiscount,
 						'shipping_charge' => $shippingCharge,
 						'grand_total' => $orderTotal,
 					],
@@ -258,6 +330,11 @@ class FrontendCheckoutController extends Controller
 				if (($appliedCoupon['type'] ?? '') === 'gehna_coins' && (int) ($appliedCoupon['reward_coins'] ?? 0) > 0) {
 					User::whereKey(Auth::id())->increment('gehna_coins', (int) $appliedCoupon['reward_coins']);
 				}
+			}
+
+			// Debit the redeemed Gehna Coins from the buyer's balance.
+			if ($coinsUsed > 0) {
+				$buyer->decrement('gehna_coins', $coinsUsed);
 			}
 
 			foreach ($cartItems as $cartItem) {
@@ -304,12 +381,14 @@ class FrontendCheckoutController extends Controller
 			$this->sendInvoiceMailIfNeeded($order);
 			Cart::where('user_id', Auth::id())->delete();
 			session()->forget('checkout_coupon');
+			session()->forget('checkout_coins');
 
 			return redirect()->route('checkout.success', $order)
 				->with('success', 'Order placed successfully with Cash on Delivery.');
 		}
 
 		session()->forget('checkout_coupon');
+		session()->forget('checkout_coins');
 
 		$razorpayOrder = $this->createRazorpayOrder($provider, $order);
 
@@ -711,6 +790,21 @@ class FrontendCheckoutController extends Controller
 			'reward_coins' => (int) ($coupon->reward_coins ?? 0),
 			'discount' => $discount,
 			'free_items' => $this->couponService->freeItemsBreakdown($coupon, collect($cartItems)),
+		];
+	}
+
+	private function getAppliedCoinsSummary(float $orderTotal): array
+	{
+		$balance = (int) (Auth::user()->gehna_coins ?? 0);
+		$requested = (int) (session('checkout_coins.coins') ?? 0);
+		$coins = max(0, min($requested, $balance, (int) floor(max(0.0, $orderTotal))));
+
+		return [
+			'requested' => $requested,
+			'coins' => $coins,
+			'discount' => (float) $coins,
+			'balance' => $balance,
+			'balance_after' => max(0, $balance - $coins),
 		];
 	}
 

@@ -9,8 +9,10 @@ use App\Services\OrderInventoryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\View\View;
+use App\Mail\ReturnRequestMail;
 
 class FrontendOrderController extends Controller
 {
@@ -56,6 +58,18 @@ class FrontendOrderController extends Controller
             'cancelled_at' => now(),
         ]);
 
+        // Return redeemed Gehna Coins to the customer when the order is cancelled.
+        $meta = $order->payment_meta ?? [];
+        $coinsUsed = (int) ($meta['pricing']['coins_used'] ?? 0);
+        if ($coinsUsed > 0 && empty($meta['coins_restored_at'])) {
+            $order->user()->increment('gehna_coins', $coinsUsed);
+            $order->update([
+                'payment_meta' => array_merge($meta, [
+                    'coins_restored_at' => now()->toDateTimeString(),
+                ]),
+            ]);
+        }
+
         $this->inventoryService->restockForOrder($order);
 
         return redirect()->route('orders.show', $order)
@@ -80,7 +94,7 @@ class FrontendOrderController extends Controller
             'quantities.*' => 'integer|min:1',
         ]);
 
-        if ($order->status !== 'delivered') {
+                        if ($order->status !== 'delivered') {
             return back()->with('error', 'Returns can be requested after the order is delivered.');
         }
 
@@ -99,7 +113,9 @@ class FrontendOrderController extends Controller
             $returnItems->push(['item' => $item, 'quantity' => $quantity]);
         }
 
-        DB::transaction(function () use ($order, $data, $returnItems) {
+        $returnRequest = null;
+
+        DB::transaction(function () use ($order, $data, $returnItems, &$returnRequest) {
             $returnRequest = ReturnRequest::create([
                 'order_id' => $order->id,
                 'user_id' => Auth::id(),
@@ -117,7 +133,7 @@ class FrontendOrderController extends Controller
                 'amount' => $returnItems->sum(fn ($row) => $row['item']->unit_price * $row['quantity']),
             ]);
 
-            foreach ($returnItems as $row) {
+                        foreach ($returnItems as $row) {
                 $returnRequest->items()->create([
                     'order_item_id' => $row['item']->id,
                     'quantity' => $row['quantity'],
@@ -125,6 +141,10 @@ class FrontendOrderController extends Controller
                 ]);
             }
         });
+
+        if (! empty($order->user->email)) {
+            Mail::to($order->user->email)->send(new ReturnRequestMail($returnRequest, $order));
+        }
 
         return redirect()->route('orders.show', $order)->with('success', 'Return request submitted for admin review.');
     }

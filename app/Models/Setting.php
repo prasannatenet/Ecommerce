@@ -30,9 +30,12 @@ class Setting extends Model
         'smtp_encryption',
         'smtp_from_email',
         'smtp_from_name',
+        'mail_driver',
+        'resend_api_key',
     ];
 
     protected $casts = [
         'smtp_password' => 'encrypted',
+        'resend_api_key' => 'encrypted',
     ];
 }

@@ -106,6 +106,39 @@
                                 <input type="url" name="linkedin_url" class="df-form-control" value="{{ old('linkedin_url', optional($setting)->linkedin_url) }}" placeholder="https://linkedin.com/company/yourcompany">
                             </div>
 
+                                                        <div class="col-12 mt-4 mb-2">
+                                <h6 style="font-weight:700; color:var(--df-text-secondary); text-transform:uppercase; font-size:0.8rem; letter-spacing:0.5px; border-bottom:1px solid var(--df-border); padding-bottom:8px;">Mail Service Provider</h6>
+                                <p style="color:var(--df-text-secondary); font-size:0.82rem; margin-bottom:10px;">
+                                    Choose which mail engine sends outgoing emails. Changing this here takes effect immediately — no code or .env edits required.
+                                </p>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="df-form-label">Mail Driver / Provider</label>
+                                <select name="mail_driver" id="mailDriver" class="df-form-control">
+                                    <option value="smtp" @selected(old('mail_driver', optional($setting)->mail_driver ?? 'smtp') === 'smtp')>SMTP (server settings below)</option>
+                                    <option value="resend" @selected(old('mail_driver', optional($setting)->mail_driver) === 'resend')>Resend</option>
+                                    <option value="sendmail" @selected(old('mail_driver', optional($setting)->mail_driver) === 'sendmail')>Sendmail (server binary)</option>
+                                    <option value="log" @selected(old('mail_driver', optional($setting)->mail_driver) === 'log')>Log (dev only — writes to log)</option>
+                                </select>
+                                <small style="color:var(--df-text-secondary); font-size:0.8rem;">Resend is recommended for fast, deliverable transactional email.</small>
+                            </div>
+
+                            <div id="resendFields" class="mt-3" @style(['display:none' => (old('mail_driver', optional($setting)->mail_driver ?? 'smtp') !== 'resend')])>
+                                <div class="col-12 mb-2">
+                                    <div style="font-weight:600; color:var(--df-text-secondary); padding:6px 8px; font-size:0.8rem;">Resend API Key</div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-key"></i></span>
+                                        <input type="password" name="resend_api_key" id="resendApiKey" class="df-form-control" value="" autocomplete="new-password" placeholder="re_xxxxxxxxxxxx">
+                                        <button type="button" id="toggleResendKey" class="btn btn-outline-secondary" tabindex="-1" style="pointer-events:none; opacity:0.6;">
+                                            <i class="bi bi-eye-slash"></i> <span id="toggleResendLabel">Show</span>
+                                        </button>
+                                    </div>
+                                    <small style="color:var(--df-text-secondary); font-size:0.8rem;">Leave blank to keep the currently stored key.</small>
+                                </div>
+                            </div>
+
                             <div class="col-12 mt-4 mb-2">
                                 <h6 style="font-weight:700; color:var(--df-text-secondary); text-transform:uppercase; font-size:0.8rem; letter-spacing:0.5px; border-bottom:1px solid var(--df-border); padding-bottom:8px;">SMTP Configuration</h6>
                             </div>
@@ -144,7 +177,7 @@
                             <div class="col-md-6">
                                 <label class="df-form-label">Test Recipient Email</label>
                                 <input type="email" name="test_email" class="df-form-control" value="{{ old('test_email') }}" placeholder="you@example.com">
-                                <small style="color:var(--df-text-secondary); font-size:0.8rem;">Used when clicking "Save & Send Test SMTP".</small>
+                                <small style="color:var(--df-text-secondary); font-size:0.8rem;">Used when clicking "Save &amp; Send Test Email".</small>
                             </div>
 
                             <div class="col-12 mt-4 mb-2">
@@ -197,8 +230,8 @@
                             <button type="submit" class="df-btn df-btn-primary">
                                 <i class="bi bi-check2-circle"></i> Save Settings
                             </button>
-                            <button type="submit" name="action" value="test_smtp" class="df-btn" style="background:#0f766e; color:#fff; border:1px solid #0f766e;">
-                                <i class="bi bi-envelope-check"></i> Save &amp; Send Test SMTP
+                            <button type="submit" name="action" value="test_mail" class="df-btn" style="background:#0f766e; color:#fff; border:1px solid #0f766e;">
+                                <i class="bi bi-envelope-check"></i> Save &amp; Send Test Email
                             </button>
                         </div>
                     </form>
@@ -260,6 +293,41 @@
         document.addEventListener('DOMContentLoaded', function() {
             setupImagePreview('logoInput', 'logoPreview', 'currentLogo');
             setupImagePreview('faviconInput', 'faviconPreview', 'currentFavicon');
+
+            // --- Mail Service Provider toggle ---
+            var driverSelect = document.getElementById('mailDriver');
+            var resendBox = document.getElementById('resendFields');
+
+            function toggleResendFields() {
+                if (!driverSelect || !resendBox) return;
+                resendBox.style.display = (driverSelect.value === 'resend') ? 'block' : 'none';
+            }
+
+            if (driverSelect) {
+                driverSelect.addEventListener('change', toggleResendFields);
+                // Reflect the server-rendered initial state once the DOM is ready.
+                toggleResendFields();
+            }
+
+            // Show / hide the Resend API key as plain text.
+            var toggleKeyBtn = document.getElementById('toggleResendKey');
+            var resendKey = document.getElementById('resendApiKey');
+            if (toggleKeyBtn && resendKey) {
+                toggleKeyBtn.style.pointerEvents = 'auto';
+                toggleKeyBtn.style.opacity = '1';
+                toggleKeyBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (resendKey.type === 'password') {
+                        resendKey.type = 'text';
+                        toggleKeyBtn.querySelector('#toggleResendLabel').textContent = 'Hide';
+                        toggleKeyBtn.querySelector('i').classList.replace('bi-eye-slash', 'bi-eye');
+                    } else {
+                        resendKey.type = 'password';
+                        toggleKeyBtn.querySelector('#toggleResendLabel').textContent = 'Show';
+                        toggleKeyBtn.querySelector('i').classList.replace('bi-eye', 'bi-eye-slash');
+                    }
+                });
+            }
         });
     </script>
     @endpush

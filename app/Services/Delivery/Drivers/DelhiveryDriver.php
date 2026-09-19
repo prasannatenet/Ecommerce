@@ -29,9 +29,10 @@ class DelhiveryDriver implements DeliveryDriver
             return rtrim($partner->base_url, '/');
         }
 
-        return $partner->is_sandbox
-            ? 'https://staging-express.delhivery.com'
-            : 'https://track.delhivery.com';
+        return config(
+            $partner->is_sandbox ? 'delhivery.old_api.sandbox_base_url' : 'delhivery.old_api.production_base_url',
+            $partner->is_sandbox ? 'https://staging-express.delhivery.com' : 'https://track.delhivery.com'
+        );
     }
 
     private function headers(DeliveryPartner $partner): array

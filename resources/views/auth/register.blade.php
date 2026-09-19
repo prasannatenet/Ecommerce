@@ -53,12 +53,18 @@
                 </div>
                 <div class="auth-two-fields">
                     <div class="auth-field">
+                        <label for="phone">Mobile number</label>
+                        <input id="phone" type="tel" name="phone" value="{{ old('phone') }}" required autocomplete="tel" inputmode="tel" maxlength="20" placeholder="98765 43210">
+                    </div>
+                    <div class="auth-field">
                         <label for="password">Password</label>
                         <div class="auth-password-wrap">
                             <input id="password" type="password" name="password" required autocomplete="new-password" placeholder="Create password">
                             <button type="button" class="auth-password-toggle" onclick="togglePass('password', 'eye1')" aria-label="Show password"><i class="bi bi-eye" id="eye1"></i></button>
                         </div>
                     </div>
+                </div>
+                <div class="auth-two-fields">
                     <div class="auth-field">
                         <label for="password_confirmation">Confirm password</label>
                         <div class="auth-password-wrap">
@@ -66,6 +72,7 @@
                             <button type="button" class="auth-password-toggle" onclick="togglePass('password_confirmation', 'eye2')" aria-label="Show password"><i class="bi bi-eye" id="eye2"></i></button>
                         </div>
                     </div>
+                    <div class="auth-field"></div>
                 </div>
                 <button type="submit" class="auth-submit">Register now <i class="bi bi-arrow-right"></i></button>
             </form>

@@ -334,6 +334,36 @@
                             @endif
                         </div> --}}
 
+                        {{-- Gehna Coins Redemption --}}
+                        <div style="margin-bottom:20px; padding:16px 18px; border:1.5px dashed #017075; border-radius:10px; background:#F2FAFA;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:10px; flex-wrap:wrap;">
+                                <span style="color:#017075; font-weight:800; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;">
+                                    <i class="bi bi-coin me-1"></i> Gehna Coins
+                                </span>
+                                <span style="color:#495057; font-size:0.8rem; font-weight:600;">Balance: {{ (int) ($coinsBalance ?? 0) }} coins <span style="color:#6C757D;">(1 coin = Rs 1)</span></span>
+                            </div>
+                            @if(!empty($appliedCoins) && (int) ($appliedCoins['coins'] ?? 0) > 0)
+                                <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+                                    <span style="color:#198754; font-size:0.85rem; font-weight:700;">
+                                        <i class="bi bi-check-circle-fill me-1"></i> {{ (int) $appliedCoins['coins'] }} coins applied — Rs {{ number_format($appliedCoins['discount'], 2) }} off
+                                    </span>
+                                    <form action="{{ route('checkout.coins.remove') }}" method="POST" style="margin:0;">
+                                        @csrf
+                                        <button type="submit" style="padding:6px 12px; border-radius:7px; border:1px solid #DC3545; background:#fff; color:#DC3545; font-size:0.75rem; font-weight:700; cursor:pointer;">Remove</button>
+                                    </form>
+                                </div>
+                            @elseif((int) ($coinsBalance ?? 0) > 0)
+                                <form action="{{ route('checkout.coins.apply') }}" method="POST" style="display:flex; gap:8px; flex-wrap:wrap;">
+                                    @csrf
+                                    <input type="number" name="coins" min="1" max="{{ (int) $coinsBalance }}" value="{{ old('coins', (int) ($appliedCoins['requested'] ?? 0) > 0 ? (int) $appliedCoins['requested'] : '') }}"
+                                           placeholder="Enter coins to use" style="flex:1 1 120px; padding:10px 14px; border-radius:8px; border:1.5px solid #DEE2E6; font-size:0.9rem;">
+                                    <button type="submit" style="padding:10px 18px; border-radius:8px; border:none; background:linear-gradient(95deg, #017075 0%, #00595D 101.11%); color:#fff; font-size:0.8rem; font-weight:800; cursor:pointer;">Redeem</button>
+                                </form>
+                            @else
+                                <span style="color:#6C757D; font-size:0.85rem;">Earn Gehna Coins with eligible coupons and redeem them on your next payment.</span>
+                            @endif
+                        </div>
+
                         {{-- Totals --}}
                         <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
                             <span style="color:#6C757D; font-size:0.9rem;">Subtotal</span>
@@ -343,6 +373,12 @@
                             <span style="color:#6C757D; font-size:0.9rem;">Discount</span>
                             <span style="color:#198754; font-size:0.9rem; font-weight:600;">- Rs {{ number_format($discount, 2) }}</span>
                         </div>
+                        @if(!empty($appliedCoins) && (int) ($appliedCoins['coins'] ?? 0) > 0)
+                            <div style="display:flex; justify-content:space-between; margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid #f0f0f0;">
+                                <span style="color:#6C757D; font-size:0.9rem;">Gehna Coins ({{ (int) $appliedCoins['coins'] }})</span>
+                                <span style="color:#198754; font-size:0.9rem; font-weight:600;">- Rs {{ number_format($appliedCoins['discount'], 2) }}</span>
+                            </div>
+                        @endif
                         @if($appliedCoupon && $appliedCoupon['type'] === 'buy_get' && $freeItems->isNotEmpty())
                             <div style="margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid #f0f0f0;">
                                 <div style="font-size:0.85rem; color:#198754; font-weight:700; margin-bottom:4px;">

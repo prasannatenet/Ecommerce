@@ -21,6 +21,15 @@
         </div>
 
         <div class="col-12">
+            <label class="df-form-label" for="phone">Mobile Number</label>
+            <input id="phone" name="phone" type="tel" class="df-form-control {{ $errors->has('phone') ? 'is-invalid' : '' }}"
+                   value="{{ old('phone', $user->phone) }}" autocomplete="tel" maxlength="20" placeholder="98765 43210">
+            @if($errors->has('phone'))
+                <div class="text-danger mt-1" style="font-size:0.85rem;">{{ $errors->first('phone') }}</div>
+            @endif
+        </div>
+
+        <div class="col-12">
             <label class="df-form-label" for="email">Email</label>
             <input id="email" name="email" type="email" class="df-form-control {{ $errors->has('email') ? 'is-invalid' : '' }}"
                    value="{{ old('email', $user->email) }}" required autocomplete="username">

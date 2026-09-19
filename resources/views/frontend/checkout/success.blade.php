@@ -44,6 +44,12 @@
                                     <p style="font-weight:900; color:#017075; margin:0; font-size:1.1rem;">Rs {{ number_format($order->total, 2) }}</p>
                                 </div>
                             </div>
+                            @if((int) (($order->payment_meta ?? [])['pricing']['coins_used'] ?? 0) > 0)
+                                <div style="margin-top:12px; padding-top:12px; border-top:1px dashed #DEE2E6; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; font-size:0.85rem;">
+                                    <span style="color:#6C757D; font-weight:600;"><i class="bi bi-coin me-1"></i> Gehna Coins Redeemed</span>
+                                    <span style="color:#198754; font-weight:800;">{{ (int) $order->payment_meta['pricing']['coins_used'] }} coins — Rs {{ number_format((float) $order->payment_meta['pricing']['coins_discount'], 2) }} off</span>
+                                </div>
+                            @endif
                         </div>
 
                         <div class="d-flex flex-column gap-3">
