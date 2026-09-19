@@ -732,8 +732,17 @@ class FrontendCheckoutController extends Controller
 
 	private function sendInvoiceMailIfNeeded(Order $order): void
 	{
-		if (! $order->user || empty($order->user->email)) {
-			return;
+		// Use the billing email captured at checkout so the invoice goes to the
+		// address the customer entered, even if the order is tied to a different
+		// account email or placed by a guest.
+		$billingEmail = $order->billing_address['email'] ?? null;
+
+		if (! $billingEmail) {
+			if (! $order->user || empty($order->user->email)) {
+				return;
+			}
+
+			$billingEmail = $order->user->email;
 		}
 
 		$meta = $order->payment_meta ?? [];
@@ -741,7 +750,7 @@ class FrontendCheckoutController extends Controller
 			return;
 		}
 
-		Mail::to($order->user->email)->send(new OrderInvoiceMail($order));
+		Mail::to($billingEmail)->send(new OrderInvoiceMail($order));
 
 		$order->update([
 			'payment_meta' => array_merge($meta, [
@@ -752,11 +761,17 @@ class FrontendCheckoutController extends Controller
 
 	private function sendCreditNoteMail(Order $order, OrderRefund $refund): void
 	{
-		if (! $order->user || empty($order->user->email)) {
-			return;
+		$billingEmail = $order->billing_address['email'] ?? null;
+
+		if (! $billingEmail) {
+			if (! $order->user || empty($order->user->email)) {
+				return;
+			}
+
+			$billingEmail = $order->user->email;
 		}
 
-		Mail::to($order->user->email)->send(new OrderCreditNoteMail($order, $refund));
+		Mail::to($billingEmail)->send(new OrderCreditNoteMail($order, $refund));
 
 		$refund->update([
 			'emailed_at' => now(),
