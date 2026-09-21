@@ -82,6 +82,11 @@ class Product extends Model
         return $this->belongsToMany(Tag::class, 'product_tag')->withTimestamps();
     }
 
+    public function combos()
+    {
+        return $this->belongsToMany(Combo::class, 'combo_product');
+    }
+
     public function attributes()
     {
         return $this->belongsToMany(Attribute::class, 'product_attributes')

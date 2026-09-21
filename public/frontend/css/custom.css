@@ -1054,6 +1054,81 @@ section.promo-hero-slider {
     background: #0f3d321c;
 }
 
+/* Instant add-to-cart / wishlist feedback (no page reload). */
+@keyframes gehna-badge-bump {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.45); }
+    100% { transform: scale(1); }
+}
+.frontend-site .site-cart-count.bump,
+.frontend-site .site-mobile-cart-count.bump,
+.frontend-site .nav-wishlist-count.bump {
+    animation: gehna-badge-bump 0.45s ease;
+}
+.frontend-site button.is-adding {
+    opacity: 0.75;
+    pointer-events: none;
+}
+/* Inline card stepper: replaces Add to Cart after first add.
+   JS copies the add-to-cart button's exact height and border-radius onto the
+   container (while the button is still visible), so the counter always renders
+   at the same size as the button it replaced — for every card style. */
+.frontend-site .gehna-qty-stepper {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    min-height: 42px;
+    padding: 4px;
+    border-radius: 8px;
+    background: var(--primary-500, #017075);
+    color: #fff;
+    overflow: hidden;
+    user-select: none;
+}
+.frontend-site .gehna-qty-stepper button {
+    flex: 0 0 38px;
+    width: 38px;
+    height: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+}
+.frontend-site .gehna-qty-stepper button:hover { background: rgba(255,255,255,0.30); }
+.frontend-site .gehna-qty-stepper [data-qty] {
+    flex: 1;
+    text-align: center;
+    font-weight: 800;
+    font-size: 1rem;
+}
+.frontend-site .gehna-qty-stepper.is-busy { opacity: 0.7; pointer-events: none; }
+.frontend-site .shop-btn-icon.is-wishlisted {
+    border-color: #dc3545 !important;
+    color: #dc3545 !important;
+}
+.frontend-site .shop-btn-icon.is-wishlisted i {
+    color: #dc3545 !important;
+}
+.frontend-site #wishlistToggleBtn.active {
+    border-color: #dc3545 !important;
+    color: #dc3545 !important;
+}
+.frontend-site #wishlistToggleBtn.active i {
+    color: #dc3545 !important;
+}
+.frontend-site .wishlist-btn-ajax.is-wishlisted {
+    border-color: #dc3545 !important;
+    color: #dc3545 !important;
+}
+.frontend-site .wishlist-btn-ajax.is-wishlisted i {
+    color: #dc3545 !important;
+}
+
 .breadcrumb li a {
     color: var(--text-primary);
 }

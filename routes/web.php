@@ -16,6 +16,7 @@ use App\Http\Controllers\Backend\BackendUserController;
 use App\Http\Controllers\Backend\BackendWishlistController;
 use App\Http\Controllers\Backend\BackendOrderItemController;
 use App\Http\Controllers\Backend\BackendCouponController;
+use App\Http\Controllers\Backend\BackendComboController;
 use App\Http\Controllers\Backend\BackendPaymentProviderController;
 use App\Http\Controllers\Backend\BackendSettingController;
 use App\Http\Controllers\Backend\BackendPageController;
@@ -83,6 +84,8 @@ Route::post('/location/pincode', [SiteLocationController::class, 'store'])->name
 Route::post('/location/detect', [SiteLocationController::class, 'detect'])->name('location.detect');
 Route::post('/location/clear', [SiteLocationController::class, 'clear'])->name('location.clear');
 Route::post('/cart/add', [FrontendCartController::class, 'add'])->name('cart.add');
+Route::get('/cart/quantities', [FrontendCartController::class, 'quantities'])->name('cart.quantities');
+Route::post('/cart/set-quantity', [FrontendCartController::class, 'setQuantityByProduct'])->name('cart.set-quantity');
 Route::get('/cart', [FrontendCartController::class, 'index'])->name('cart.index');
 Route::patch('/cart/{cart}', [FrontendCartController::class, 'update'])->name('cart.update');
 Route::delete('/cart/{cart}', [FrontendCartController::class, 'destroy'])->name('cart.destroy');
@@ -91,6 +94,8 @@ Route::post('/wishlist/toggle', [FrontendWishlistController::class, 'toggle'])->
 Route::post('/wishlist/move-to-cart', [FrontendWishlistController::class, 'moveToCart'])->name('wishlist.move-to-cart');
 Route::post('/wishlist/clear', [FrontendWishlistController::class, 'clear'])->name('wishlist.clear');
 Route::get('/wishlist', [FrontendWishlistController::class, 'index'])->name('wishlist.index');
+// Light fragment of the wishlist drawer for silent background refresh (no page reload).
+Route::get('/wishlist/list', [FrontendWishlistController::class, 'list'])->name('wishlist.list');
 Route::post('/webhooks/razorpay', [FrontendCheckoutController::class, 'razorpayWebhook'])
     ->name('webhooks.razorpay')
     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
@@ -141,6 +146,8 @@ Route::prefix('admin')->middleware(['auth','admin'])->name('admin.')->group(func
     Route::resource('attributes', BackendAttributeController::class);
     Route::resource('tags', BackendTagController::class);
     Route::resource('coupons', BackendCouponController::class);
+    Route::resource('combos', BackendComboController::class);
+    Route::post('combos/{combo}/toggle', [BackendComboController::class, 'toggle'])->name('combos.toggle');
     Route::resource('payment-providers', BackendPaymentProviderController::class);
     Route::post('payment-providers/{paymentProvider}/toggle', [BackendPaymentProviderController::class, 'toggleStatus'])->name('payment-providers.toggle');
     Route::get('payment-settings', [BackendPaymentProviderController::class, 'settings'])->name('payment-providers.settings');

@@ -125,7 +125,7 @@ class BackendDeliveryPartnerController extends Controller
 
         private function driverOptions(): array
     {
-        return ['manual' => 'Manual (no API)', 'delhivery' => 'Delhivery'];
+        return ['manual' => 'Manual (no API)', 'delhivery' => 'Delhivery', 'custom_api' => 'Custom API'];
     }
 
     private function normalize(Request $request, array $data, ?int $id = null): array
@@ -185,6 +185,17 @@ class BackendDeliveryPartnerController extends Controller
             'b2c_auth_url' => $request->input('config_b2c_auth_url'),
             'b2c_token_url' => $request->input('config_b2c_token_url'),
             'b2c_mcp_url' => $request->input('config_b2c_mcp_url'),
+            'booking_endpoint' => $request->input('config_booking_endpoint'),
+            'booking_method' => $request->input('config_booking_method'),
+            'booking_headers' => $request->input('config_booking_headers'),
+            'booking_payload_template' => $request->input('config_booking_payload_template'),
+            'booking_awb_path' => $request->input('config_booking_awb_path'),
+            'tracking_endpoint' => $request->input('config_tracking_endpoint'),
+            'tracking_method' => $request->input('config_tracking_method'),
+            'tracking_headers' => $request->input('config_tracking_headers'),
+            'tracking_events_path' => $request->input('config_tracking_events_path'),
+            'tracking_status_path' => $request->input('config_tracking_status_path'),
+            'tracking_timestamp_path' => $request->input('config_tracking_timestamp_path'),
         ], fn ($v) => $v !== null && $v !== '');
 
         $map = [];
@@ -211,7 +222,7 @@ class BackendDeliveryPartnerController extends Controller
         return $request->validate([
             'name' => 'required|string|max:100',
             'code' => ['required', 'string', 'max:50', Rule::unique('delivery_partners', 'code')->ignore($id)],
-            'driver' => 'required|string|in:manual,delhivery',
+            'driver' => 'required|string|in:manual,delhivery,custom_api',
             'contact_email' => 'nullable|email|max:255',
             'contact_phone' => 'nullable|string|max:50',
             'is_active' => 'nullable|boolean',
@@ -247,6 +258,17 @@ class BackendDeliveryPartnerController extends Controller
             'config_b2c_auth_url' => 'nullable|url|max:500',
             'config_b2c_token_url' => 'nullable|url|max:500',
             'config_b2c_mcp_url' => 'nullable|url|max:500',
+            'config_booking_endpoint' => 'nullable|string|max:500',
+            'config_booking_method' => 'nullable|string|in:GET,POST',
+            'config_booking_headers' => 'nullable|string|max:2000',
+            'config_booking_payload_template' => 'nullable|string|max:5000',
+            'config_booking_awb_path' => 'nullable|string|max:255',
+            'config_tracking_endpoint' => 'nullable|string|max:500',
+            'config_tracking_method' => 'nullable|string|in:GET,POST',
+            'config_tracking_headers' => 'nullable|string|max:2000',
+            'config_tracking_events_path' => 'nullable|string|max:255',
+            'config_tracking_status_path' => 'nullable|string|max:255',
+            'config_tracking_timestamp_path' => 'nullable|string|max:255',
             'status_map' => 'nullable|array',
             'status_map.*.provider' => 'nullable|string|max:100',
             'status_map.*.internal' => 'nullable|string|max:50',

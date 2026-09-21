@@ -75,11 +75,15 @@ class FrontendCartController extends Controller
 
     public function add(Request $request)
     {
-        $data = $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'product_variation_id' => 'nullable|integer|exists:product_variations,id',
-            'quantity' => 'required|integer|min:1',
-        ]);
+        try {
+            $data = $request->validate([
+                'product_id' => 'required|exists:products,id',
+                'product_variation_id' => 'nullable|integer|exists:product_variations,id',
+                'quantity' => 'required|integer|min:1',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->cartActionResponse($request, false, 'Please choose a valid product and quantity.', 422);
+        }
 
         $product = Product::with(['variations' => fn ($q) => $q->where('is_active', true)])->findOrFail($data['product_id']);
 
@@ -88,7 +92,7 @@ class FrontendCartController extends Controller
 
         if ($hasActiveVariations) {
             if (empty($data['product_variation_id'])) {
-                return back()->with('error', 'Please select a variation before adding to cart.');
+                return $this->cartActionResponse($request, false, 'Please select a variation before adding to cart.', 422);
             }
 
             $selectedVariation = ProductVariation::query()
@@ -98,7 +102,7 @@ class FrontendCartController extends Controller
                 ->first();
 
             if (! $selectedVariation) {
-                return back()->with('error', 'Selected variation is invalid or unavailable.');
+                return $this->cartActionResponse($request, false, 'Selected variation is invalid or unavailable.');
             }
         }
 
@@ -106,7 +110,7 @@ class FrontendCartController extends Controller
         $unitPrice = $selectedVariation ? (float) $selectedVariation->price : (float) ($product->sale_price ?? $product->base_price);
 
         if (! Auth::check()) {
-            return $this->addToGuestCart($request, $product->id, $variationId, $unitPrice);
+            return $this->addToGuestCart($request, $product->id, $variationId, $unitPrice, (int) $data['quantity']);
         }
 
         // Merge any items a guest saved before logging in.
@@ -130,7 +134,28 @@ class FrontendCartController extends Controller
             ]);
         }
 
-        return back()->with('success', 'Product added to cart successfully.');
+        return $this->cartActionResponse($request, true, 'Product added to cart successfully.');
+    }
+
+    /**
+     * Same redirect for normal submits, JSON with fresh counts for AJAX submits.
+     */
+    private function cartActionResponse(Request $request, bool $success, string $message, int $status = 200, ?int $productId = null)
+    {
+        $wantsJson = $request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'fetch';
+
+        if ($wantsJson) {
+            $summary = $this->cartSummaryResponse($message, $request);
+
+            return response()->json(array_merge($summary, [
+                'success' => $success,
+                'message' => $message,
+            ]), $success ? 200 : $status);
+        }
+
+        return $success
+            ? back()->with('success', $message)
+            : back()->with('error', $message);
     }
 
     public function update(Request $request, string $cart): RedirectResponse|JsonResponse
@@ -154,10 +179,133 @@ class FrontendCartController extends Controller
 
         // AJAX quantity changes get fresh totals back instead of a full page reload.
         if ($wantsJson) {
-            return response()->json($this->cartSummaryResponse('Cart quantity updated.'));
+            return response()->json($this->cartSummaryResponse('Cart quantity updated.', $request));
         }
 
         return back()->with('success', 'Cart quantity updated.');
+    }
+
+    /**
+     * Current quantity of SIMPLE (variation-free) products, keyed by product id.
+     * Product cards use this to swap "Add to Cart" with an inline counter.
+     */
+    public function quantities(): JsonResponse
+    {
+        $items = $this->currentCartItems();
+
+        return response()->json([
+            'success' => true,
+            'quantities' => $this->simpleProductQuantities($items),
+            'cart_count' => (int) $items->sum(fn ($item) => (int) $item->quantity),
+        ]);
+    }
+
+    /**
+     * Set an exact quantity for a SIMPLE product from a product card.
+     * quantity=0 removes the line so the card flips back to "Add to Cart".
+     */
+    public function setQuantityByProduct(Request $request): RedirectResponse|JsonResponse
+    {
+        try {
+            $data = $request->validate([
+                'product_id' => 'required|exists:products,id',
+                'quantity' => 'required|integer|min:0|max:99',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->cartActionResponse($request, false, 'Please choose a valid product and quantity.', 422);
+        }
+
+        $productId = (int) $data['product_id'];
+        $quantity = (int) $data['quantity'];
+        $product = Product::with(['variations' => fn ($q) => $q->where('is_active', true)])->findOrFail($productId);
+
+        if ($product->variations->isNotEmpty()) {
+            return $this->cartActionResponse($request, false, 'Please select a variation before updating the cart.', 422);
+        }
+
+        if ($quantity > 0 && (bool) ($product->manage_stock ?? false) && (int) ($product->stock ?? 0) < $quantity) {
+            return $this->cartActionResponse($request, false, 'Only ' . (int) ($product->stock ?? 0) . ' available in stock.', 422);
+        }
+
+        $unitPrice = (float) ($product->sale_price ?? $product->base_price);
+
+        if (! Auth::check()) {
+            $entries = array_values((array) (session('guest_cart', []) ?? []));
+            $key = 'p' . $productId;
+            $found = null;
+            foreach ($entries as $i => $entry) {
+                if (($entry['key'] ?? '') === $key) {
+                    $found = $i;
+                    break;
+                }
+            }
+
+            if ($quantity <= 0) {
+                if ($found !== null) {
+                    unset($entries[$found]);
+                    session(['guest_cart' => array_values($entries)]);
+                }
+
+                return $this->cartActionResponse($request, true, 'Removed from cart.', 200, $productId);
+            }
+
+            if ($found !== null) {
+                $entries[$found]['quantity'] = $quantity;
+                $entries[$found]['price'] = $unitPrice;
+            } else {
+                $entries[] = [
+                    'key' => $key,
+                    'product_id' => $productId,
+                    'product_variation_id' => null,
+                    'quantity' => $quantity,
+                    'price' => $unitPrice,
+                ];
+            }
+
+            session(['guest_cart' => $entries]);
+
+            $msg = $quantity === 1 ? 'Product added to cart successfully.' : 'Cart quantity updated.';
+
+            return $this->cartActionResponse($request, true, $msg, 200, $productId);
+        }
+
+        $this->mergeGuestCartToUser(Auth::id());
+
+        $cartItem = Cart::where('user_id', Auth::id())
+            ->where('product_id', $productId)
+            ->whereNull('product_variation_id')
+            ->first();
+
+        if (! $cartItem) {
+            $cartItem = Cart::where('user_id', Auth::id())
+                ->where('product_id', $productId)
+                ->where('product_variation_id', 0)
+                ->first();
+        }
+
+        if ($quantity <= 0) {
+            $cartItem?->delete();
+
+            return $this->cartActionResponse($request, true, 'Removed from cart.', 200, $productId);
+        }
+
+        if ($cartItem) {
+            $cartItem->quantity = $quantity;
+            $cartItem->price = $unitPrice;
+            $cartItem->save();
+        } else {
+            Cart::create([
+                'user_id' => Auth::id(),
+                'product_id' => $productId,
+                'product_variation_id' => null,
+                'quantity' => $quantity,
+                'price' => $unitPrice,
+            ]);
+        }
+
+        $msg = $quantity === 1 ? 'Product added to cart successfully.' : 'Cart quantity updated.';
+
+        return $this->cartActionResponse($request, true, $msg, 200, $productId);
     }
 
     public function destroy(string $cart): RedirectResponse
@@ -238,11 +386,11 @@ class FrontendCartController extends Controller
         return collect($items);
     }
 
-    private function addToGuestCart(Request $request, int $productId, ?int $variationId, float $unitPrice)
+    private function addToGuestCart(Request $request, int $productId, ?int $variationId, float $unitPrice, int $quantity = 1)
     {
         $entries = (array) (session('guest_cart', []) ?? []);
         $key = $variationId ? 'p' . $productId . '_v' . $variationId : 'p' . $productId;
-        $quantity = max(1, (int) $request->input('quantity', 1));
+        $quantity = max(1, (int) $request->input('quantity', $quantity));
 
         $found = false;
         foreach ($entries as $i => $entry) {
@@ -265,7 +413,7 @@ class FrontendCartController extends Controller
 
         session(['guest_cart' => $entries]);
 
-        return back()->with('success', 'Product added to cart successfully.');
+        return $this->cartActionResponse($request, true, 'Product added to cart successfully.');
     }
 
     private function updateGuestCartItem(string $key, int $qty, bool $wantsJson = false): RedirectResponse|JsonResponse
@@ -413,7 +561,7 @@ class FrontendCartController extends Controller
      * Recomputed cart totals returned to the cart page after an AJAX
      * quantity change so the UI can update itself without a reload.
      */
-    private function cartSummaryResponse(string $message): array
+    private function cartSummaryResponse(string $message, ?\Illuminate\Http\Request $request = null): array
     {
         $cartItems = $this->currentCartItems();
 
@@ -460,7 +608,35 @@ class FrontendCartController extends Controller
             'shipping_charge' => $shippingCharge,
             'grand_total' => round($grandTotal, 2),
             'cart_count' => (int) $cartItems->sum(fn ($item) => (int) $item->quantity),
+            'quantities' => $this->simpleProductQuantities($cartItems),
+            'product_id' => $request ? (int) $request->input('product_id', 0) ?: null : null,
         ];
+    }
+
+    private function simpleProductQuantities($cartItems): array
+    {
+        $map = [];
+
+        foreach ($cartItems as $item) {
+            $variationId = $item->variation_id
+                ?? $item->product_variation_id
+                ?? ($item->variation->id ?? null)
+                ?? null;
+
+            if (! empty($variationId)) {
+                continue;
+            }
+
+            $productId = (int) ($item->product_id ?? optional($item->product)->id ?? 0);
+            if ($productId <= 0) {
+                continue;
+            }
+
+            $key = (string) $productId;
+            $map[$key] = ($map[$key] ?? 0) + (int) $item->quantity;
+        }
+
+        return $map;
     }
 
     private function getAppliedCouponSummary($cartItems): ?array

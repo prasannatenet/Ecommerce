@@ -42,8 +42,12 @@
 
 <body class="frontend-site {{ request()->routeIs('home') ? 'home-page' : '' }}">
 
-    @include('layouts.topbar')
-    @include('layouts.navbar')
+    {{-- Pages that should render without the global chrome opt out with @section('hide_topbar_navbar', true) --}}
+    @sectionMissing('hide_topbar_navbar')
+        @include('layouts.topbar')
+        @include('layouts.navbar')
+    @endif
+
     @hasSection('hero')
         @yield('hero')
     @else
@@ -59,7 +63,10 @@
 
 
 
-    @include('layouts.footer')
+    {{-- Pages that should render without the site footer opt out with @section('hide_footer', true) --}}
+    @sectionMissing('hide_footer')
+        @include('layouts.footer')
+    @endif
 
 
     <!-- ===== QUICK VIEW MODAL ===== -->
@@ -108,6 +115,45 @@
 
     <!-- ===== WISHLIST OFFCANVAS ===== -->
     @include('frontend.wishlist.index')
+
+    <script>
+        /* Wishlist drawer: silent background refresh — no page reload, no scroll impact. */
+        window.refreshWishlistSidebar = (function () {
+            var pending = null;
+            function swapInto(container, incoming) {
+                if (!container) return;
+                container.innerHTML = '';
+                while (incoming.firstChild) container.appendChild(incoming.firstChild);
+            }
+            function refresh() {
+                if (pending) return pending;
+                pending = fetch('{{ route("wishlist.list") }}', {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    credentials: 'same-origin'
+                })
+                .then(function (res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.text(); })
+                .then(function (html) {
+                    pending = null;
+                    var doc = new DOMParser().parseFromString(html, 'text/html');
+                    var fresh = doc.getElementById('wishlistSidebar');
+                    var body = fresh ? fresh.querySelector('.offcanvas-body') : null;
+                    var current = document.querySelector('#wishlistSidebar .offcanvas-body');
+                    if (body && current) swapInto(current, body);
+                })
+                .catch(function () { pending = null; });
+                return pending;
+            }
+            return refresh;
+        })();
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var sidebar = document.getElementById('wishlistSidebar');
+            if (!sidebar || typeof bootstrap === 'undefined') return;
+            sidebar.addEventListener('show.bs.offcanvas', function () {
+                window.refreshWishlistSidebar();
+            });
+        });
+    </script>
 
     <!-- ===== CONFIRM POPUP ===== -->
     <div class="confirm-popup-overlay" id="confirmPopup">
@@ -320,34 +366,21 @@
             .then(response => response.json())
             .then(data => {
                 if(data.success) {
-                    // Update Wishlist Offcanvas HTML silently by fetching /wishlist
-                    fetch('{{ route('wishlist.index') }}', {
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
+                    // Update all header counts
+                    document.querySelectorAll('.nav-wishlist-count').forEach(countElem => {
+                        countElem.innerText = data.total_count;
+                        if (data.total_count > 0) {
+                            countElem.classList.remove('d-none');
+                        } else {
+                            countElem.classList.add('d-none');
                         }
-                    })
-                    .then(res => res.text())
-                    .then(html => {
-                        let parser = new DOMParser();
-                        let doc = parser.parseFromString(html, 'text/html');
-                        let newBody = doc.querySelector('.offcanvas-body');
-                        if (newBody && document.querySelector('#wishlistSidebar .offcanvas-body')) {
-                            document.querySelector('#wishlistSidebar .offcanvas-body').innerHTML = newBody.innerHTML;
-                        }
-
-                        // Update all header counts
-                        document.querySelectorAll('.nav-wishlist-count').forEach(countElem => {
-                            countElem.innerText = data.total_count;
-                            if (data.total_count > 0) {
-                                countElem.classList.remove('d-none');
-                            } else {
-                                countElem.classList.add('d-none');
-                            }
-                        });
-
-                        // Show toast notification instead of opening sidebar
-                        showToast(data.message);
                     });
+
+                    // Silently refresh the wishlist drawer in the background
+                    if (typeof window.refreshWishlistSidebar === 'function') window.refreshWishlistSidebar();
+
+                    // Show toast notification instead of opening sidebar
+                    showToast(data.message);
                 } else if (data.redirect) {
                     // Not logged in case (if we handle that in JSON)
                     window.location.href = data.redirect;
@@ -407,20 +440,8 @@
                     el.textContent = data.cart_count;
                 });
 
-                // Reload the wishlist sidebar content
-                fetch('{{ route("wishlist.index") }}', {
-                    headers: { 'Accept': 'text/html' }
-                })
-                .then(r => r.text())
-                .then(html => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    const newBody = doc.querySelector('#wishlistSidebar .offcanvas-body');
-                    const currentBody = document.querySelector('#wishlistSidebar .offcanvas-body');
-                    if (newBody && currentBody) {
-                        currentBody.innerHTML = newBody.innerHTML;
-                    }
-                });
+                // Silently refresh the wishlist drawer in the background
+                if (typeof window.refreshWishlistSidebar === 'function') window.refreshWishlistSidebar();
             }
         })
         .catch(() => showToast('Something went wrong. Please try again.'));
@@ -480,25 +501,32 @@
                         el.textContent = data.wishlist_count;
                     });
 
-                    fetch('{{ route("wishlist.index") }}', {
-                        headers: { 'Accept': 'text/html' }
-                    })
-                    .then(r => r.text())
-                    .then(html => {
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(html, 'text/html');
-                        const newBody = doc.querySelector('#wishlistSidebar .offcanvas-body');
-                        const currentBody = document.querySelector('#wishlistSidebar .offcanvas-body');
-                        if (newBody && currentBody) {
-                            currentBody.innerHTML = newBody.innerHTML;
-                        }
-                    });
+                    // Silently refresh the wishlist drawer in the background
+                    if (typeof window.refreshWishlistSidebar === 'function') window.refreshWishlistSidebar();
                 }
             })
             .catch(() => showToast('Something went wrong. Please try again.'));
         });
     }
     </script>
+    {{-- Instant add-to-cart / wishlist (no page reload). --}}
+    <script>
+        window.GEHNA_ROUTES = Object.assign({}, window.GEHNA_ROUTES || {}, {
+            wishlistToggle: '{{ route("wishlist.toggle") }}',
+            wishlistList: '{{ route("wishlist.list") }}',
+            cartQuantities: '{{ route("cart.quantities") }}',
+            cartSetQuantity: '{{ route("cart.set-quantity") }}'
+        });
+        {{-- Server-rendered cart state: card counters paint instantly on load,
+             no AJAX round-trip (cart-stepper.js uses this before falling back
+             to the /cart/quantities fetch). --}}
+        window.GEHNA_CART_STATE = {
+            quantities: @json((array) ($simpleCartQuantities ?? [])),
+            cart_count: @json((int) ($headerCartCount ?? 0))
+        };
+    </script>
+    <script src="{{ asset('frontend/js/instant-commerce.js') }}"></script>
+    <script src="{{ asset('frontend/js/cart-stepper.js') }}"></script>
     @stack('scripts')
 </body>
 

@@ -214,16 +214,29 @@
                             </div>
                         </form>
 
+                        @php $pdpWishlisted = $inWishlist ?? false; @endphp
                         @auth
-                            <form action="{{ route('wishlist.toggle') }}" method="POST" class="mb-4">
+                            <form action="{{ route('wishlist.toggle') }}" method="POST" class="mb-4" id="wishlistToggleForm">
                                 @csrf
                                 <input type="hidden" name="product_id" value="{{ $product->id }}">
                                 @if ($isVariableProduct)
                                     <input type="hidden" name="product_variation_id" id="wishlist_variation_id"
                                         value="{{ $defaultVariationId }}">
                                 @endif
-                                <button type="submit" class="btn btn-outline-secondary w-100">
-                                    <i class="bi bi-heart me-2"></i>Add to Wishlist
+                                <button type="submit" class="btn btn-outline-secondary w-100 {{ $pdpWishlisted ? 'active' : '' }}" id="wishlistToggleBtn">
+                                    <i class="bi {{ $pdpWishlisted ? 'bi-heart-fill' : 'bi-heart' }} me-2" @if($pdpWishlisted) style="color:#dc3545;" @endif></i><span>{{ $pdpWishlisted ? 'Wishlisted' : 'Add to Wishlist' }}</span>
+                                </button>
+                            </form>
+                        @else
+                            <form action="{{ route('wishlist.toggle') }}" method="POST" class="mb-4" id="wishlistToggleForm">
+                                @csrf
+                                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                @if ($isVariableProduct)
+                                    <input type="hidden" name="product_variation_id" id="wishlist_variation_id"
+                                        value="{{ $defaultVariationId }}">
+                                @endif
+                                <button type="submit" class="btn btn-outline-secondary w-100 {{ $pdpWishlisted ? 'active' : '' }}" id="wishlistToggleBtn">
+                                    <i class="bi {{ $pdpWishlisted ? 'bi-heart-fill' : 'bi-heart' }} me-2" @if($pdpWishlisted) style="color:#dc3545;" @endif></i><span>{{ $pdpWishlisted ? 'Wishlisted' : 'Add to Wishlist' }}</span>
                                 </button>
                             </form>
                         @endauth
@@ -444,6 +457,9 @@
 
         </div>
     </section>
+
+    {{-- Active combo offers including this product — shown below the product --}}
+    @include('frontend.partials.combo-offers', ['product' => $product, 'combos' => $combos ?? collect()])
 
 @endsection
 

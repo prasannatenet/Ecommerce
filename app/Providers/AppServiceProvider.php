@@ -7,7 +7,6 @@ use App\Models\Page;
 use App\Models\Setting;
 use App\Models\Wishlist;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -31,32 +30,53 @@ class AppServiceProvider extends ServiceProvider
 
         View::share('appSetting', $setting);
 
+        // The admin "SMTP Configuration" section is the single source of truth
+        // for outgoing mail. Setting::applyMailConfig() holds the one and only
+        // settings => mail config mapping; nothing else may duplicate it.
         if ($setting && $setting->smtp_host) {
-            Config::set('mail.default', 'smtp');
-            Config::set('mail.mailers.smtp.host', $setting->smtp_host);
-            Config::set('mail.mailers.smtp.port', (int) ($setting->smtp_port ?: 587));
-            Config::set('mail.mailers.smtp.username', $setting->smtp_username);
-            Config::set('mail.mailers.smtp.password', $setting->smtp_password);
-            Config::set('mail.mailers.smtp.scheme', $setting->smtp_encryption ?: null);
-            Config::set('mail.from.address', $setting->smtp_from_email ?: config('mail.from.address'));
-            Config::set('mail.from.name', $setting->smtp_from_name ?: config('mail.from.name'));
+            $setting->applyMailConfig();
         }
 
         View::composer(['layouts.frontend', 'layouts.navbar'], function ($view): void {
             if (Auth::check()) {
-                $cartCount = (int) Cart::where('user_id', Auth::id())->sum('quantity');
+                $cartRows = Cart::where('user_id', Auth::id())
+                    ->get(['product_id', 'product_variation_id', 'quantity']);
                 $wishlistCount = (int) Wishlist::where('user_id', Auth::id())
                     ->distinct('product_id')
                     ->count('product_id');
             } else {
                 // Guests keep their cart & wishlist in the session.
-                $cartCount = (int) collect((array) session('guest_cart', []))
-                    ->sum(fn ($entry) => (int) ($entry['quantity'] ?? 1));
+                $cartRows = collect(array_values((array) session('guest_cart', [])));
                 $wishlistCount = count((array) session('guest_wishlist', []));
             }
 
+            $cartCount = (int) $cartRows->sum(fn ($row) => (int) (
+                is_array($row) ? ($row['quantity'] ?? 1) : $row->quantity
+            ));
+
+            // Quantities of simple (variation-free) products keyed by product id.
+            // Exposed to the layout so product-card counters render instantly on
+            // page load instead of waiting for the /cart/quantities AJAX call.
+            $simpleCartQuantities = [];
+            foreach ($cartRows as $row) {
+                $variationId = is_array($row)
+                    ? ($row['product_variation_id'] ?? null)
+                    : $row->product_variation_id;
+                if (! empty($variationId)) {
+                    continue;
+                }
+
+                $productId = (int) (is_array($row) ? ($row['product_id'] ?? 0) : $row->product_id);
+                $quantity = (int) (is_array($row) ? ($row['quantity'] ?? 0) : $row->quantity);
+                if ($productId > 0 && $quantity > 0) {
+                    $key = (string) $productId;
+                    $simpleCartQuantities[$key] = ($simpleCartQuantities[$key] ?? 0) + $quantity;
+                }
+            }
+
             $view->with('headerCartCount', $cartCount)
-                ->with('headerWishlistCount', $wishlistCount);
+                ->with('headerWishlistCount', $wishlistCount)
+                ->with('simpleCartQuantities', $simpleCartQuantities);
         });
 
         View::composer(['layouts.footer'], function ($view): void {

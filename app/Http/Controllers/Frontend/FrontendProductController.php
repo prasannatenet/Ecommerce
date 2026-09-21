@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Combo;
 use App\Models\Product;
 use App\Models\Review;
 use App\Models\Wishlist;
@@ -105,11 +106,31 @@ class FrontendProductController extends Controller
         $reviewsCount = $reviews->count();
         $averageRating = $reviewsCount > 0 ? round((float) $reviews->avg('rating'), 1) : 0.0;
 
+        // Active combo offers that include this product — the offer is shown
+        // below the product on its detail page.
+        $combos = Combo::whereHas('products', fn ($query) => $query->where('products.id', $product->id))
+            ->active()
+            ->with(['products' => fn ($query) => $query->with('images')])
+            ->orderBy('id')
+            ->get();
+
+        $inWishlist = false;
+        if (Auth::check()) {
+            $inWishlist = Wishlist::where('user_id', Auth::id())
+                ->where('product_id', $product->id)
+                ->exists();
+        } else {
+            $guestWishlist = array_map('intval', (array) (session('guest_wishlist', []) ?? []));
+            $inWishlist = in_array((int) $product->id, $guestWishlist, true);
+        }
+
         return view('frontend.product.show', compact(
             'product',
             'reviews',
             'reviewsCount',
-            'averageRating'
+            'averageRating',
+            'inWishlist',
+            'combos'
         ));
     }
 

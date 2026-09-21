@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\ProductVariation;
 use App\Models\Wishlist;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
@@ -26,6 +27,19 @@ class FrontendWishlistController extends Controller
             ->paginate(20);
 
         return view('frontend.wishlist.index', compact('items'));
+    }
+
+    /**
+     * Light fragment: only the #wishlistSidebar offcanvas markup, always fresh
+     * from the session/database. The layout JS swaps this into the drawer in
+     * the background (no page reload, no scroll impact) after wishlist changes
+     * and whenever the drawer is opened with stale content.
+     */
+    public function list(): Response
+    {
+        return response()
+            ->view('frontend.wishlist.index')
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
     }
 
     /**
@@ -58,10 +72,22 @@ class FrontendWishlistController extends Controller
             return $this->toggleGuest($request);
         }
 
-        $data = $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'product_variation_id' => 'nullable|integer|exists:product_variations,id',
-        ]);
+        try {
+            $data = $request->validate([
+                'product_id' => 'required|exists:products,id',
+                'product_variation_id' => 'nullable|integer|exists:product_variations,id',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($this->wantsWishlistJson($request)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Please choose a valid product.',
+                    'errors' => $e->errors(),
+                ], 422);
+            }
+
+            throw $e;
+        }
 
         $product = Product::with(['variations' => fn ($q) => $q->where('is_active', true)])
             ->findOrFail((int) $data['product_id']);
@@ -96,16 +122,7 @@ class FrontendWishlistController extends Controller
             $existing->delete();
             $totalCount = Wishlist::where('user_id', Auth::id())->count();
 
-            if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => true,
-                    'action' => 'removed',
-                    'message' => 'Removed from wishlist.',
-                    'total_count' => $totalCount
-                ]);
-            }
-
-            return back()->with('success', 'Removed from wishlist.');
+            return $this->wishlistToggleResponse($request, 'removed', 'Removed from wishlist.', $totalCount, (int) $product->id);
         }
 
         Wishlist::create([
@@ -116,16 +133,32 @@ class FrontendWishlistController extends Controller
 
         $totalCount = Wishlist::where('user_id', Auth::id())->count();
 
-        if ($request->ajax() || $request->wantsJson()) {
+        return $this->wishlistToggleResponse($request, 'added', 'Added to wishlist.', $totalCount, (int) $product->id);
+    }
+
+    /**
+     * Same redirect for normal submits, instant JSON for AJAX submits.
+     */
+    private function wishlistToggleResponse(Request $request, string $action, string $message, int $totalCount, int $productId)
+    {
+        if ($this->wantsWishlistJson($request)) {
             return response()->json([
                 'success' => true,
-                'action' => 'added',
-                'message' => 'Added to wishlist.',
-                'total_count' => $totalCount
+                'action' => $action,
+                'wishlisted' => $action === 'added',
+                'message' => $message,
+                'product_id' => $productId,
+                'wishlist_count' => $totalCount,
+                'total_count' => $totalCount,
             ]);
         }
 
-        return back()->with('success', 'Added to wishlist.');
+        return back()->with('success', $message);
+    }
+
+    private function wantsWishlistJson(Request $request): bool
+    {
+        return $request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'fetch';
     }
 
     public function moveToCart(Request $request)
@@ -248,9 +281,21 @@ class FrontendWishlistController extends Controller
 
     private function toggleGuest(Request $request)
     {
-        $data = $request->validate([
-            'product_id' => 'required|exists:products,id',
-        ]);
+        try {
+            $data = $request->validate([
+                'product_id' => 'required|exists:products,id',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($this->wantsWishlistJson($request)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Please choose a valid product.',
+                    'errors' => $e->errors(),
+                ], 422);
+            }
+
+            throw $e;
+        }
 
         $productId = (int) $data['product_id'];
         $ids = $this->guestWishlistIds();
@@ -282,11 +327,14 @@ class FrontendWishlistController extends Controller
 
         $this->saveGuestWishlist($ids);
 
-        if ($request->ajax() || $request->wantsJson()) {
+        if ($this->wantsWishlistJson($request)) {
             return response()->json([
                 'success' => true,
                 'action' => $action,
+                'wishlisted' => $action === 'added',
                 'message' => $message,
+                'product_id' => $productId,
+                'wishlist_count' => count($ids),
                 'total_count' => count($ids),
             ]);
         }

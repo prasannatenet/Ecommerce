@@ -415,6 +415,85 @@
         </div>
     </div>
 </details>
+{{-- ============================ CUSTOM API SETTINGS ============================ --}}
+<div class="df-card mb-4" id="customApiSettingsCard" style="display:none;">
+    <div class="df-card-header">
+        <h5 class="df-card-title"><i class="bi bi-code-slash"></i> Custom API Configuration</h5>
+    </div>
+    <div class="df-card-body">
+        <div class="row g-3">
+            <div class="col-12"><h6 class="mb-0">Booking API</h6></div>
+            <div class="col-md-3">
+                <label class="df-form-label">Method</label>
+                <select name="config_booking_method" class="df-form-select">
+                    <option value="POST" {{ old('config_booking_method', optional($partner)->configValue('booking_method')) === 'POST' ? 'selected' : '' }}>POST</option>
+                    <option value="GET" {{ old('config_booking_method', optional($partner)->configValue('booking_method')) === 'GET' ? 'selected' : '' }}>GET</option>
+                </select>
+            </div>
+            <div class="col-md-9">
+                <label class="df-form-label">Booking Endpoint</label>
+                <input type="text" name="config_booking_endpoint" class="df-form-control"
+                       value="{{ old('config_booking_endpoint', optional($partner)->configValue('booking_endpoint')) }}"
+                       placeholder="/api/v1/shipments/create">
+            </div>
+            <div class="col-md-12">
+                <label class="df-form-label">Headers (one per line: Key: Value)</label>
+                <textarea name="config_booking_headers" class="df-form-control" rows="2"
+                          placeholder="X-Custom-Auth: abc123&#10;Accept-Language: en">{{ old('config_booking_headers', optional($partner)->configValue('booking_headers')) }}</textarea>
+            </div>
+            <div class="col-md-12">
+                <label class="df-form-label">JSON Payload Template</label>
+                <textarea name="config_booking_payload_template" class="df-form-control" rows="5"
+                          placeholder='{"order_id": "@{{order_id}}", "name": "@{{customer_name}}"}'>{{ old('config_booking_payload_template', optional($partner)->configValue('booking_payload_template')) }}</textarea>
+                <p class="df-form-hint">Available vars: @{{order_id}}, @{{customer_name}}, @{{address}}, @{{city}}, @{{state}}, @{{country}}, @{{phone}}, @{{pincode}}, @{{payment_mode}}, @{{cod_amount}}, @{{total_amount}}, @{{weight}}</p>
+            </div>
+            <div class="col-md-12">
+                <label class="df-form-label">AWB JSON Path in Response</label>
+                <input type="text" name="config_booking_awb_path" class="df-form-control"
+                       value="{{ old('config_booking_awb_path', optional($partner)->configValue('booking_awb_path')) }}"
+                       placeholder="data.awb_number">
+            </div>
+
+            <div class="col-12 mt-4"><h6 class="mb-0">Tracking API</h6></div>
+            <div class="col-md-3">
+                <label class="df-form-label">Method</label>
+                <select name="config_tracking_method" class="df-form-select">
+                    <option value="GET" {{ old('config_tracking_method', optional($partner)->configValue('tracking_method')) === 'GET' ? 'selected' : '' }}>GET</option>
+                    <option value="POST" {{ old('config_tracking_method', optional($partner)->configValue('tracking_method')) === 'POST' ? 'selected' : '' }}>POST</option>
+                </select>
+            </div>
+            <div class="col-md-9">
+                <label class="df-form-label">Tracking Endpoint</label>
+                <input type="text" name="config_tracking_endpoint" class="df-form-control"
+                       value="{{ old('config_tracking_endpoint', optional($partner)->configValue('tracking_endpoint')) }}"
+                       placeholder="/api/v1/track/@{{waybill}}">
+                <p class="df-form-hint">Use @{{waybill}} as placeholder for the tracking number.</p>
+            </div>
+            <div class="col-md-12">
+                <label class="df-form-label">Headers (one per line)</label>
+                <textarea name="config_tracking_headers" class="df-form-control" rows="2">{{ old('config_tracking_headers', optional($partner)->configValue('tracking_headers')) }}</textarea>
+            </div>
+            <div class="col-md-4">
+                <label class="df-form-label">Events Array Path</label>
+                <input type="text" name="config_tracking_events_path" class="df-form-control"
+                       value="{{ old('config_tracking_events_path', optional($partner)->configValue('tracking_events_path')) }}"
+                       placeholder="data.tracking_history">
+            </div>
+            <div class="col-md-4">
+                <label class="df-form-label">Status Field Path</label>
+                <input type="text" name="config_tracking_status_path" class="df-form-control"
+                       value="{{ old('config_tracking_status_path', optional($partner)->configValue('tracking_status_path')) }}"
+                       placeholder="status">
+            </div>
+            <div class="col-md-4">
+                <label class="df-form-label">Timestamp Field Path</label>
+                <input type="text" name="config_tracking_timestamp_path" class="df-form-control"
+                       value="{{ old('config_tracking_timestamp_path', optional($partner)->configValue('tracking_timestamp_path')) }}"
+                       placeholder="created_at">
+            </div>
+        </div>
+    </div>
+</div>
 <details class="df-card mb-4" style="padding:0;">
     <summary style="cursor:pointer; padding:16px 20px; font-weight:700;">
         <i class="bi bi-cloud"></i> Advanced — Delhivery One (B2C) endpoints &amp; status mapping
@@ -517,12 +596,14 @@
     (function () {
         var driverSelect = document.getElementById('driverSelect');
         var apiCard = document.getElementById('apiSettingsCard');
+        var customApiCard = document.getElementById('customApiSettingsCard');
         var autoBookToggle = document.getElementById('autoBookToggle');
         var triggerRow = document.getElementById('autoBookTriggerRow');
 
         function syncDriver() {
-            if (!driverSelect || !apiCard) { return; }
-            apiCard.style.display = driverSelect.value === 'manual' ? 'none' : '';
+            if (!driverSelect) { return; }
+            if (apiCard) { apiCard.style.display = driverSelect.value === 'manual' ? 'none' : ''; }
+            if (customApiCard) { customApiCard.style.display = driverSelect.value === 'custom_api' ? '' : 'none'; }
         }
 
         function syncAutoBook() {

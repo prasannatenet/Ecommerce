@@ -115,6 +115,18 @@
                     <a href="{{ route('admin.coupons.create') }}" class="df-nav-link">Add Coupon</a>
                 </div>
             </div>
+
+            <div class="df-nav-item has-submenu">
+                <a class="df-nav-link" href="#">
+                    <span class="nav-icon"><i class="bi bi-gift"></i></span>
+                    <span class="nav-text">Combo Offers</span>
+                    <span class="nav-chevron"><i class="bi bi-chevron-right"></i></span>
+                </a>
+                <div class="df-submenu">
+                    <a href="{{ route('admin.combos.index') }}" class="df-nav-link">All Combos</a>
+                    <a href="{{ route('admin.combos.create') }}" class="df-nav-link">Add Combo</a>
+                </div>
+            </div>
         </div>
 
         {{-- PAYMENTS --}}

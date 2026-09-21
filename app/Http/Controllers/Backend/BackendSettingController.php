@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
@@ -27,9 +26,6 @@ class BackendSettingController extends Controller
         // Preserve existing encrypted credentials when the user leaves them blank.
         if (($data['smtp_password'] ?? '') === '') {
             unset($data['smtp_password']);
-        }
-        if (($data['resend_api_key'] ?? '') === '') {
-            unset($data['resend_api_key']);
         }
 
         if ($request->hasFile('logo')) {
@@ -58,7 +54,9 @@ class BackendSettingController extends Controller
                     ->withInput();
             }
 
-            $this->applyMailConfig($setting);
+            // Single mail code path: the same method AppServiceProvider uses
+            // for every other outgoing email, so the test always matches it.
+            $setting->applyMailConfig();
 
             try {
                 Mail::raw('This is a test email from your store mail configuration.', function ($message) use ($testEmail): void {
@@ -78,53 +76,6 @@ class BackendSettingController extends Controller
         return redirect()->route('admin.settings.edit')->with('success', 'Settings updated successfully.');
     }
 
-        /**
-     * Apply the admin-configured mail driver to the runtime config.
-     *
-     * The driver is selected via the Setting.mail_driver column so switching
-     * providers (Resend, SMTP, Log, ...) is a matter of choosing a different
-     * value in the admin UI — no code changes needed. Adding a new provider
-     * later is just one new match-arm + one dedicated credential column.
-     */
-    private function applyMailConfig(Setting $setting): void
-    {
-        $driver = $setting->mail_driver ?: 'smtp';
-
-        // The "from" address / name are shared by every transport.
-        Config::set('mail.from.address', $setting->smtp_from_email ?: config('mail.from.address'));
-        Config::set('mail.from.name', $setting->smtp_from_name ?: config('mail.from.name'));
-
-        match ($driver) {
-            'smtp'   => $this->applySmtp($setting),
-            'resend' => $this->applyResend($setting),
-            default  => null,
-        };
-
-        Config::set('mail.default', $driver);
-    }
-
-    /**
-     * Apply SMTP transport credentials pulled from the settings table.
-     */
-    private function applySmtp(Setting $setting): void
-    {
-        Config::set('mail.mailers.smtp.host', $setting->smtp_host);
-        Config::set('mail.mailers.smtp.port', (int) ($setting->smtp_port ?: 587));
-        Config::set('mail.mailers.smtp.username', $setting->smtp_username);
-        Config::set('mail.mailers.smtp.password', $setting->smtp_password);
-        Config::set('mail.mailers.smtp.scheme', $setting->smtp_encryption ?: null);
-    }
-
-    /**
-     * Apply the Resend transport. Laravel reads the API key from
-     * config('services.resend.key') at send-time — the 'resend' mailer
-     * block in config/mail.php is already sufficient.
-     */
-    private function applyResend(Setting $setting): void
-    {
-        Config::set('services.resend.key', $setting->resend_api_key);
-    }
-
     private function validateData(Request $request): array
     {
         return $request->validate([
@@ -142,13 +93,11 @@ class BackendSettingController extends Controller
             'twitter_url' => 'nullable|url|max:255',
             'youtube_url' => 'nullable|url|max:255',
             'linkedin_url' => 'nullable|url|max:255',
-            'mail_driver' => 'required|in:smtp,resend,sendmail,log',
-            'resend_api_key' => 'nullable|string|max:255',
             'smtp_host' => 'nullable|string|max:255',
             'smtp_port' => 'nullable|integer|min:1|max:65535',
             'smtp_username' => 'nullable|string|max:255',
             'smtp_password' => 'nullable|string|max:255',
-            'smtp_encryption' => 'nullable|in:tls,ssl',
+            'smtp_encryption' => 'nullable|in:tls,ssl,smtp,smtps',
             'smtp_from_email' => 'nullable|email|max:255',
             'smtp_from_name' => 'nullable|string|max:255',
             'test_email' => 'nullable|email|max:255',

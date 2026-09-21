@@ -8593,7 +8593,7 @@ body .footer small {
 }
 
 /* Reference auth layout takes precedence over the shared auth defaults. */
-.auth-page { min-height: 660px; padding: 28px 16px; background: #fff; }
+.auth-page { min-height: 100VH; padding: 28px 16px; background: #fff; }
 .auth-frame { width: min(100%, 920px); min-height: 610px; grid-template-columns: 1fr 1.04fr; border: 1px solid #dfe4e2; border-radius: 28px; box-shadow: 0 12px 36px rgba(33,49,44,.08); }
 .auth-showcase { min-height: 610px; padding: 34px 42px 38px; justify-content: center; align-items: center; color: #0c1714; background-color: #d2f5e7 ; background-image: none ; text-align: center; }
 

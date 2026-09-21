@@ -22,6 +22,7 @@ class DeliveryManager
             'delhivery' => ($partner->use_b2c_one && config('delhivery.b2c_one.enabled'))
                 ? (new B2CDelhiveryDriver())->forPartner($partner)
                 : new DelhiveryDriver(),
+            'custom_api' => new \App\Services\Delivery\Drivers\CustomApiDriver(),
             default => null,
         };
     }
@@ -406,7 +407,7 @@ class DeliveryManager
         }
 
         try {
-            Mail::to($email)->send(new ShipmentStatusMail($shipment->fresh(['order', 'deliveryPartner']), $status));
+            Mail::to($email)->queue(new ShipmentStatusMail($shipment->fresh(['order', 'deliveryPartner']), $status));
         } catch (\Throwable $e) {
             Log::warning('Shipment status notification failed', [
                 'shipment' => $shipment->id,

@@ -101,16 +101,14 @@
                                     @endif
                                 </a>
                                 <div class="product-actions-overlay">
-                                    <form action="{{ route('cart.add') }}" method="POST" id="quick-cart-{{ $product->id }}">
+                                    <form action="{{ route('cart.add') }}" method="POST" id="quick-cart-{{ $product->id }}" style="display:contents;">
                                         @csrf
                                         <input type="hidden" name="product_id" value="{{ $product->id }}">
                                         <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="btn-cart-gehna" title="Add to Cart">
+                                            <i class="bi bi-cart-plus"></i><span class="d-none">Add to Cart</span>
+                                        </button>
                                     </form>
-                                    <button type="button"
-                                        onclick="document.getElementById('quick-cart-{{ $product->id }}').submit()"
-                                        class="btn-cart-gehna" title="Add to Cart">
-                                        <i class="bi bi-cart-plus"></i>
-                                    </button>
                                     <a href="{{ route('product.show', $product->slug) }}" class="btn-cart-gehna"
                                         title="View Product">
                                         <i class="bi bi-eye"></i>

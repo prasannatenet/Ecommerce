@@ -2,6 +2,9 @@
 
 @section('title', 'Create Account | GEHNA Fitness')
 
+{{-- @section('hide_topbar_navbar', true)
+@section('hide_footer', true) --}}
+
 @section('styles')
 
 @endsection
