@@ -74,6 +74,13 @@
                         </button>
                     </form>
 
+                    <button type="button" class="shop-btn-icon product-share-btn" title="Share"
+                        aria-label="Share this product"
+                        data-share-url="{{ route('product.show', $product->slug) }}"
+                        data-share-title="{{ $product->name }}">
+                        <i class="bi bi-share"></i>
+                    </button>
+
                     <button type="button" class="shop-btn-icon" title="Quick View"
                         onclick="openQuickView({{ $product->id }}, '{{ addslashes($product->name) }}')">
                         <i class="bi bi-eye"></i>

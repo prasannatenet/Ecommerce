@@ -9014,6 +9014,19 @@ body .footer small {
   color: #d4af37;
 }
 
+/* ===== RECENT SEARCHES ===== */
+.site-search-result--recent {
+  border-left: 3px solid #d4af37;
+}
+
+.site-search-type--recent {
+  background: #64748b;
+}
+
+.site-search-recent-term {
+  color: #0f172a;
+}
+
 /* ===== SHOP BY CATEGORY DROPDOWN ===== */
 .site-cat-dropdown {
   position: relative;

@@ -215,31 +215,46 @@
                         </form>
 
                         @php $pdpWishlisted = $inWishlist ?? false; @endphp
-                        @auth
-                            <form action="{{ route('wishlist.toggle') }}" method="POST" class="mb-4" id="wishlistToggleForm">
-                                @csrf
-                                <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                @if ($isVariableProduct)
-                                    <input type="hidden" name="product_variation_id" id="wishlist_variation_id"
-                                        value="{{ $defaultVariationId }}">
-                                @endif
-                                <button type="submit" class="btn btn-outline-secondary w-100 {{ $pdpWishlisted ? 'active' : '' }}" id="wishlistToggleBtn">
-                                    <i class="bi {{ $pdpWishlisted ? 'bi-heart-fill' : 'bi-heart' }} me-2" @if($pdpWishlisted) style="color:#dc3545;" @endif></i><span>{{ $pdpWishlisted ? 'Wishlisted' : 'Add to Wishlist' }}</span>
-                                </button>
-                            </form>
-                        @else
-                            <form action="{{ route('wishlist.toggle') }}" method="POST" class="mb-4" id="wishlistToggleForm">
-                                @csrf
-                                <input type="hidden" name="product_id" value="{{ $product->id }}">
-                                @if ($isVariableProduct)
-                                    <input type="hidden" name="product_variation_id" id="wishlist_variation_id"
-                                        value="{{ $defaultVariationId }}">
-                                @endif
-                                <button type="submit" class="btn btn-outline-secondary w-100 {{ $pdpWishlisted ? 'active' : '' }}" id="wishlistToggleBtn">
-                                    <i class="bi {{ $pdpWishlisted ? 'bi-heart-fill' : 'bi-heart' }} me-2" @if($pdpWishlisted) style="color:#dc3545;" @endif></i><span>{{ $pdpWishlisted ? 'Wishlisted' : 'Add to Wishlist' }}</span>
-                                </button>
-                            </form>
-                        @endauth
+
+{{-- Share + Wishlist row --}}
+<div class="d-flex gap-2 mb-4">
+    <div class="flex-fill">
+        @auth
+            <form action="{{ route('wishlist.toggle') }}" method="POST" id="wishlistToggleForm">
+                @csrf
+                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                @if ($isVariableProduct)
+                    <input type="hidden" name="product_variation_id" id="wishlist_variation_id"
+                        value="{{ $defaultVariationId }}">
+                @endif
+                <button type="submit" class="btn btn-outline-secondary w-100 {{ $pdpWishlisted ? 'active' : '' }}" id="wishlistToggleBtn">
+                    <i class="bi {{ $pdpWishlisted ? 'bi-heart-fill' : 'bi-heart' }} me-2" @if($pdpWishlisted) style="color:#dc3545;" @endif></i><span>{{ $pdpWishlisted ? 'Wishlisted' : 'Add to Wishlist' }}</span>
+                </button>
+            </form>
+        @else
+            <form action="{{ route('wishlist.toggle') }}" method="POST" id="wishlistToggleForm">
+                @csrf
+                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                @if ($isVariableProduct)
+                    <input type="hidden" name="product_variation_id" id="wishlist_variation_id"
+                        value="{{ $defaultVariationId }}">
+                @endif
+                <button type="submit" class="btn btn-outline-secondary w-100 {{ $pdpWishlisted ? 'active' : '' }}" id="wishlistToggleBtn">
+                    <i class="bi {{ $pdpWishlisted ? 'bi-heart-fill' : 'bi-heart' }} me-2" @if($pdpWishlisted) style="color:#dc3545;" @endif></i><span>{{ $pdpWishlisted ? 'Wishlisted' : 'Add to Wishlist' }}</span>
+                </button>
+            </form>
+        @endauth
+    </div>
+
+    {{-- Share button: opens the OS share sheet on mobile (Web Share API),
+         falls back to the share modal on desktop --}}
+    <button type="button" class="btn btn-outline-secondary product-share-btn"
+        data-share-url="{{ url()->current() }}"
+        data-share-title="{{ $product->name }}"
+        title="Share this product" aria-label="Share this product">
+        <i class="bi bi-share me-2"></i><span>Share</span>
+    </button>
+</div>
 
                         {{-- Trust Badges --}}
                         <div class="d-flex gap-4 pt-3 border-top flex-wrap">
@@ -270,12 +285,12 @@
                                         class="text-muted">{{ $product->category->name }}</a>
                                 </div>
                             @endif
-                            <div class="mt-2 d-flex gap-3 align-items-center">
-                                <strong>Share:</strong>
+                            {{-- <div class="mt-2 d-flex gap-3 align-items-center">
+                                <strong>Share this product:</strong>
                                 <a href="#" class="text-muted"><i class="bi bi-facebook fs-5"></i></a>
                                 <a href="#" class="text-muted"><i class="bi bi-twitter-x fs-5"></i></a>
                                 <a href="#" class="text-muted"><i class="bi bi-whatsapp fs-5"></i></a>
-                            </div>
+                            </div> --}}
                         </div>
 
                     </div>
@@ -405,6 +420,7 @@
                         {{-- Review submission form --}}
                         <div class="review-form-wrap mb-4">
                             @auth
+                                @if ($canReview)
                                 <form id="reviewForm" method="POST" action="{{ route('products.reviews.store', $product) }}">
                                     @csrf
                                     <h6 class="review-form-title fw-bold mb-2" id="reviewFormTitle">Write a Review</h6>
@@ -465,6 +481,13 @@
     @include('frontend.partials.related-products', [
         'relatedProducts' => $relatedProducts ?? collect(),
         'wishlistProductIds' => $relatedWishlistIds ?? [],
+    ])
+
+    {{-- Product share modal --}}
+    @include('frontend.partials.share-modal', [
+        'modalId'  => 'product',
+        'shareUrl' => url()->current(),
+        'shareTitle' => $product->name,
     ])
 
 @endsection
@@ -1240,5 +1263,9 @@ form.addEventListener('submit', function(e) {
 
             bindReviewActions();
         })();
+
+        // Product share behaviour lives in /frontend/js/product-share.js
+        // (loaded globally in the layout) so product cards on the shop and
+        // category pages can share too.
     </script>
 @endpush

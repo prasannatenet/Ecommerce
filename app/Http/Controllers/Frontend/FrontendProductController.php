@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 
 use App\Models\Category;
 use App\Models\Combo;
+use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Review;
 use App\Models\Wishlist;
@@ -102,7 +103,7 @@ class FrontendProductController extends Controller
     public function show($slug)
     {
         $product = Product::where('slug', $slug)
-            ->with('variations', 'images', 'brand', 'category')
+            ->with('variations.images', 'images', 'brand', 'category')
             ->firstOrFail();
 
         $reviews = $product->reviews()->with('user')->latest()->get();
@@ -146,12 +147,16 @@ class FrontendProductController extends Controller
                 ->all()
             : [];
 
+        // Only customers who bought this product can review it.
+        $canReview = $this->hasUserPurchasedProduct($product);
+
         return view('frontend.product.show', compact(
             'product',
             'reviews',
             'reviewsCount',
             'averageRating',
             'inWishlist',
+            'canReview',
             'combos',
             'relatedProducts',
             'relatedWishlistIds'
@@ -180,6 +185,9 @@ class FrontendProductController extends Controller
 
     public function storeReview(Request $request, Product $product)
     {
+        // Only customers who bought this product may review it.
+        abort_unless($this->hasUserPurchasedProduct($product), 403, 'You can only review products you have purchased.');
+
         $data = $request->validate([
             'rating'  => 'required|integer|min:1|max:5',
             'comment' => 'required|string|max:2000',
@@ -223,6 +231,25 @@ class FrontendProductController extends Controller
         $review->delete();
 
         return $this->reviewListResponse($product, $request, 'Your review has been deleted.');
+    }
+
+    /**
+     * A product may only be reviewed by the customer who bought it — the user
+     * must have a live order item for this product. Cancelled, failed and
+     * refunded orders do not count as a purchase.
+     */
+    private function hasUserPurchasedProduct(Product $product): bool
+    {
+        if (! Auth::check()) {
+            return false;
+        }
+
+        return OrderItem::where('product_id', $product->id)
+            ->whereHas('order', function ($query) {
+                $query->where('user_id', Auth::id())
+                    ->whereNotIn('status', ['cancelled', 'failed', 'refunded']);
+            })
+            ->exists();
     }
 
     /**

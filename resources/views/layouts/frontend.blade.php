@@ -24,7 +24,7 @@
     <link rel="stylesheet" href="{{ asset('frontend/css/gehna.css') }}">
     <link rel="stylesheet" href="{{ asset('frontend/css/custom.css') }}">
     <script src="{{ asset('frontend/js/load.js') }}"></script>
-    <script src="{{ asset('frontend/js/app.js') }}"></script>
+    <script src="{{ asset('frontend/js/app.js') }}?v={{ filemtime(public_path('frontend/js/app.js')) }}"></script>
 
         @yield('styles')
     @stack('styles')
@@ -527,6 +527,7 @@
     </script>
     <script src="{{ asset('frontend/js/instant-commerce.js') }}"></script>
     <script src="{{ asset('frontend/js/cart-stepper.js') }}"></script>
+    <script src="{{ asset('frontend/js/product-share.js') }}"></script>
     @stack('scripts')
 </body>
 

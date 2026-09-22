@@ -167,6 +167,9 @@
         </div>
     </section>
 
+    {{-- Product share modal (used by the share button on every product card) --}}
+    @include('frontend.partials.share-modal', ['modalId' => 'product'])
+
 @endsection
 
 @push('styles')

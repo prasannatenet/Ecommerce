@@ -142,6 +142,7 @@ Route::prefix('admin')->middleware(['auth','admin'])->name('admin.')->group(func
     Route::post('products/{product}/variations', [BackendProductController::class, 'storeVariation'])->name('products.variations.store');
     Route::put('variations/{variation}', [BackendProductController::class, 'updateVariation'])->name('variations.update');
     Route::delete('variations/{variation}', [BackendProductController::class, 'destroyVariation'])->name('variations.destroy');
+    Route::delete('variations/{variation}/images/{image}', [BackendProductController::class, 'destroyVariationImage'])->name('variations.images.destroy');
     
     Route::resource('categories', BackendCategoryController::class);
     Route::resource('attributes', BackendAttributeController::class);

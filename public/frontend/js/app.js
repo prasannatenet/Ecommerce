@@ -1,16 +1,3 @@
-// ===== GEHNA FITNESS - Main Application JavaScript =====
-
-// ===== PRODUCT DATA =====
-// const products = [
-//   { id: 1, name: "GEHNA Adjustable Dumbbell 12kg", category: "dumbbells", weight: "12kg", price: 7999, originalPrice: 12999, discount: 38, rating: 4.5, reviews: 234, image: "images/dumbbell.png", badge: "sale", description: "Perfect starter adjustable dumbbell with dial system. Adjust from 2kg to 12kg in seconds.", features: ["Adjustable Dial System", "Space Saving Design", "Durable ABS + Steel", "Anti-slip Grip", "Quick Weight Change"], specs: { "Weight Range": "2kg - 12kg", "Material": "Steel + ABS Plastic", "Handle": "Ergonomic Rubber Grip", "Adjustments": "6 weight settings", "Dimensions": "35 x 18 x 18 cm", "Warranty": "2 Years" } },
-//   { id: 2, name: "GEHNA Adjustable Dumbbell 24kg", category: "dumbbells", weight: "24kg", price: 14999, originalPrice: 22999, discount: 35, rating: 4.7, reviews: 412, image: "images/dumbbell0-12.png", badge: "sale", description: "Mid-range adjustable dumbbell pair. Replaces 15 sets of weights. Dial from 2kg to 24kg.", features: ["Adjustable Dial System", "Replaces 15 Sets", "Premium Steel Construction", "Anti-slip Textured Grip", "Includes Storage Tray"], specs: { "Weight Range": "2kg - 24kg", "Material": "Premium Steel + ABS", "Handle": "Textured Anti-slip Grip", "Adjustments": "15 weight settings", "Dimensions": "42 x 22 x 22 cm", "Warranty": "3 Years" } },
-//   { id: 3, name: "GEHNA Adjustable Dumbbell 40kg", category: "dumbbells", weight: "40kg", price: 24999, originalPrice: 39999, discount: 37, rating: 4.8, reviews: 189, image: "images/dumbbell4-40.png", badge: "new", description: "Pro-level adjustable dumbbell. Maximum versatility with 2kg to 40kg range. Built for serious lifters.", features: ["Adjustable Dial System", "Pro-grade Steel", "Replaces 20+ Sets", "Heavy-duty Storage Cradle", "Knurled Chrome Handle"], specs: { "Weight Range": "2kg - 40kg", "Material": "Commercial Grade Steel", "Handle": "Knurled Chrome Bar", "Adjustments": "20 weight settings", "Dimensions": "48 x 25 x 25 cm", "Warranty": "5 Years" } },
-//   { id: 4, name: "GEHNA Adjustable Bench Pro", category: "benches", weight: "N/A", price: 12999, originalPrice: 19999, discount: 35, rating: 4.6, reviews: 156, image: "images/power_bench.png", badge: "sale", description: "7-position adjustable bench for complete workouts. Heavy-duty steel frame supports up to 300kg.", features: ["7 Adjustable Positions", "300kg Weight Capacity", "High-density Foam Padding", "Foldable Design", "Non-slip Rubber Feet"], specs: { "Positions": "7 (Decline to Upright)", "Max Capacity": "300 kg", "Frame": "Heavy-duty Steel", "Padding": "High-density Foam", "Dimensions": "125 x 55 x 45 cm", "Warranty": "3 Years" } },
-//   { id: 5, name: "GEHNA Bottle", category: "bottle", weight: "N/A", price: 24999, originalPrice: 42998, discount: 42, rating: 4.9, reviews: 98, image: "images/bottel.png", badge: "sale", description: "Complete home gym combo. Includes 24kg adjustable dumbbells pair + adjustable bench. Save ₹18,000!", features: ["24kg Adjustable Dumbbells (Pair)", "Adjustable Bench Included", "Save Over ₹18,000", "Complete Home Gym", "Free Assembly Guide"], specs: { "Dumbbell Range": "2kg - 24kg", "Bench Positions": "7", "Total Pieces": "3 (2 Dumbbells + 1 Bench)", "Max Bench Capacity": "300 kg", "Dimensions": "Full setup: 125 x 80 x 45 cm", "Warranty": "3 Years" } },
-//   { id: 6, name: "GEHNA Home Gym Starter Kit", category: "bottle", weight: "12kg", price: 19999, originalPrice: 34999, discount: 43, rating: 4.5, reviews: 76, image: "images/home-gym-kit.png", badge: "new", description: "Everything you need to start your fitness journey. Dumbbells, mat, bands, and more in one package.", features: ["12kg Adjustable Dumbbells", "Exercise Mat Included", "Resistance Bands Set", "Ab Roller Included", "Workout Guide PDF"], specs: { "Dumbbell Range": "2kg - 12kg", "Mat Size": "183 x 61 cm", "Bands": "5 Resistance Levels", "Ab Roller": "Double Wheel", "Total Items": "8 Pieces", "Warranty": "2 Years" } },
-//   { id: 7, name: "GEHNA Adjustable Kettlebell", category: "dumbbells", weight: "20kg", price: 8999, originalPrice: 14999, discount: 40, rating: 4.4, reviews: 134, image: "images/kettlebell.png", badge: "sale", description: "Adjustable kettlebell from 8kg to 20kg. Perfect for dynamic workouts and functional training.", features: ["Adjustable 8kg to 20kg", "Smooth Dial Mechanism", "Wide Ergonomic Handle", "Cast Iron Construction", "Compact Design"], specs: { "Weight Range": "8kg - 20kg", "Material": "Cast Iron", "Handle": "Wide Ergonomic Grip", "Adjustments": "7 weight settings", "Dimensions": "22 x 22 x 30 cm", "Warranty": "2 Years" } },
-//   { id: 8, name: "GEHNA Dumbbell 40kg + Bench Pro", category: "bottle", weight: "40kg", price: 34999, originalPrice: 59998, discount: 42, rating: 4.9, reviews: 62, image: "images/combo-set.png", badge: "sale", description: "Ultimate home gym combo. 40kg adjustable dumbbells pair + Pro bench. For serious strength training.", features: ["40kg Adjustable Dumbbells (Pair)", "Pro Adjustable Bench", "Save Over ₹25,000", "Commercial Grade Steel", "Free Online Training"], specs: { "Dumbbell Range": "2kg - 40kg", "Bench Positions": "7", "Total Pieces": "3 (2 Dumbbells + 1 Bench)", "Max Bench Capacity": "300 kg", "Dimensions": "Full setup: 130 x 85 x 48 cm", "Warranty": "5 Years" } }
-// ];
 
 // ===== CART MANAGEMENT =====
 class Cart {
@@ -922,7 +909,9 @@ function initSiteSearch() {
   const input = document.getElementById('siteSearchInput');
   const results = document.getElementById('siteSearchResults');
   const form = document.getElementById('siteSearchForm');
-  if (!box || !input || !results || !form) return;
+  if (!box || !input || !results || !form) {
+    return;
+  }
 
   const searchUrl = '/search';
   let debounceTimer = null;
@@ -956,13 +945,10 @@ function initSiteSearch() {
     const products = data.products || [];
     const categories = data.categories || [];
     const q = data.query || '';
+    const recent = data.recent || [];
     let html = '';
     currentResults = [];
     activeIndex = -1;
-
-    if (!products.length && !categories.length) {
-      html += '<div class="site-search-empty">No results for \u201c' + escapeHtmlSearch(q) + '\u201d. Try different keywords.</div>';
-    }
 
     if (products.length) {
       html += '<p class="site-search-group-title">Products</p>';
@@ -997,12 +983,34 @@ function initSiteSearch() {
         + '">View all results for \u201c' + escapeHtmlSearch(q) + '\u201d <i class="bi bi-arrow-right"></i></a>';
     }
 
+    // Always show recent searches as a separate section at the bottom
+    if (recent.length) {
+      html += '<p class="site-search-group-title">Recent Searches</p>';
+      recent.forEach((term) => {
+        const encoded = encodeURIComponent(term);
+        currentResults.push({ type: 'recent', slug: encoded, label: term });
+        html += '<a class="site-search-result site-search-result--recent" href="/products?search=' + encoded + '" data-type="recent">'
+          + '<span class="site-search-type site-search-type--recent">Recent</span>'
+          + '<span class="site-search-text"><strong class="site-search-recent-term">' + escapeHtmlSearch(term) + '</strong></span>'
+          + '</a>';
+      });
+    }
+
+    // If nothing at all, show a friendly empty state
+    if (!products.length && !categories.length && !recent.length) {
+      html = '<div class="site-search-empty">No results for \u201c' + escapeHtmlSearch(q) + '\u201d. Try different keywords.</div>';
+    }
+
     results.innerHTML = html;
   }
 
   async function fetchResults(q) {
     try {
       const res = await fetch(searchUrl + '?q=' + encodeURIComponent(q), { headers: { 'Accept': 'application/json' } });
+      if (!res.ok) {
+        closeResults();
+        return;
+      }
       const data = await res.json();
       renderResults(data);
     } catch (e) {
@@ -1017,6 +1025,28 @@ function initSiteSearch() {
     results.innerHTML = '<div class="site-search-loading"><span class="spinner-border spinner-border-sm me-2"></span>Searching…</div>';
     openResults();
     debounceTimer = setTimeout(() => fetchResults(q), 300);
+  });
+
+  // Prevent the form from submitting on Enter so the AJAX results can be used.
+  // If results are available, Enter navigates to the highlighted item or the
+  // first result; otherwise it falls through to the full /search page.
+  form.addEventListener('submit', (e) => {
+    const q = input.value.trim();
+    if (q.length >= 2 && currentResults.length > 0) {
+      e.preventDefault();
+      // If there's an active selection, navigate to it; otherwise go to the first result
+      const idx = activeIndex > -1 ? activeIndex : 0;
+      const item = currentResults[idx];
+      if (item) {
+        if (item.type === 'product') {
+          window.location.href = '/product/' + item.slug;
+        } else if (item.type === 'category') {
+          window.location.href = '/category/' + item.slug;
+        } else {
+          window.location.href = item.slug;
+        }
+      }
+    }
   });
 
   input.addEventListener('focus', () => {
@@ -1041,9 +1071,11 @@ function initSiteSearch() {
       return;
     }
 
-    if (e.key === 'Enter' && items.length && activeIndex > -1) {
+    if (e.key === 'Enter' && items.length) {
       e.preventDefault();
-      window.location.href = items[activeIndex].href;
+      // If there's an active selection, navigate to it; otherwise go to the first result
+      const idx = activeIndex > -1 ? activeIndex : 0;
+      window.location.href = items[idx].href;
     }
   });
 

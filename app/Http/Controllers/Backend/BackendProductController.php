@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\ProductVariation;
 use App\Models\Tag;
+use App\Models\VariationImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -316,7 +317,7 @@ class BackendProductController extends Controller
 
     public function show(Product $product)
     {
-        $product->load('brand', 'category', 'images', 'variations', 'attributes.values', 'tags');
+        $product->load('brand', 'category', 'images', 'variations.images', 'attributes.values', 'tags');
         return view('backend.product.show', compact('product'));
     }
 
@@ -359,16 +360,29 @@ class BackendProductController extends Controller
     public function storeVariation(Request $request, Product $product)
     {
         $validated = $request->validate([
-            'sku'        => 'required|string|unique:product_variations,sku',
-            'price'      => 'required|numeric|min:0',
-            'stock'      => 'required|integer|min:0',
-            'attributes' => 'required|array',
-            'is_active'  => 'boolean',
+            'sku'             => 'required|string|unique:product_variations,sku',
+            'price'           => 'required|numeric|min:0',
+            'stock'           => 'required|integer|min:0',
+            'description'     => 'nullable|string|max:5000',
+            'discount_type'   => 'nullable|in:fixed,percentage',
+            'discount_value'  => 'nullable|numeric|min:0',
+            'attributes'      => 'required|array',
+            'is_active'       => 'boolean',
+            'images'          => 'nullable|array|max:10',
+            'images.*'        => 'image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
+
+        $validated['sale_price'] = $this->resolveVariationSalePrice(
+            $validated['price'] ?? 0,
+            $validated['discount_type'] ?? null,
+            $validated['discount_value'] ?? null
+        );
 
         $validated['product_id'] = $product->id;
 
-        ProductVariation::create($validated);
+        $variation = ProductVariation::create($validated);
+
+        $this->storeVariationImages($request, $variation, true);
 
         return back()->with('success', 'Variation created successfully');
     }
@@ -376,21 +390,128 @@ class BackendProductController extends Controller
     public function updateVariation(Request $request, ProductVariation $variation)
     {
         $validated = $request->validate([
-            'sku'        => 'required|string|unique:product_variations,sku,' . $variation->id,
-            'price'      => 'required|numeric|min:0',
-            'stock'      => 'required|integer|min:0',
-            'attributes' => 'required|array',
-            'is_active'  => 'boolean',
+            'sku'             => 'required|string|unique:product_variations,sku,' . $variation->id,
+            'price'           => 'required|numeric|min:0',
+            'stock'           => 'required|integer|min:0',
+            'description'     => 'nullable|string|max:5000',
+            'discount_type'   => 'nullable|in:fixed,percentage',
+            'discount_value'  => 'nullable|numeric|min:0',
+            'attributes'      => 'required|array',
+            'is_active'       => 'boolean',
+            'images'          => 'nullable|array|max:10',
+            'images.*'        => 'image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
+        $validated['sale_price'] = $this->resolveVariationSalePrice(
+            $validated['price'] ?? 0,
+            $validated['discount_type'] ?? null,
+            $validated['discount_value'] ?? null
+        );
+
         $variation->update($validated);
+
+        $this->storeVariationImages($request, $variation, false);
 
         return back()->with('success', 'Variation updated successfully');
     }
 
+    /**
+     * Compute the variation sale price from price + discount, mirroring the
+     * product-level discount rules.
+     */
+    private function resolveVariationSalePrice($price, $type, $value): ?float
+    {
+        if (empty($type) || $value === null || $value === '' || (float) $value <= 0) {
+            return null;
+        }
+
+        $price = (float) $price;
+        $value = (float) $value;
+
+        if ($type === 'percentage' && $value > 100) {
+            throw ValidationException::withMessages([
+                'discount_value' => 'Percentage discount cannot be greater than 100%.',
+            ]);
+        }
+
+        $discountAmount = $type === 'percentage'
+            ? $price * ($value / 100)
+            : $value;
+        $salePrice = round($price - $discountAmount, 2);
+
+        if ($salePrice < 0 || $salePrice >= $price) {
+            throw ValidationException::withMessages([
+                'discount_value' => 'Discount must produce a sale price below the variation price.',
+            ]);
+        }
+
+        return $salePrice;
+    }
+
+    /**
+     * Persist uploaded variation images to disk + variation_images table.
+     */
+    private function storeVariationImages(Request $request, ProductVariation $variation, bool $isCreate): void
+    {
+        if (! $request->hasFile('images')) {
+            return;
+        }
+
+        $hasPrimary = ! $isCreate && $variation->images()->where('is_primary', true)->exists();
+
+        foreach ($request->file('images') as $file) {
+            if (! $file->isValid()) {
+                continue;
+            }
+
+            $path = $file->store('variations', 'public');
+
+            $variation->images()->create([
+                'path'       => $path,
+                'is_primary' => ! $hasPrimary,
+            ]);
+
+            $hasPrimary = true;
+        }
+    }
+
+    public function destroyVariationImage(ProductVariation $variation, VariationImage $image)
+    {
+        if ((int) $image->product_variation_id !== (int) $variation->id) {
+            abort(404);
+        }
+
+        $deletedPath = $image->path;
+        $wasPrimary  = (bool) $image->is_primary;
+
+        $image->delete();
+
+        if ($wasPrimary) {
+            $variation->images()->first()?->update(['is_primary' => true]);
+        }
+
+        if (! empty($deletedPath) && ! VariationImage::where('path', $deletedPath)->exists()) {
+            if (Storage::disk('public')->exists($deletedPath)) {
+                Storage::disk('public')->delete($deletedPath);
+            }
+        }
+
+        return back()->with('success', 'Variation image deleted successfully.');
+    }
+
     public function destroyVariation(ProductVariation $variation)
     {
+        // Remove stored image files before the cascade delete wipes the rows.
+        foreach ($variation->images as $image) {
+            if (! empty($image->path) && ! VariationImage::where('path', $image->path)->where('product_variation_id', '!=', $variation->id)->exists()) {
+                if (Storage::disk('public')->exists($image->path)) {
+                    Storage::disk('public')->delete($image->path);
+                }
+            }
+        }
+
         $variation->delete();
+
         return back()->with('success', 'Variation deleted successfully');
     }
 

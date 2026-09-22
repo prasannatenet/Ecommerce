@@ -144,6 +144,14 @@
                                             </button>
                                         </form>
 
+                                        {{-- Share --}}
+                                        <button type="button" class="shop-btn-icon product-share-btn" title="Share"
+                                            aria-label="Share this product"
+                                            data-share-url="{{ route('product.show', $product->slug) }}"
+                                            data-share-title="{{ $product->name }}">
+                                            <i class="bi bi-share"></i>
+                                        </button>
+
                                         {{-- Quick View --}}
                                         <button type="button" class="shop-btn-icon" title="Quick View"
                                             onclick="openQuickView({{ $product->id }}, '{{ addslashes($product->name) }}')">
@@ -160,6 +168,9 @@
 
         </div>
     </section>
+
+    {{-- Product share modal (used by the share button on every product card) --}}
+    @include('frontend.partials.share-modal', ['modalId' => 'product'])
 
 @endsection
 

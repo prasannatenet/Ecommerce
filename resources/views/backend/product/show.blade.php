@@ -159,7 +159,7 @@
                 <div id="addVariationForm" style="display:none; border-bottom:1px solid var(--df-border-color);">
                     <div class="df-card-body" style="background:var(--df-primary-light);">
                         <h6 style="font-weight:700; margin-bottom:16px;"><i class="bi bi-plus-circle"></i> New Variation</h6>
-                        <form action="{{ route('admin.products.variations.store', $product) }}" method="POST">
+                        <form action="{{ route('admin.products.variations.store', $product) }}" method="POST" enctype="multipart/form-data">
                             @csrf
 
                             {{-- Attribute Dropdowns --}}
@@ -210,12 +210,45 @@
                                 </div>
                                 <div class="col-md-4">
                                     <label class="df-form-label">Price (₹) <span class="text-danger">*</span></label>
-                                    <input type="number" name="price" class="df-form-control" step="0.01" min="0" placeholder="0.00" required>
+                                    <input type="number" name="price" id="newVarPrice" class="df-form-control" step="0.01" min="0" placeholder="0.00" required oninput="calculateVariationSalePrice('newVarPrice', 'newVarDiscountType', 'newVarDiscountValue', 'newVarSalePricePreview')">
                                 </div>
                                 <div class="col-md-4">
                                     <label class="df-form-label">Stock <span class="text-danger">*</span></label>
                                     <input type="number" name="stock" class="df-form-control" min="0" placeholder="0" required>
                                 </div>
+                            </div>
+
+                            {{-- Description --}}
+                            <div class="mb-3">
+                                <label class="df-form-label">Description</label>
+                                <textarea name="description" class="df-form-control" rows="3" placeholder="Describe this variation (e.g. material, finish, what makes it different)"></textarea>
+                            </div>
+
+                            {{-- Discount --}}
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="df-form-label">Discount Type</label>
+                                    <select name="discount_type" id="newVarDiscountType" class="df-form-select" onchange="calculateVariationSalePrice('newVarPrice', 'newVarDiscountType', 'newVarDiscountValue', 'newVarSalePricePreview')">
+                                        <option value="">No discount</option>
+                                        <option value="percentage">Percentage (%)</option>
+                                        <option value="fixed">Fixed amount (₹)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="df-form-label">Discount Value</label>
+                                    <input type="number" name="discount_value" id="newVarDiscountValue" class="df-form-control" step="0.01" min="0" placeholder="0" oninput="calculateVariationSalePrice('newVarPrice', 'newVarDiscountType', 'newVarDiscountValue', 'newVarSalePricePreview')">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="df-form-label">Sale Price</label>
+                                    <p class="df-form-hint" id="newVarSalePricePreview" style="margin-top:8px;">No discount selected.</p>
+                                </div>
+                            </div>
+
+                            {{-- Images --}}
+                            <div class="mb-3">
+                                <label class="df-form-label">Variation Images (up to 10)</label>
+                                <input type="file" name="images[]" id="newVarImages" class="df-form-control" accept="image/jpeg,image/png,image/webp" multiple onchange="previewVariationImages('newVarImages', 'newVarImagePreview')">
+                                <div id="newVarImagePreview" class="d-flex flex-wrap gap-2 mt-2"></div>
                             </div>
 
                             <div class="mb-3">
@@ -261,6 +294,15 @@
                                     </div>
                                     <div class="d-flex align-items-center gap-3">
                                         <span class="df-price-regular">₹{{ number_format($variation->price, 2) }}</span>
+                                        @if($variation->effectivePrice() < (float) $variation->price)
+                                            <span class="df-badge df-badge-success">Sale ₹{{ number_format($variation->effectivePrice(), 2) }}</span>
+                                            @if($variation->discountPercentage())
+                                                <span class="df-badge df-badge-purple">-{{ $variation->discountPercentage() }}%</span>
+                                            @endif
+                                        @endif
+                                        @if($variation->images->count())
+                                            <span class="df-badge df-badge-info"><i class="bi bi-images"></i> {{ $variation->images->count() }}</span>
+                                        @endif
                                         <span class="df-badge {{ $variation->stock > 0 ? 'df-badge-success' : 'df-badge-danger' }}">
                                             {{ $variation->stock }} in stock
                                         </span>
@@ -273,7 +315,7 @@
 
                                 {{-- Variation Edit Form (collapsible) --}}
                                 <div id="variation-{{ $variation->id }}" style="display:none; padding:16px 20px; background:var(--df-body-bg); border-top:1px solid var(--df-border-color);">
-                                    <form action="{{ route('admin.variations.update', $variation) }}" method="POST">
+                                    <form action="{{ route('admin.variations.update', $variation) }}" method="POST" enctype="multipart/form-data">
                                         @csrf
                                         @method('PUT')
 
@@ -296,7 +338,7 @@
                                             </div>
                                             <div class="col-md-3">
                                                 <label class="df-form-label">Price (₹)</label>
-                                                <input type="number" name="price" class="df-form-control" step="0.01" value="{{ $variation->price }}" required>
+                                                <input type="number" name="price" id="varPrice-{{ $variation->id }}" class="df-form-control" step="0.01" value="{{ $variation->price }}" required oninput="calculateVariationSalePrice('varPrice-{{ $variation->id }}', 'varDiscountType-{{ $variation->id }}', 'varDiscountValue-{{ $variation->id }}', 'varSalePricePreview-{{ $variation->id }}')">
                                             </div>
                                             <div class="col-md-3">
                                                 <label class="df-form-label">Stock</label>
@@ -308,6 +350,68 @@
                                                     <option value="1" {{ $variation->is_active ? 'selected' : '' }}>Active</option>
                                                     <option value="0" {{ !$variation->is_active ? 'selected' : '' }}>Inactive</option>
                                                 </select>
+                                            </div>
+                                        </div>
+
+                                        {{-- Existing Variation Images --}}
+                                        @if($variation->images->count())
+                                            <div class="mb-3">
+                                                <label class="df-form-label">Variation Images</label>
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    @foreach($variation->images as $vImage)
+                                                        <div class="position-relative">
+                                                            <img src="{{ asset('storage/' . $vImage->path) }}" alt=""
+                                                                 style="width:80px;height:80px;object-fit:cover;border-radius:10px;border:1px solid var(--df-border-color);">
+                                                            @if($vImage->is_primary)
+                                                                <span class="df-badge df-badge-success position-absolute" style="top:4px;left:4px;font-size:0.6rem;">Main</span>
+                                                            @endif
+                                                            <form action="{{ route('admin.variations.images.destroy', [$variation, $vImage]) }}" method="POST"
+                                                                  onsubmit="return confirm('Delete this image?')" style="position:absolute;top:4px;right:4px;">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="btn btn-sm btn-danger" style="line-height:1;padding:2px 6px;font-size:0.7rem;">
+                                                                    <i class="bi bi-trash"></i>
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        {{-- Add More Images --}}
+                                        <div class="mb-3">
+                                            <label class="df-form-label">Add More Images</label>
+                                            <input type="file" name="images[]" class="df-form-control" accept="image/jpeg,image/png,image/webp" multiple>
+                                        </div>
+
+                                        {{-- Discount --}}
+                                        @php
+                                            $varDiscountType = $variation->discount_type;
+                                            $varDiscountValue = $variation->discount_value;
+                                            if (!$varDiscountType && $variation->sale_price && $variation->price > 0 && $variation->sale_price < $variation->price) {
+                                                $varDiscountType = 'percentage';
+                                                $varDiscountValue = round((($variation->price - $variation->sale_price) / $variation->price) * 100, 2);
+                                            }
+                                        @endphp
+                                        <div class="row g-3 mb-3">
+                                            <div class="col-md-4">
+                                                <label class="df-form-label">Discount Type</label>
+                                                <select name="discount_type" id="varDiscountType-{{ $variation->id }}" class="df-form-select" onchange="calculateVariationSalePrice('varPrice-{{ $variation->id }}', 'varDiscountType-{{ $variation->id }}', 'varDiscountValue-{{ $variation->id }}', 'varSalePricePreview-{{ $variation->id }}')">
+                                                    <option value="">No discount</option>
+                                                    <option value="percentage" {{ $varDiscountType === 'percentage' ? 'selected' : '' }}>Percentage (%)</option>
+                                                    <option value="fixed" {{ $varDiscountType === 'fixed' ? 'selected' : '' }}>Fixed amount (₹)</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="df-form-label">Discount Value</label>
+                                                <input type="number" name="discount_value" id="varDiscountValue-{{ $variation->id }}" class="df-form-control" step="0.01" min="0" placeholder="0" value="{{ $varDiscountValue }}" oninput="calculateVariationSalePrice('varPrice-{{ $variation->id }}', 'varDiscountType-{{ $variation->id }}', 'varDiscountValue-{{ $variation->id }}', 'varSalePricePreview-{{ $variation->id }}')">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="df-form-label">Sale Price</label>
+                                                <p class="df-form-hint" id="varSalePricePreview-{{ $variation->id }}" style="margin-top:8px;">
+                                                    {{ $variation->effectivePrice() < (float) $variation->price ? 'Currently ₹' . number_format($variation->effectivePrice(), 2) : 'No discount selected.' }}
+                                                </p>
                                             </div>
                                         </div>
 
@@ -441,6 +545,53 @@
 
 @push('scripts')
 <script>
+function calculateVariationSalePrice(priceId, typeId, valueId, previewId) {
+    const priceEl = document.getElementById(priceId);
+    const typeEl = document.getElementById(typeId);
+    const valueEl = document.getElementById(valueId);
+    const previewEl = document.getElementById(previewId);
+    if (!priceEl || !typeEl || !valueEl || !previewEl) return;
+
+    const price = parseFloat(priceEl.value) || 0;
+    const type = typeEl.value;
+    const value = parseFloat(valueEl.value) || 0;
+
+    if (!type || value <= 0 || price <= 0) {
+        previewEl.textContent = 'No discount selected.';
+        return;
+    }
+
+    const discountAmount = type === 'percentage' ? price * value / 100 : value;
+    const salePrice = Math.max(0, price - discountAmount);
+
+    if (salePrice >= price) {
+        previewEl.textContent = '⚠ Discount must lower the price.';
+        previewEl.style.color = 'var(--df-danger)';
+        return;
+    }
+
+    previewEl.style.color = '';
+    previewEl.textContent = `Sale price: ₹${salePrice.toFixed(2)} (saves ₹${discountAmount.toFixed(2)})`;
+}
+
+function previewVariationImages(inputId, previewId) {
+    const input = document.getElementById(inputId);
+    const preview = document.getElementById(previewId);
+    if (!input || !preview) return;
+    preview.innerHTML = '';
+
+    Array.from(input.files).slice(0, 10).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.style.cssText = 'width:80px;height:80px;object-fit:cover;border-radius:10px;border:1px solid var(--df-border-color);';
+            preview.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
 function toggleVariation(id) {
     const panel = document.getElementById('variation-' + id);
     const chevron = document.getElementById('chevron-' + id);
