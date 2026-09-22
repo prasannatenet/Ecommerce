@@ -453,6 +453,13 @@
                                         <span class="small text-muted"><span id="commentCharCount">0</span>/2000</span>
                                     </div>
                                 </form>
+                                @else
+                                    <div class="review-login-prompt p-3 rounded-3">
+                                        <i class="bi bi-bag-check me-2"></i>
+                                        You can review this product after purchasing it.
+                                        <a href="{{ route('orders.index') }}" class="fw-semibold">View your orders</a>
+                                    </div>
+                                @endif
                             @else
                                 <div class="review-login-prompt p-3 rounded-3">
                                     <i class="bi bi-box-arrow-in-right me-2"></i>
