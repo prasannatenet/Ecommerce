@@ -84,6 +84,7 @@ Route::post('/location/pincode', [SiteLocationController::class, 'store'])->name
 Route::post('/location/detect', [SiteLocationController::class, 'detect'])->name('location.detect');
 Route::post('/location/clear', [SiteLocationController::class, 'clear'])->name('location.clear');
 Route::post('/cart/add', [FrontendCartController::class, 'add'])->name('cart.add');
+Route::post('/cart/add-combo', [FrontendCartController::class, 'addCombo'])->name('cart.add-combo');
 Route::get('/cart/quantities', [FrontendCartController::class, 'quantities'])->name('cart.quantities');
 Route::post('/cart/set-quantity', [FrontendCartController::class, 'setQuantityByProduct'])->name('cart.set-quantity');
 Route::get('/cart', [FrontendCartController::class, 'index'])->name('cart.index');

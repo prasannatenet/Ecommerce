@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
+
 use App\Models\Category;
 use App\Models\Combo;
 use App\Models\Product;
@@ -133,6 +134,7 @@ class FrontendProductController extends Controller
             'combos'
         ));
     }
+
 
     public function storeReview(Request $request, Product $product)
     {

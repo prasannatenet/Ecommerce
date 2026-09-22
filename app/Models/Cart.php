@@ -13,6 +13,7 @@ class Cart extends Model
         'user_id',
         'product_id',
         'product_variation_id',
+        'combo_id',
         'quantity',
         'price',
     ];
@@ -30,6 +31,11 @@ class Cart extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function combo()
+    {
+        return $this->belongsTo(Combo::class);
     }
 
     // Calculate subtotal for this item

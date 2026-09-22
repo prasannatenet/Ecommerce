@@ -118,6 +118,19 @@
                     <span class="co-valid ms-auto"><i class="bi bi-clock me-1"></i>Offer ends {{ $combo->expires_at->format('M d, Y') }}</span>
                 @endif
             </div>
+
+            <div class="co-actions mt-3">
+                <form action="{{ route('cart.add-combo') }}" method="POST" class="d-inline-flex align-items-center gap-2">
+                    @csrf
+                    <input type="hidden" name="combo_id" value="{{ $combo->id }}">
+                    <label for="combo_qty_{{ $combo->id }}" class="co-price-label mb-0">Qty:</label>
+                    <input type="number" name="quantity" id="combo_qty_{{ $combo->id }}" value="1" min="1" max="99"
+                           class="form-control form-control-sm" style="width: 70px;">
+                    <button type="submit" class="btn btn-sm px-4 py-2" style="background: linear-gradient(135deg, #013a3c, #02AAB1); color: #fff; border: none; font-weight: 700; border-radius: 999px;">
+                        <i class="bi bi-cart-plus me-1"></i>Add to Cart
+                    </button>
+                </form>
+            </div>
         </div>
     @endforeach
 </section>

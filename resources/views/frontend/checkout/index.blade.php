@@ -369,6 +369,14 @@
                             <span style="color:#6C757D; font-size:0.9rem;">Subtotal</span>
                             <span style="color:#495057; font-size:0.9rem; font-weight:600;">Rs {{ number_format($subtotal, 2) }}</span>
                         </div>
+                        @if(($comboDiscount ?? 0) > 0)
+                            <div style="display:flex; justify-content:space-between; margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid #f0f0f0;">
+                                <span style="color:#198754; font-size:0.9rem; font-weight:700;">
+                                    <i class="bi bi-gift-fill me-1"></i>Combo Price Discount
+                                </span>
+                                <span style="color:#198754; font-size:0.9rem; font-weight:700;">- Rs {{ number_format($comboDiscount, 2) }}</span>
+                            </div>
+                        @endif
                         <div style="display:flex; justify-content:space-between; margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid #f0f0f0;">
                             <span style="color:#6C757D; font-size:0.9rem;">Discount</span>
                             <span style="color:#198754; font-size:0.9rem; font-weight:600;">- Rs {{ number_format($discount, 2) }}</span>
@@ -400,6 +408,25 @@
                             <span style="color:#0D0D0D; font-weight:800; font-size:1rem; text-transform:uppercase; letter-spacing:1px;">Total</span>
                             <span style="color:#017075; font-weight:900; font-size:1.3rem;">Rs {{ number_format($grandTotal, 2) }}</span>
                         </div>
+                        @if(($comboDiscount ?? 0) > 0)
+                            <div style="margin-top:12px; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:10px 12px; font-size:0.82rem; color:#15803d;">
+                                <div style="font-weight:800; margin-bottom:4px;">
+                                    <i class="bi bi-check-circle-fill me-1"></i>Combo price applied
+                                </div>
+                                @foreach(($comboSummary['combos'] ?? []) as $appliedCombo)
+                                    <div style="display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap;">
+                                        <span>{{ $appliedCombo['combo']->name }}@if((int) $appliedCombo['sets'] > 1) × {{ (int) $appliedCombo['sets'] }}@endif</span>
+                                        <span>
+                                            <s style="color:#6C757D;">Rs {{ number_format($appliedCombo['regular_total'], 2) }}</s>
+                                            <strong>Rs {{ number_format($appliedCombo['combo_price'], 2) }}</strong>
+                                        </span>
+                                    </div>
+                                @endforeach
+                                <div style="margin-top:4px;">
+                                    You save Rs {{ number_format($comboDiscount, 2) }} on this order.
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>

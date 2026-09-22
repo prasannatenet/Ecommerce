@@ -13,6 +13,7 @@ use App\Models\OrderRefund;
 use App\Models\PaymentProvider;
 use App\Models\PaymentTransaction;
 use App\Models\User;
+use App\Services\ComboService;
 use App\Services\CouponService;
 use App\Services\OrderInventoryService;
 use Illuminate\Http\JsonResponse;
@@ -30,6 +31,7 @@ class FrontendCheckoutController extends Controller
 	public function __construct(
 		private readonly OrderInventoryService $inventoryService,
 		private readonly CouponService $couponService,
+		private readonly ComboService $comboService,
 	) {
 	}
 
@@ -47,8 +49,14 @@ class FrontendCheckoutController extends Controller
 		$appliedCoupon = $this->getAppliedCouponSummary($cartItems);
 		$discount = (float) ($appliedCoupon['discount'] ?? 0);
 		$freeItems = collect($appliedCoupon['free_items'] ?? []);
+
+		// Combo price: when every product of an active combo is in the cart the
+		// customer pays the combo price instead of the individual prices.
+		$comboSummary = $this->comboService->summarize($cartItems);
+		$comboDiscount = (float) ($comboSummary['discount'] ?? 0);
+
 		$shippingCharge = (float) $subtotal >= 5000 ? 0.0 : 199.0;
-		$orderTotal = max(0, (float) $subtotal - $discount) + $shippingCharge;
+		$orderTotal = max(0, (float) $subtotal - $comboDiscount - $discount) + $shippingCharge;
 		$appliedCoins = $this->getAppliedCoinsSummary($orderTotal);
 		$coinsDiscount = (float) ($appliedCoins['discount'] ?? 0);
 		$coinsBalance = (int) ($appliedCoins['balance'] ?? 0);
@@ -95,6 +103,8 @@ class FrontendCheckoutController extends Controller
 			'cartItems' => $cartItems,
 			'subtotal' => $subtotal,
 			'discount' => $discount,
+			'comboDiscount' => $comboDiscount,
+			'comboSummary' => $comboSummary,
 			'freeItems' => $freeItems,
 			'shippingCharge' => $shippingCharge,
 			'grandTotal' => $grandTotal,
@@ -167,8 +177,9 @@ class FrontendCheckoutController extends Controller
 		$subtotal = (float) $cartItems->sum(fn ($item) => $item->quantity * (float) $item->price);
 		$appliedCoupon = $this->getAppliedCouponSummary($cartItems);
 		$discount = (float) ($appliedCoupon['discount'] ?? 0);
+		$comboDiscount = (float) ($this->comboService->summarize($cartItems)['discount'] ?? 0);
 		$shippingCharge = $subtotal >= 5000 ? 0.0 : 199.0;
-		$orderTotal = max(0, $subtotal - $discount) + $shippingCharge;
+		$orderTotal = max(0, $subtotal - $comboDiscount - $discount) + $shippingCharge;
 
 		$maxUsable = max(0, min($balance, (int) floor($orderTotal)));
 		if ($maxUsable < 1) {
@@ -235,8 +246,13 @@ class FrontendCheckoutController extends Controller
 		$totalQuantity = (int) $cartItems->sum(fn ($item) => (int) $item->quantity);
 		$appliedCoupon = $this->getAppliedCouponSummary($cartItems);
 		$discount = (float) ($appliedCoupon['discount'] ?? 0);
+
+		// Combo price earned by the cart (all products of an active combo).
+		$comboSummary = $this->comboService->summarize($cartItems);
+		$comboDiscount = (float) ($comboSummary['discount'] ?? 0);
+
 		$shippingCharge = $subtotal >= 5000 ? 0.0 : 199.0;
-		$orderTotal = max(0, $subtotal - $discount) + $shippingCharge;
+		$orderTotal = max(0, $subtotal - $comboDiscount - $discount) + $shippingCharge;
 		$appliedCoins = $this->getAppliedCoinsSummary($orderTotal);
 		$coinsUsed = (int) ($appliedCoins['coins'] ?? 0);
 		$coinsDiscount = (float) $coinsUsed;
@@ -272,7 +288,7 @@ class FrontendCheckoutController extends Controller
 				'country' => $request->input('shipping_country'),
 			];
 
-		$order = DB::transaction(function () use ($provider, $subtotal, $discount, $coinsUsed, $coinsDiscount, $shippingCharge, $orderTotal, $billingAddress, $shippingAddress, $data, $cartItems, $appliedCoupon) {
+		$order = DB::transaction(function () use ($provider, $subtotal, $discount, $comboDiscount, $comboSummary, $coinsUsed, $coinsDiscount, $shippingCharge, $orderTotal, $billingAddress, $shippingAddress, $data, $cartItems, $appliedCoupon) {
 			$buyer = Auth::user() ? User::whereKey(Auth::id())->lockForUpdate()->first() : null;
 
 			if ($coinsUsed > 0 && (! $buyer || (int) $buyer->gehna_coins < $coinsUsed)) {
@@ -295,12 +311,21 @@ class FrontendCheckoutController extends Controller
 				'payment_meta' => [
 					'pricing' => [
 						'subtotal' => $subtotal,
+						'combo_discount' => $comboDiscount,
 						'discount' => $discount,
 						'coins_used' => $coinsUsed,
 						'coins_discount' => $coinsDiscount,
 						'shipping_charge' => $shippingCharge,
 						'grand_total' => $orderTotal,
 					],
+					'combos' => collect($comboSummary['combos'] ?? [])->map(fn ($applied) => [
+						'combo_id' => $applied['combo']->id,
+						'name' => $applied['combo']->name,
+						'sets' => (int) $applied['sets'],
+						'regular_total' => (float) $applied['regular_total'],
+						'combo_price' => (float) $applied['combo_price'],
+						'discount' => (float) $applied['discount'],
+					])->values()->all(),
 					'coupon' => $appliedCoupon ? [
 						'id' => $appliedCoupon['id'],
 						'code' => $appliedCoupon['code'],
@@ -346,18 +371,26 @@ class FrontendCheckoutController extends Controller
 					$productName .= ' (' . $variationLabel . ')';
 				}
 
+				// Lines unlocked by a combo are billed at their allocated combo
+				// price, so the order items add up to the discounted subtotal.
+				$lineAllocation = $comboSummary['line_allocations'][(string) $cartItem->id] ?? null;
+				$lineTotal = $this->comboService->chargedLineTotal($cartItem, $comboSummary);
+				$lineQuantity = max(1, (int) $cartItem->quantity);
+
 				OrderItem::create([
 					'order_id' => $order->id,
 					'product_id' => $cartItem->product_id,
 					'product_variation_id' => $cartItem->product_variation_id,
 					'product_name' => $productName,
 					'sku' => $variation?->sku ?? optional($cartItem->product)->sku,
-					'unit_price' => (float) $cartItem->price,
+					'unit_price' => $lineAllocation ? round($lineTotal / $lineQuantity, 2) : (float) $cartItem->price,
 					'quantity' => (int) $cartItem->quantity,
-					'line_total' => (float) $cartItem->quantity * (float) $cartItem->price,
+					'line_total' => $lineTotal,
 					'meta' => [
 						'from_cart_id' => $cartItem->id,
 						'variation_attributes' => $variation?->attributes,
+						'combo_names' => $lineAllocation['combo_names'] ?? [],
+						'combo_discount' => (float) ($lineAllocation['discount'] ?? 0),
 					],
 				]);
 			}

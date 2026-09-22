@@ -104,8 +104,9 @@
     function ajaxSubmit(form, btn) {
         var action = form.getAttribute('action') || '';
         var isCart = action.indexOf('/cart/add') !== -1;
+        var isCombo = action.indexOf('/cart/add-combo') !== -1;
         var isWish = action.indexOf('/wishlist') !== -1 && action.indexOf('toggle') !== -1;
-        if (!isCart && !isWish) return false;
+        if (!isCart && !isCombo && !isWish) return false;
         setBusy(btn, true);
         fetch(action, {
             method: 'POST',
@@ -117,9 +118,10 @@
                 return data;
             });
         }).then(function (data) {
-            if (typeof showToast === 'function') showToast(data.message || (isCart ? 'Added to cart.' : 'Wishlist updated.'));
+            if (typeof showToast === 'function') showToast(data.message || (isCart ? 'Added to cart.' : (isCombo ? 'Combo added to cart.' : 'Wishlist updated.')));
             if (isCart && data.cart_count !== undefined) updateCartBadges(data.cart_count);
-            if (isCart) {
+            if (isCombo && data.cart_count !== undefined) updateCartBadges(data.cart_count);
+            if (isCart || isCombo) {
                 var cartPid = form.querySelector('input[name="product_id"]');
                 var cartQty = 1;
                 if (data.quantities && cartPid && data.quantities[String(cartPid.value)] !== undefined) {
@@ -143,6 +145,12 @@
                         }
                     }));
                 } catch (evtErr) { /* older browsers: stepper hydrates on next poll */ }
+
+                // Remove the combo suggestion card that triggered this add.
+                if (isCombo && form.classList.contains('combo-suggest-form')) {
+                    var suggestCard = form.closest('.combo-suggest-card');
+                    if (suggestCard) suggestCard.remove();
+                }
             }
             if (isWish) {
                 var count = data.wishlist_count !== undefined ? data.wishlist_count : data.total_count;
@@ -168,7 +176,7 @@
         var form = e.target;
         if (!form || form.tagName !== 'FORM') return;
         var action = form.getAttribute('action') || '';
-        if (action.indexOf('/cart/add') === -1 && action.indexOf('/wishlist/toggle') === -1) return;
+        if (action.indexOf('/cart/add') === -1 && action.indexOf('/cart/add-combo') === -1 && action.indexOf('/wishlist/toggle') === -1) return;
         if (form.classList.contains('js-cart-qty-form')) return;
         var btn = (e.submitter && e.submitter.tagName === 'BUTTON') ? e.submitter : form.querySelector('button[type="submit"]');
         if (ajaxSubmit(form, btn)) e.preventDefault();

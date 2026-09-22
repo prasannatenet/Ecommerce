@@ -67,6 +67,26 @@
             <div class="row g-5 cart-page-wrap" >
                 @php
                     $freeItemsByCartId = $freeItems->keyBy(fn ($free) => $free['cart_item']->id);
+
+                    // Build per-product combo hint map from incomplete suggestions
+                    // Format: [ product_id => [ ['combo_name'=>..., 'missing'=>Collection], ... ] ]
+                    $productComboHints = [];
+                    if (!empty($comboSuggestions['incomplete'])) {
+                        foreach ($comboSuggestions['incomplete'] as $sg) {
+                            foreach ($sg['in_cart'] as $inCartProduct) {
+                                $pid = $inCartProduct->id;
+                                if (!isset($productComboHints[$pid])) {
+                                    $productComboHints[$pid] = [];
+                                }
+                                $productComboHints[$pid][] = [
+                                    'combo_name'      => $sg['combo']->name,
+                                    'missing'         => $sg['missing'],
+                                    'savings_percent' => $sg['savings_percent'],
+                                    'discount_amount' => $sg['discount_amount'],
+                                ];
+                            }
+                        }
+                    }
                 @endphp
 
                 {{-- Cart Items --}}
@@ -76,7 +96,12 @@
                         <a href="{{ route('products.index') }}" class="text-decoration-none" style="color:var(--primary); font-weight:600;">
                             <i class="bi bi-arrow-left me-1"></i> Continue Shopping
                         </a>
-                    </div>  
+                    </div>
+
+                    {{-- Combo Suggestions (incomplete + complete) --}}
+                    @if(isset($comboSuggestions) && (!empty($comboSuggestions['incomplete']) || !empty($comboSuggestions['complete'])))
+                        @include('frontend.partials.cart-combo-suggestions', ['comboSuggestions' => $comboSuggestions])
+                    @endif
 
                     <div class="table-responsive">
                         <table class="cart-table">
@@ -118,6 +143,17 @@
                                             <span id="cart-free-badge-{{ $item->id }}" class="badge {{ (int) ($freeItemsByCartId[$item->id]['free_quantity'] ?? 0) > 0 ? '' : 'd-none' }}" style="background:#198754; color:#fff; font-size:0.72rem; font-weight:700; margin-top:4px;">
                                                 <i class="bi bi-gift me-1"></i>{{ $freeItemsByCartId[$item->id]['free_quantity'] ?? 0 }} FREE with Buy {{ $appliedCoupon['buy_quantity'] ?? 1 }} Get {{ $appliedCoupon['get_quantity'] ?? 1 }}
                                             </span>
+                                            @php
+                                                $comboName = isset($item->combo) && $item->combo ? $item->combo->name : null;
+                                                if (!$comboName && !empty($item->combo_id)) {
+                                                    $comboName = 'Combo';
+                                                }
+                                            @endphp
+                                            @if($comboName)
+                                                <span class="badge mt-1" style="background: linear-gradient(135deg, #013a3c, #02AAB1); color: #fff; font-size:0.72rem; font-weight:700;">
+                                                    <i class="bi bi-gift me-1"></i>Combo: {{ $comboName }}
+                                                </span>
+                                            @endif
                                             @if($item->variation)
                                                 @php
                                                     $variationAttrs = $item->variation->attributes ?? [];
@@ -128,6 +164,26 @@
                                                     $attrs = collect($variationAttrs)->map(fn($val, $key) => ucfirst($key) . ': ' . $val)->implode(' | ');
                                                 @endphp
                                                 <div class="cart-item-variant">{{ $attrs ?: ('Variation #' . $item->variation->id) }}</div>
+                                            @endif
+
+                                            {{-- Inline combo hint: show only for incomplete combos --}}
+                                            @if(!empty($productComboHints[$item->product->id]))
+                                                @foreach($productComboHints[$item->product->id] as $hint)
+                                                    <div class="combo-inline-hint mt-2">
+                                                        <i class="bi bi-tag-fill me-1" style="color:#f59e0b;"></i>
+                                                        <span style="font-size:0.78rem; color:#92400e; font-weight:600;">
+                                                            Add
+                                                            @foreach($hint['missing'] as $mp)
+                                                                <a href="{{ route('product.show', $mp->slug) }}"
+                                                                   style="color:#013a3c; text-decoration:underline; font-weight:700;">
+                                                                    {{ $mp->name }}</a>@if(!$loop->last), @endif
+                                                            @endforeach
+                                                            &amp; get
+                                                            <strong style="color:#016b70;">{{ $hint['savings_percent'] }}% off</strong>
+                                                            on total!
+                                                        </span>
+                                                    </div>
+                                                @endforeach
                                             @endif
                                         </td>
 
@@ -155,13 +211,25 @@
                                             @php
                                                 $freeQty = !empty($freeItemsByCartId[$item->id]) ? (int) $freeItemsByCartId[$item->id]['free_quantity'] : 0;
                                                 $chargedQty = max(0, (int) $item->quantity - $freeQty);
+                                                $lineGrossTotal = (float) $item->quantity * (float) $item->price;
+                                                $lineCombo = $comboSummary['line_allocations'][(string) $item->id] ?? null;
+                                                $lineComboUnits = (int) ($lineCombo['combo_units'] ?? 0);
+                                                $lineChargedTotal = $lineCombo
+                                                    ? max(0, $lineGrossTotal - (float) $lineCombo['discount'])
+                                                    : $lineGrossTotal;
                                             @endphp
                                             @if($freeQty > 0)
                                                 <s class="text-muted" style="font-weight:400;">₹{{ number_format($item->quantity * $item->price, 0) }}</s>
                                                 <span style="color:#198754;">₹{{ number_format($chargedQty * $item->price, 0) }}</span>
                                                 <div style="font-size:0.72rem; color:#198754; font-weight:700;">{{ $freeQty }} FREE</div>
+                                            @elseif($lineComboUnits > 0)
+                                                <s class="text-muted" style="font-weight:400;">₹{{ number_format($lineGrossTotal, 0) }}</s>
+                                                <span style="color:#198754;">₹{{ number_format($lineChargedTotal, 0) }}</span>
+                                                <div style="font-size:0.72rem; color:#198754; font-weight:700;">
+                                                    <i class="bi bi-gift-fill me-1"></i>{{ $lineComboUnits }} at combo price
+                                                </div>
                                             @else
-                                                ₹{{ number_format($item->quantity * $item->price, 0) }}
+                                                ₹{{ number_format($lineGrossTotal, 0) }}
                                             @endif
                                         </td>
 
@@ -294,6 +362,12 @@
                             <span>Subtotal</span>
                             <span id="cart-summary-subtotal">₹{{ number_format($subtotal, 0) }}</span>
                         </div>
+                        @if($comboDiscount > 0)
+                            <div class="cart-summary-row" id="cart-summary-combo-row" style="color:var(--success); flex-wrap:wrap; gap:2px 8px;">
+                                <span><i class="bi bi-gift-fill me-1"></i>Combo Discount</span>
+                                <span style="text-align:right;" id="cart-summary-combo">- ₹{{ number_format($comboDiscount, 2) }}</span>
+                            </div>
+                        @endif
                         <div class="cart-summary-row {{ $discount > 0 ? '' : 'd-none' }}" id="cart-summary-discount-row" style="color:var(--success);">
                             <span>Discount</span>
                             <span id="cart-summary-discount">- ₹{{ number_format($discount, 0) }}</span>
@@ -313,6 +387,12 @@
                         <div class="cart-summary-row total">
                             <span>Total</span>
                             <span id="cart-summary-total">₹{{ number_format($grandTotal, 0) }}</span>
+                        </div>
+
+                        {{-- Combo price the customer is charged (rendered/refreshed
+                             by App\Services\ComboService via AJAX too) --}}
+                        <div id="cart-summary-combo-note" class="{{ $comboDiscount > 0 ? '' : 'd-none' }}">
+                            @include('frontend.partials.cart-combo-total', ['comboSummary' => $comboSummary])
                         </div>
 
                         <a href="{{ route('checkout.index') }}" class="btn-gehna btn-teal-gehna w-100 mt-4 justify-content-center" style="border-radius:8px;">
@@ -406,7 +486,31 @@
         color: #212529;
         word-break: break-word;
     }
+
+    /* Combo inline hint strip below product name */
+    .combo-inline-hint {
+        display: inline-flex;
+        align-items: flex-start;
+        gap: 4px;
+        background: #fef3c7;
+        border: 1px solid #fde68a;
+        border-radius: 6px;
+        padding: 4px 8px;
+        line-height: 1.4;
+    }
+
+    /* Combo suggestion / unlocked banners */
+    .combo-suggest-card,
+    .combo-unlocked-banner {
+        animation: comboBannerSlideIn 0.35s ease both;
+    }
+
+    @keyframes comboBannerSlideIn {
+        from { opacity: 0; transform: translateY(-8px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
 </style>
+
 @endpush
 
 @push('scripts')
@@ -464,6 +568,11 @@
     // ===== AJAX quantity updates (no page reload) =====
     function formatCartMoney(value) {
         return Number(value || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
+    }
+
+    // Combo prices/discounts are quoted to the paisa so the maths stays exact.
+    function formatCartMoneyExact(value) {
+        return Number(value || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
     function cartToast(message) {
@@ -550,6 +659,12 @@
                         '<s class="text-muted" style="font-weight:400;">₹' + formatCartMoney(item.line_gross_total) + '</s> ' +
                         '<span style="color:#198754;">₹' + formatCartMoney(item.line_total) + '</span>' +
                         '<div style="font-size:0.72rem; color:#198754; font-weight:700;">' + item.free_quantity + ' FREE</div>';
+                } else if (item.combo_units > 0) {
+                    lineTotal.innerHTML =
+                        '<s class="text-muted" style="font-weight:400;">₹' + formatCartMoney(item.line_gross_total) + '</s> ' +
+                        '<span style="color:#198754;">₹' + formatCartMoney(item.line_total) + '</span>' +
+                        '<div style="font-size:0.72rem; color:#198754; font-weight:700;">' +
+                        '<i class="bi bi-gift-fill me-1"></i>' + item.combo_units + ' at combo price</div>';
                 } else {
                     lineTotal.textContent = '₹' + formatCartMoney(item.line_total);
                 }
@@ -575,6 +690,18 @@
 
         setSummary('cart-summary-subtotal', '₹' + formatCartMoney(data.subtotal));
 
+        const comboRow = document.getElementById('cart-summary-combo-row');
+        if (comboRow) {
+            comboRow.classList.toggle('d-none', !(data.combo_discount > 0));
+            setSummary('cart-summary-combo', '- ₹' + formatCartMoneyExact(data.combo_discount));
+        }
+
+        const comboNote = document.getElementById('cart-summary-combo-note');
+        if (comboNote) {
+            comboNote.innerHTML = (data.combo_price_html || '').trim();
+            comboNote.classList.toggle('d-none', !(data.combo_discount > 0));
+        }
+
         const discountRow = document.getElementById('cart-summary-discount-row');
         if (discountRow) {
             discountRow.classList.toggle('d-none', !(data.discount > 0));
@@ -592,6 +719,22 @@
 
         setSummary('cart-summary-shipping', data.shipping_charge > 0 ? '₹' + formatCartMoney(data.shipping_charge) : 'FREE');
         setSummary('cart-summary-total', '₹' + formatCartMoney(data.grand_total));
+
+        // Refresh combo suggestions if available in the AJAX response.
+        if (data.combo_suggestions_html) {
+            var suggestWrap = document.getElementById('cartComboSuggestions');
+            if (suggestWrap) {
+                suggestWrap.innerHTML = data.combo_suggestions_html.trim();
+            } else if (data.combo_suggestions_html.trim()) {
+                var cartItemsHeading = document.querySelector('.cart-page-wrap h5');
+                if (cartItemsHeading) {
+                    var wrapper = document.createElement('div');
+                    wrapper.id = 'cartComboSuggestions';
+                    wrapper.innerHTML = data.combo_suggestions_html.trim();
+                    cartItemsHeading.parentNode.insertBefore(wrapper, cartItemsHeading.nextSibling);
+                }
+            }
+        }
 
         // Header badge(s) — keep in sync like the wishlist AJAX handlers do.
         document.querySelectorAll('.site-cart-link .site-cart-count, .nav-cart-count, .cart-count').forEach(function (badge) {
