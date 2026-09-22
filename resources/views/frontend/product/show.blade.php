@@ -461,6 +461,12 @@
     {{-- Active combo offers including this product — shown below the product --}}
     @include('frontend.partials.combo-offers', ['product' => $product, 'combos' => $combos ?? collect()])
 
+    {{-- Suggestions: other active products from the same category --}}
+    @include('frontend.partials.related-products', [
+        'relatedProducts' => $relatedProducts ?? collect(),
+        'wishlistProductIds' => $relatedWishlistIds ?? [],
+    ])
+
 @endsection
 
 @push('styles')

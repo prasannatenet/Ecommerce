@@ -51,7 +51,9 @@ class FrontendProductController extends Controller
                 $query->latest();
                 break;
             case 'popularity':
-                $query->orderByDesc('is_featured');
+                // No popularity/featured column exists on products; fall back
+                // to the newest products instead of crashing on a bad column.
+                $query->latest();
                 break;
             default:
                 $query->latest();
@@ -114,6 +116,46 @@ class FrontendProductController extends Controller
             ->with(['products' => fn ($query) => $query->with('images')])
             ->orderBy('id')
             ->get();
+        $inWishlist = false;
+        if (Auth::check()) {
+            $inWishlist = Wishlist::where('user_id', Auth::id())
+                ->where('product_id', $product->id)
+                ->exists();
+        } else {
+            $guestWishlist = array_map('intval', (array) (session('guest_wishlist', []) ?? []));
+            $inWishlist = in_array((int) $product->id, $guestWishlist, true);
+        }
+
+        // Suggestions: other active products from the same category as this
+        // product, shown below the product details.
+        $relatedProducts = Product::where('category_id', $product->category_id)
+            ->where('id', '!=', $product->id)
+            ->where('is_active', true)
+            ->with('brand', 'category', 'images', 'variations')
+            ->latest()
+            ->take(6)
+            ->get();
+
+        $relatedWishlistIds = Auth::check()
+            ? Wishlist::where('user_id', Auth::id())
+                ->whereIn('product_id', $relatedProducts->pluck('id'))
+                ->pluck('product_id')
+                ->map(fn ($id) => (int) $id)
+                ->unique()
+                ->values()
+                ->all()
+            : [];
+
+        return view('frontend.product.show', compact(
+            'product',
+            'reviews',
+            'reviewsCount',
+            'averageRating',
+            'inWishlist',
+            'combos',
+            'relatedProducts',
+            'relatedWishlistIds'
+        ));
 
         $inWishlist = false;
         if (Auth::check()) {
