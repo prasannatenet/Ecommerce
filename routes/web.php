@@ -139,6 +139,8 @@ Route::middleware(['auth'])->group(function(){
 // Admin
 Route::prefix('admin')->middleware(['auth','admin'])->name('admin.')->group(function(){
     Route::get('/', DashboardController::class . '@index')->name('dashboard');
+    Route::get('dashboard/sales', [DashboardController::class, 'sales'])->name('dashboard.sales');
+
     Route::resource('products', BackendProductController::class);
     Route::delete('products/{product}/images/{image}', [BackendProductController::class, 'destroyImage'])->name('products.images.destroy');
     Route::delete('products/{product}/videos/{video}', [BackendProductController::class, 'destroyVideo'])->name('products.videos.destroy');

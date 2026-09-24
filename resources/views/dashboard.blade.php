@@ -172,17 +172,23 @@
         <div class="col-xl-8">
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-white border-0 py-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 fw-bold">Sales Overview</h5>
-                        <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-secondary active">Week</button>
-                            <button class="btn btn-outline-secondary">Month</button>
-                            <button class="btn btn-outline-secondary">Year</button>
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                        <div>
+                            <h5 class="mb-0 fw-bold">Sales Overview</h5>
+                            <small class="text-muted" id="salesChartSummary"></small>
+                        </div>
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Sales period">
+                            <button type="button" class="btn btn-outline-secondary active" data-sales-period="week" aria-pressed="true">Week</button>
+                            <button type="button" class="btn btn-outline-secondary" data-sales-period="month" aria-pressed="false">Month</button>
+                            <button type="button" class="btn btn-outline-secondary" data-sales-period="year" aria-pressed="false">Year</button>
                         </div>
                     </div>
                 </div>
                 <div class="card-body">
-                    <canvas id="salesChart" height="300"></canvas>
+                    <div id="salesChartMessage" class="alert alert-info d-none mb-3" role="status" aria-live="polite"></div>
+                    <div class="position-relative" style="height: 300px;">
+                        <canvas id="salesChart" aria-label="Paid sales overview chart" role="img"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -193,7 +199,9 @@
                     <h5 class="mb-0 fw-bold">Category Distribution</h5>
                 </div>
                 <div class="card-body">
-                    <canvas id="categoryChart" height="300"></canvas>
+                    <div class="position-relative" style="height: 300px;">
+                        <canvas id="categoryChart" aria-label="Product category distribution chart" role="img"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -201,12 +209,12 @@
 
     <!-- Recent Orders & Top Products -->
     <div class="row g-3">
-        <div class="col-xl-8">
-            <div class="card border-0 shadow-sm">
+        <div class="col-xl-7">
+            <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-white border-0 py-3">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0 fw-bold">Recent Orders</h5>
-                        <a href="{{ url('/admin/orders') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                        <a href="{{ route('admin.orders.index') }}" class="btn btn-sm btn-outline-primary">View All</a>
                     </div>
                 </div>
                 <div class="card-body p-0">
@@ -214,55 +222,44 @@
                         <table class="table table-hover mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th class="border-0">Order ID</th>
+                                    <th class="border-0">Order</th>
                                     <th class="border-0">Customer</th>
-                                    <th class="border-0">Product</th>
+                                    <th class="border-0">Products</th>
                                     <th class="border-0">Amount</th>
-                                    <th class="border-0">Status</th>
+                                    <th class="border-0">Payment</th>
                                     <th class="border-0">Date</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td class="fw-medium">#ORD-001</td>
-                                    <td>John Doe</td>
-                                    <td>iPhone 15 Pro</td>
-                                    <td class="fw-bold">$999.00</td>
-                                    <td><span class="badge bg-success-subtle text-success">Completed</span></td>
-                                    <td>Nov 5, 2025</td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-medium">#ORD-002</td>
-                                    <td>Jane Smith</td>
-                                    <td>MacBook Pro</td>
-                                    <td class="fw-bold">$2,499.00</td>
-                                    <td><span class="badge bg-warning-subtle text-warning">Pending</span></td>
-                                    <td>Nov 5, 2025</td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-medium">#ORD-003</td>
-                                    <td>Mike Johnson</td>
-                                    <td>AirPods Pro</td>
-                                    <td class="fw-bold">$249.00</td>
-                                    <td><span class="badge bg-primary-subtle text-primary">Processing</span></td>
-                                    <td>Nov 4, 2025</td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-medium">#ORD-004</td>
-                                    <td>Sarah Williams</td>
-                                    <td>iPad Air</td>
-                                    <td class="fw-bold">$599.00</td>
-                                    <td><span class="badge bg-success-subtle text-success">Completed</span></td>
-                                    <td>Nov 4, 2025</td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-medium">#ORD-005</td>
-                                    <td>Tom Brown</td>
-                                    <td>Apple Watch</td>
-                                    <td class="fw-bold">$399.00</td>
-                                    <td><span class="badge bg-danger-subtle text-danger">Cancelled</span></td>
-                                    <td>Nov 3, 2025</td>
-                                </tr>
+                                @forelse($recentOrders as $order)
+                                    <tr>
+                                        <td class="fw-medium">
+                                            <a href="{{ route('admin.orders.show', $order) }}" class="text-decoration-none">#{{ $order->id }}</a>
+                                            <div class="small text-muted">{{ ucfirst($order->status) }}</div>
+                                        </td>
+                                        <td>
+                                            {{ $order->user?->name ?: 'Guest customer' }}
+                                            @if($order->user?->email)
+                                                <div class="small text-muted">{{ $order->user->email }}</div>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($order->items->isNotEmpty())
+                                                {{ $order->items->first()->product_name }}
+                                                @if($order->items->count() > 1)
+                                                    <div class="small text-muted">+{{ $order->items->count() - 1 }} more</div>
+                                                @endif
+                                            @else
+                                                <span class="text-muted">—</span>
+                                            @endif
+                                        </td>
+                                        <td class="fw-bold text-nowrap">₹{{ number_format($order->total, 2) }}</td>
+                                        <td><span class="badge bg-secondary-subtle text-secondary">{{ ucfirst($order->payment_status ?? 'pending') }}</span></td>
+                                        <td class="text-nowrap">{{ $order->created_at->format('M d, Y H:i') }}</td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="6" class="text-center text-muted py-4">No orders have been placed yet.</td></tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -270,80 +267,53 @@
             </div>
         </div>
 
-        <div class="col-xl-4">
-            <div class="card border-0 shadow-sm">
+        <div class="col-xl-5">
+            <div class="card border-0 shadow-sm h-100">
                 <div class="card-header bg-white border-0 py-3">
-                    <h5 class="mb-0 fw-bold">Top Products</h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold">Top Products</h5>
+                        <span class="badge bg-primary-subtle text-primary">Paid orders</span>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
-                        <div class="product-img-sm bg-light rounded me-3">
-                            <i class="bi bi-phone text-primary"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <h6 class="mb-0">iPhone 15 Pro</h6>
-                            <small class="text-muted">Electronics</small>
-                        </div>
-                        <div class="text-end">
-                            <div class="fw-bold">$999</div>
-                            <small class="text-success">348 sold</small>
-                        </div>
-                    </div>
-
-                    <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
-                        <div class="product-img-sm bg-light rounded me-3">
-                            <i class="bi bi-laptop text-success"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <h6 class="mb-0">MacBook Pro</h6>
-                            <small class="text-muted">Computers</small>
-                        </div>
-                        <div class="text-end">
-                            <div class="fw-bold">$2,499</div>
-                            <small class="text-success">234 sold</small>
-                        </div>
-                    </div>
-
-                    <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
-                        <div class="product-img-sm bg-light rounded me-3">
-                            <i class="bi bi-headphones text-warning"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <h6 class="mb-0">AirPods Pro</h6>
-                            <small class="text-muted">Audio</small>
-                        </div>
-                        <div class="text-end">
-                            <div class="fw-bold">$249</div>
-                            <small class="text-success">567 sold</small>
-                        </div>
-                    </div>
-
-                    <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
-                        <div class="product-img-sm bg-light rounded me-3">
-                            <i class="bi bi-tablet text-info"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <h6 class="mb-0">iPad Air</h6>
-                            <small class="text-muted">Tablets</small>
-                        </div>
-                        <div class="text-end">
-                            <div class="fw-bold">$599</div>
-                            <small class="text-success">412 sold</small>
-                        </div>
-                    </div>
-
-                    <div class="d-flex align-items-center">
-                        <div class="product-img-sm bg-light rounded me-3">
-                            <i class="bi bi-smartwatch text-danger"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <h6 class="mb-0">Apple Watch</h6>
-                            <small class="text-muted">Wearables</small>
-                        </div>
-                        <div class="text-end">
-                            <div class="fw-bold">$399</div>
-                            <small class="text-success">289 sold</small>
-                        </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="border-0">Product</th>
+                                    <th class="border-0 text-end">Units sold</th>
+                                    <th class="border-0 text-end">Sales</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($topProducts as $topProduct)
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="product-img-sm bg-light rounded me-2 flex-shrink-0">
+                                                    @if($topProduct['image'])
+                                                        <img src="{{ asset('storage/' . $topProduct['image']) }}" alt="{{ $topProduct['name'] }}" class="w-100 h-100 rounded" style="object-fit: cover;">
+                                                    @else
+                                                        <i class="bi bi-box-seam text-primary"></i>
+                                                    @endif
+                                                </div>
+                                                <div>
+                                                    @if($topProduct['product'])
+                                                        <a href="{{ route('admin.products.show', $topProduct['product']) }}" class="fw-medium text-decoration-none">{{ $topProduct['name'] }}</a>
+                                                    @else
+                                                        <span class="fw-medium">{{ $topProduct['name'] }}</span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-end text-nowrap">{{ number_format($topProduct['units_sold']) }}</td>
+                                        <td class="text-end fw-medium text-nowrap">₹{{ number_format($topProduct['sales'], 2) }}</td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="3" class="text-center text-muted py-4">No paid product sales yet.</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -413,70 +383,128 @@
 <script>
     const categoryLabels = @json($categoryChartLabels);
     const categoryData = @json($categoryChartData);
+    const initialSales = @json($salesOverview);
+    const salesEndpoint = @json(route('admin.dashboard.sales'));
+    const currencyFormatter = new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 2
+    });
 
-    // Sales Chart
-    const salesCtx = document.getElementById('salesChart');
-    if (salesCtx) {
-        new Chart(salesCtx, {
-            type: 'line',
-            data: {
-                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                datasets: [{
-                    label: 'Sales',
-                    data: [12000, 19000, 15000, 25000, 22000, 30000, 28000],
-                    borderColor: '#6366f1',
-                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                    tension: 0.4,
-                    fill: true,
-                    pointBackgroundColor: '#6366f1',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        padding: 12,
-                        titleFont: {
-                            size: 14
-                        },
-                        bodyFont: {
-                            size: 13
-                        },
-                        callbacks: {
-                            label: function(context) {
-                                return 'Sales: $' + context.parsed.y.toLocaleString();
-                            }
-                        }
-                    }
+    let salesChart = null;
+    const salesCanvas = document.getElementById('salesChart');
+    const salesMessage = document.getElementById('salesChartMessage');
+    const salesSummary = document.getElementById('salesChartSummary');
+    const salesButtons = Array.from(document.querySelectorAll('[data-sales-period]'));
+
+    function showSalesMessage(message, type = 'info') {
+        if (!salesMessage) return;
+        salesMessage.textContent = message;
+        salesMessage.className = `alert alert-${type} mb-3`;
+    }
+
+    function hideSalesMessage() {
+        if (salesMessage) salesMessage.classList.add('d-none');
+    }
+
+    function updateSalesSummary(data) {
+        if (!salesSummary) return;
+        salesSummary.textContent = `${currencyFormatter.format(data.total)} · ${data.start} – ${data.end}`;
+    }
+
+    function renderSales(data) {
+        if (!salesCanvas) return;
+
+        if (salesChart) {
+            salesChart.data.labels = data.labels;
+            salesChart.data.datasets[0].data = data.revenue;
+            salesChart.update();
+        } else {
+            salesChart = new Chart(salesCanvas, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Paid sales',
+                        data: data.revenue,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        tension: 0.35,
+                        fill: true,
+                        pointBackgroundColor: '#6366f1',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return '$' + value.toLocaleString();
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { intersect: false, mode: 'index' },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            callbacks: {
+                                label: context => `Paid sales: ${currencyFormatter.format(context.parsed.y)}`
                             }
-                        },
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
                         }
                     },
-                    x: {
-                        grid: {
-                            display: false
-                        }
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: value => currencyFormatter.format(value) },
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                        },
+                        x: { grid: { display: false } }
                     }
                 }
-            }
+            });
+        }
+
+        updateSalesSummary(data);
+        if (Number(data.total) === 0) {
+            showSalesMessage('There are no paid sales in this period yet.');
+        } else {
+            hideSalesMessage();
+        }
+    }
+
+    async function loadSales(period) {
+        salesButtons.forEach(button => {
+            button.disabled = true;
+        });
+        showSalesMessage('Loading sales data…');
+
+        try {
+            const response = await fetch(`${salesEndpoint}?period=${encodeURIComponent(period)}`, {
+                headers: { Accept: 'application/json' },
+                credentials: 'same-origin'
+            });
+            const payload = await response.json();
+            if (!response.ok) throw new Error(payload.message || 'Unable to load sales data.');
+
+            renderSales(payload);
+            salesButtons.forEach(button => {
+                const isActive = button.dataset.salesPeriod === period;
+                button.classList.toggle('active', isActive);
+                button.setAttribute('aria-pressed', String(isActive));
+            });
+        } catch (error) {
+            showSalesMessage(error.message || 'Unable to load sales data. Please try again.', 'danger');
+        } finally {
+            salesButtons.forEach(button => {
+                button.disabled = false;
+            });
+        }
+    }
+
+    if (salesCanvas) {
+        renderSales(initialSales);
+        salesButtons.forEach(button => {
+            button.addEventListener('click', () => loadSales(button.dataset.salesPeriod));
         });
     }
 

@@ -107,10 +107,19 @@ class BackendOrderController extends Controller
 
 		$previousStatus = $order->status;
 		$previousPaymentStatus = $order->payment_status;
+		$paymentStatus = $data['payment_status'] ?? $order->payment_status;
+		$paidAt = $order->paid_at;
+
+		if ($paymentStatus === 'paid' && ($previousPaymentStatus !== 'paid' || ! $paidAt)) {
+			$paidAt = now();
+		} elseif ($paymentStatus !== 'paid') {
+			$paidAt = null;
+		}
 
 		$order->update([
 			'status' => $data['status'],
-			'payment_status' => $data['payment_status'] ?? $order->payment_status,
+			'payment_status' => $paymentStatus,
+			'paid_at' => $paidAt,
 		]);
 
 		if ($order->payment_status === 'paid' && $previousPaymentStatus !== 'paid') {

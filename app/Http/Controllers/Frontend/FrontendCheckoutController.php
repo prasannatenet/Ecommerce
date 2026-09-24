@@ -613,6 +613,7 @@ class FrontendCheckoutController extends Controller
 		$order->update([
 			'status' => in_array($order->status, ['pending', 'failed'], true) ? 'processing' : $order->status,
 			'payment_status' => 'paid',
+			'paid_at' => $order->paid_at ?? now(),
 			'transaction_id' => $gatewayPaymentId,
 			'gateway_order_id' => $gatewayOrderId,
 			'payment_meta' => array_merge($order->payment_meta ?? [], [

@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Shipment;
 
 class Order extends Model
 {
@@ -15,6 +14,7 @@ class Order extends Model
         'cancelled_at',
         'payment_method',
         'payment_status',
+        'paid_at',
         'refund_status',
         'transaction_id',
         'gateway_order_id',
@@ -32,6 +32,7 @@ class Order extends Model
         'shipping_address' => 'array',
         'payment_meta' => 'array',
         'cancelled_at' => 'datetime',
+        'paid_at' => 'datetime',
         'refunded_at' => 'datetime',
         'refunded_total' => 'decimal:2',
         'stock_deducted' => 'boolean',
