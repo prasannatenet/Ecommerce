@@ -9,6 +9,7 @@ use App\Models\PaymentTransaction;
 use App\Models\PaymentProvider;
 use App\Models\ReturnRequest;
 use App\Services\OrderInventoryService;
+use App\Services\ProductRecommendationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -17,7 +18,10 @@ use Illuminate\Validation\ValidationException;
 
 class BackendReturnRequestController extends Controller
 {
-    public function __construct(private readonly OrderInventoryService $inventoryService) {}
+    public function __construct(
+        private readonly OrderInventoryService $inventoryService,
+        private readonly ProductRecommendationService $recommendations,
+    ) {}
 
     public function index()
     {
@@ -139,6 +143,8 @@ class BackendReturnRequestController extends Controller
                 Mail::to($requestRow->user->email)->send(new OrderCreditNoteMail($order, $refund));
             }
         });
+
+        $this->recommendations->forgetForOrder($order->fresh());
 
         return redirect()->route('admin.return-requests.show', $returnRequest)->with('success', 'Return approved and refund issued.');
     }

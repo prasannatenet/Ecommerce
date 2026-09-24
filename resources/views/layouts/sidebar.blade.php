@@ -32,6 +32,7 @@
                 <div class="df-submenu">
                     <a href="{{ route('admin.products.index') }}" class="df-nav-link">All Products</a>
                     <a href="{{ route('admin.products.create') }}" class="df-nav-link">Add Product</a>
+                    <a href="{{ route('admin.reviews.index') }}" class="df-nav-link">Product Reviews</a>
                 </div>
             </div>
 

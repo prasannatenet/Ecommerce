@@ -452,7 +452,7 @@
                         <div class="review-form-wrap mb-4">
                             @auth
                                 @if ($canReview)
-                                <form id="reviewForm" method="POST" action="{{ route('products.reviews.store', $product) }}">
+                                <form id="reviewForm" method="POST" action="{{ route('products.reviews.store', $product) }}" enctype="multipart/form-data">
                                     @csrf
                                     <h6 class="review-form-title fw-bold mb-2" id="reviewFormTitle">Write a Review</h6>
                                     <div class="rating-input mb-2" id="ratingInput">
@@ -473,7 +473,28 @@
                                     @error('comment')
                                         <div class="text-danger small mt-1">{{ $message }}</div>
                                     @enderror
-                                    <div class="d-flex align-items-center gap-2 mt-2">
+                                    <div class="review-image-field mt-3">
+                                        <label for="reviewImageInput" class="form-label small fw-semibold mb-1">Add photos <span class="text-muted fw-normal">(optional)</span></label>
+                                        <input type="file" id="reviewImageInput" name="images[]" class="form-control form-control-sm"
+                                            accept="image/jpeg,image/png,image/webp" multiple>
+                                        <div class="form-text">Up to 3 JPG, PNG, or WebP images. Maximum 2 MB each.</div>
+                                        @error('images')
+                                            <div class="text-danger small mt-1">{{ $message }}</div>
+                                        @enderror
+                                        @error('images.0')
+                                            <div class="text-danger small mt-1">{{ $message }}</div>
+                                        @enderror
+                                        @error('images.1')
+                                            <div class="text-danger small mt-1">{{ $message }}</div>
+                                        @enderror
+                                        @error('images.2')
+                                            <div class="text-danger small mt-1">{{ $message }}</div>
+                                        @enderror
+                                        <div id="reviewImageError" class="text-danger small mt-1" role="alert"></div>
+                                        <div id="reviewExistingImages" class="review-image-previews mt-2"></div>
+                                        <div id="reviewSelectedImages" class="review-image-previews mt-2"></div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 mt-3">
                                         <button type="submit" class="btn btn-primary-gehna btn-sm" id="reviewSubmitBtn">
                                             <i class="bi bi-send me-1"></i>Submit Review
                                         </button>
@@ -505,6 +526,20 @@
                         <div id="reviewList">
                             @include('frontend.product.review-list', ['reviews' => $reviews])
                         </div>
+
+                        <div class="modal fade" id="reviewImageModal" tabindex="-1" aria-labelledby="reviewImageModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="reviewImageModalLabel">Customer Photo</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body p-0 text-center bg-dark">
+                                        <img id="reviewImageModalImage" src="" alt="Customer review photo" class="img-fluid">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -514,6 +549,12 @@
 
     {{-- Active combo offers including this product — shown below the product --}}
     @include('frontend.partials.combo-offers', ['product' => $product, 'combos' => $combos ?? collect()])
+
+    {{-- Products commonly purchased together in valid paid orders --}}
+    @include('frontend.partials.frequently-bought-together', [
+        'frequentlyBoughtTogether' => $frequentlyBoughtTogether ?? collect(),
+        'frequentlyBoughtTogetherWishlistIds' => $frequentlyBoughtTogetherWishlistIds ?? [],
+    ])
 
     {{-- Suggestions: other active products from the same category --}}
     @include('frontend.partials.related-products', [
@@ -919,6 +960,51 @@
             background: #fdecec;
             color: #8c1d1d;
         }
+
+        .review-image-gallery,
+        .review-image-previews {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .review-image-trigger,
+        .review-image-preview {
+            position: relative;
+            width: 76px;
+            height: 76px;
+            padding: 0;
+            border: 1px solid #e2dcd3;
+            border-radius: 10px;
+            background: #f8f3ee;
+            overflow: hidden;
+        }
+
+        .review-image-trigger img,
+        .review-image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .review-image-remove {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            border: 0;
+            border-radius: 50%;
+            background: rgba(32, 15, 19, 0.78);
+            color: #fff;
+            line-height: 24px;
+        }
+
+        #reviewImageModal img {
+            max-height: 78vh;
+            object-fit: contain;
+        }
     </style>
 @endpush
 
@@ -1108,6 +1194,18 @@
                 });
             }
 
+            const reviewImageModal = document.getElementById('reviewImageModal');
+            if (reviewImageModal) {
+                reviewImageModal.addEventListener('show.bs.modal', function(event) {
+                    const trigger = event.relatedTarget;
+                    const image = document.getElementById('reviewImageModalImage');
+                    if (trigger && trigger.dataset.reviewImageSrc && image) {
+                        image.src = trigger.dataset.reviewImageSrc;
+                        image.alt = 'Customer review photo';
+                    }
+                });
+            }
+
             const form = document.getElementById('reviewForm');
             if (!form) return;
 
@@ -1119,6 +1217,10 @@
             const submitBtn = document.getElementById('reviewSubmitBtn');
             const formTitle = document.getElementById('reviewFormTitle');
             const cancelEditBtn = document.getElementById('reviewCancelEditBtn');
+            const imageInput = document.getElementById('reviewImageInput');
+            const imageError = document.getElementById('reviewImageError');
+            const existingImages = document.getElementById('reviewExistingImages');
+            const selectedImages = document.getElementById('reviewSelectedImages');
 
             // Route URL templates; the __ID__ placeholder is swapped for the
             // real review id at run time when editing or deleting a review.
@@ -1130,6 +1232,82 @@
             const storeUrl = form.action;
 
             const hints = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+            let previewObjectUrls = [];
+
+            function clearSelectedImagePreviews() {
+                previewObjectUrls.forEach(function(url) { URL.revokeObjectURL(url); });
+                previewObjectUrls = [];
+                if (selectedImages) selectedImages.innerHTML = '';
+            }
+
+            function currentReviewImageCount() {
+                const existingCount = existingImages
+                    ? existingImages.querySelectorAll('.review-image-preview').length
+                    : 0;
+                return existingCount + (imageInput ? imageInput.files.length : 0);
+            }
+
+            function updateReviewImageError() {
+                if (!imageError) return;
+                imageError.textContent = currentReviewImageCount() > 3
+                    ? 'A review can contain a maximum of 3 images.'
+                    : '';
+            }
+
+            function buildImagePreview(url, removable, onRemove) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'review-image-preview';
+                const image = document.createElement('img');
+                image.src = url;
+                image.alt = 'Review photo preview';
+                wrapper.appendChild(image);
+
+                if (removable) {
+                    const removeButton = document.createElement('button');
+                    removeButton.type = 'button';
+                    removeButton.className = 'review-image-remove';
+                    removeButton.setAttribute('aria-label', 'Remove photo');
+                    removeButton.textContent = '×';
+                    removeButton.addEventListener('click', onRemove);
+                    wrapper.appendChild(removeButton);
+                }
+
+                return wrapper;
+            }
+
+            function renderSelectedImagePreviews() {
+                clearSelectedImagePreviews();
+                if (!imageInput || !selectedImages) return;
+
+                const files = Array.from(imageInput.files || []);
+                const invalidType = files.some(function(file) {
+                    return !['image/jpeg', 'image/png', 'image/webp'].includes(file.type);
+                });
+                const oversized = files.some(function(file) { return file.size > 2 * 1024 * 1024; });
+
+                if (invalidType || oversized) {
+                    imageInput.value = '';
+                    if (imageError) {
+                        imageError.textContent = invalidType
+                            ? 'Only JPG, PNG, and WebP images are allowed.'
+                            : 'Each review image must be 2 MB or smaller.';
+                    }
+                    return;
+                }
+
+                if (currentReviewImageCount() > 3) {
+                    imageInput.value = '';
+                    if (imageError) imageError.textContent = 'A review can contain a maximum of 3 images.';
+                    return;
+                }
+
+                files.forEach(function(file) {
+                    const objectUrl = URL.createObjectURL(file);
+                    previewObjectUrls.push(objectUrl);
+                    selectedImages.appendChild(buildImagePreview(objectUrl, false));
+                });
+                updateReviewImageError();
+            }
 
             function paintStars(count) {
                 if (!starContainer) return;
@@ -1161,6 +1339,11 @@
                 if (submitBtn) submitBtn.innerHTML = '<i class="bi bi-send me-1"></i>Submit Review';
                 if (cancelEditBtn) cancelEditBtn.classList.add('d-none');
                 form.reset();
+                clearSelectedImagePreviews();
+                if (imageInput) imageInput.value = '';
+                if (imageError) imageError.textContent = '';
+                if (existingImages) existingImages.innerHTML = '';
+                form.querySelectorAll('input[name="remove_image_ids[]"]').forEach(function(input) { input.remove(); });
                 ratingValue.value = '';
                 if (ratingHint) ratingHint.textContent = '';
                 if (charCount) charCount.textContent = '0';
@@ -1174,7 +1357,7 @@
                 }
             }
 
-            function startReviewEdit(reviewId, rating, commentText) {
+            function startReviewEdit(reviewId, rating, commentText, imageData) {
                 editingReviewId = reviewId;
                 form.action = updateReviewUrlTemplate.replace('__ID__', reviewId);
 
@@ -1205,6 +1388,28 @@
                     comment.value = commentText;
                     if (charCount) charCount.textContent = commentText.length;
                 }
+                clearSelectedImagePreviews();
+                if (imageInput) imageInput.value = '';
+                if (imageError) imageError.textContent = '';
+                if (existingImages) {
+                    existingImages.innerHTML = '';
+                    form.querySelectorAll('input[name="remove_image_ids[]"]').forEach(function(input) { input.remove(); });
+                    let images = [];
+                    try { images = JSON.parse(imageData || '[]'); } catch (error) { images = []; }
+                    images.forEach(function(image) {
+                        const wrapper = buildImagePreview(image.url, true, function() {
+                            const input = document.createElement('input');
+                            input.type = 'hidden';
+                            input.name = 'remove_image_ids[]';
+                            input.value = image.id;
+                            form.appendChild(input);
+                            wrapper.remove();
+                            updateReviewImageError();
+                        });
+                        existingImages.appendChild(wrapper);
+                    });
+                }
+                updateReviewImageError();
                 form.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
 
@@ -1282,13 +1487,18 @@
                 });
             }
 
+            if (imageInput) {
+                imageInput.addEventListener('change', renderSelectedImagePreviews);
+            }
+
             function bindReviewActions() {
                 document.querySelectorAll('.review-edit-btn').forEach(function(btn) {
                     btn.addEventListener('click', function() {
                         startReviewEdit(
                             parseInt(this.dataset.reviewId, 10),
                             parseInt(this.dataset.rating, 10),
-                            this.dataset.comment || ''
+                            this.dataset.comment || '',
+                            this.dataset.images || '[]'
                         );
                     });
                 });
@@ -1342,6 +1552,11 @@ form.addEventListener('submit', function(e) {
                     comment.focus();
                     return;
                 }
+                if (currentReviewImageCount() > 3) {
+                    e.preventDefault();
+                    updateReviewImageError();
+                    return;
+                }
 
                 // Submit via AJAX so the result appears instantly without a
                 // page reload. In edit mode the form posts to the update route
@@ -1366,8 +1581,13 @@ form.addEventListener('submit', function(e) {
                     body: payload,
                 })
                 .then(function(res) {
-                    if (!res.ok) throw new Error('Bad response');
-                    return res.json();
+                    return res.json().then(function(data) {
+                        if (!res.ok) {
+                            const messages = data.errors ? Object.values(data.errors).flat() : [];
+                            throw new Error(messages[0] || 'Your review could not be saved.');
+                        }
+                        return data;
+                    });
                 })
                 .then(function(data) {
                     if (data.success) {
@@ -1375,8 +1595,8 @@ form.addEventListener('submit', function(e) {
                         resetReviewForm();
                     }
                 })
-                .catch(function() {
-                    if (window.showToast) showToast('Something went wrong. Please try again.');
+                .catch(function(error) {
+                    if (window.showToast) showToast(error.message || 'Something went wrong. Please try again.');
                 })
                 .finally(function() {
                     if (submitBtn) {

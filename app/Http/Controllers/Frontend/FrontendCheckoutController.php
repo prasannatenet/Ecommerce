@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Services\ComboService;
 use App\Services\CouponService;
 use App\Services\OrderInventoryService;
+use App\Services\ProductRecommendationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -32,6 +33,7 @@ class FrontendCheckoutController extends Controller
 		private readonly OrderInventoryService $inventoryService,
 		private readonly CouponService $couponService,
 		private readonly ComboService $comboService,
+		private readonly ProductRecommendationService $recommendations,
 	) {
 	}
 
@@ -624,6 +626,8 @@ class FrontendCheckoutController extends Controller
 			]),
 		]);
 
+		$this->recommendations->forgetForOrder($order->fresh());
+
 		$order->paymentTransactions()
 			->where('type', 'payment')
 			->where('gateway_order_id', $gatewayOrderId)
@@ -671,6 +675,8 @@ class FrontendCheckoutController extends Controller
 		$order->update([
 			'payment_status' => 'failed',
 		]);
+
+		$this->recommendations->forgetForOrder($order->fresh());
 
 		$order->paymentTransactions()
 			->where('type', 'payment')
@@ -761,6 +767,8 @@ class FrontendCheckoutController extends Controller
 			if (! $refund->emailed_at) {
 				$this->sendCreditNoteMail($order, $refund);
 			}
+
+			$this->recommendations->forgetForOrder($order->fresh());
 		}
 	}
 

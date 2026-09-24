@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Backend\BackendProductController;
+use App\Http\Controllers\Backend\BackendReviewController;
 use App\Http\Controllers\Backend\BackendCategoryController;
 use App\Http\Controllers\Backend\BackendBrandController;
 use App\Http\Controllers\Backend\BackendOrderController;
@@ -142,6 +143,7 @@ Route::prefix('admin')->middleware(['auth','admin'])->name('admin.')->group(func
     Route::get('dashboard/sales', [DashboardController::class, 'sales'])->name('dashboard.sales');
 
     Route::resource('products', BackendProductController::class);
+    Route::get('reviews', [BackendReviewController::class, 'index'])->name('reviews.index');
     Route::delete('products/{product}/images/{image}', [BackendProductController::class, 'destroyImage'])->name('products.images.destroy');
     Route::delete('products/{product}/videos/{video}', [BackendProductController::class, 'destroyVideo'])->name('products.videos.destroy');
     

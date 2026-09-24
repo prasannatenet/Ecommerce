@@ -14,12 +14,24 @@
                 @endfor
             </div>
             <p class="review-text">{{ $review->comment }}</p>
+            @if ($review->images->isNotEmpty())
+                <div class="review-image-gallery" aria-label="Photos from this review">
+                    @foreach ($review->images as $image)
+                        <button type="button" class="review-image-trigger" data-bs-toggle="modal"
+                            data-bs-target="#reviewImageModal" data-review-image-src="{{ $image->url }}"
+                            aria-label="Open review photo {{ $loop->iteration }}">
+                            <img src="{{ $image->url }}" alt="Customer photo for {{ $product->name }}" loading="lazy">
+                        </button>
+                    @endforeach
+                </div>
+            @endif
             @if (Auth::check() && (int) $review->user_id === (int) Auth::id())
-                <div class="review-actions mt-2 d-flex gap-2">
+                <div class="review-actions mt-3 d-flex gap-2">
                     <button type="button" class="btn btn-sm review-edit-btn"
                         data-review-id="{{ $review->id }}"
                         data-rating="{{ $review->rating }}"
-                        data-comment="{{ $review->comment }}">
+                        data-comment="{{ $review->comment }}"
+                        data-images="{{ $review->images->map(fn ($image) => ['id' => (int) $image->id, 'url' => $image->url])->values()->toJson() }}">
                         <i class="bi bi-pencil me-1"></i>Edit
                     </button>
                     <form method="POST"

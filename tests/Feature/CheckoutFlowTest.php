@@ -124,7 +124,8 @@ it('verifies Razorpay signature and marks payment as paid', function () {
 
     $order = Order::find($payload['order']['id']);
 
-    expect($order->payment_status)->toBe('paid');
+    expect($order->payment_status)->toBe('paid')
+        ->and($order->paid_at)->not->toBeNull();
     expect($order->transaction_id)->toBe($paymentId);
 
     $paymentTxn = $order->paymentTransactions()->where('type', 'payment')->latest('id')->first();

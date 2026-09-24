@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\ReturnRequest;
 use App\Services\OrderInventoryService;
+use App\Services\ProductRecommendationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,8 +17,10 @@ use App\Mail\ReturnRequestMail;
 
 class FrontendOrderController extends Controller
 {
-    public function __construct(private readonly OrderInventoryService $inventoryService)
-    {
+    public function __construct(
+        private readonly OrderInventoryService $inventoryService,
+        private readonly ProductRecommendationService $recommendations,
+    ) {
     }
 
     public function index(): View
@@ -71,6 +74,7 @@ class FrontendOrderController extends Controller
         }
 
         $this->inventoryService->restockForOrder($order);
+        $this->recommendations->forgetForOrder($order->fresh());
 
         return redirect()->route('orders.show', $order)
             ->with('success', 'Order cancelled successfully. If payment was prepaid, refund will be initiated by admin.');

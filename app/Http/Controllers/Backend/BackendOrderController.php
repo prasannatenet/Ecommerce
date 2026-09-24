@@ -11,6 +11,7 @@ use App\Models\OrderRefund;
 use App\Models\PaymentProvider;
 use App\Models\PaymentTransaction;
 use App\Services\OrderInventoryService;
+use App\Services\ProductRecommendationService;
 use App\Services\Delivery\DeliveryManager;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -21,8 +22,10 @@ use Illuminate\Validation\ValidationException;
 
 class BackendOrderController extends Controller
 {
-	public function __construct(private readonly OrderInventoryService $inventoryService)
-	{
+	public function __construct(
+		private readonly OrderInventoryService $inventoryService,
+		private readonly ProductRecommendationService $recommendations,
+	) {
 	}
 
 	public function index()
@@ -122,6 +125,8 @@ class BackendOrderController extends Controller
 			'paid_at' => $paidAt,
 		]);
 
+		$this->recommendations->forgetForOrder($order->fresh());
+
 		if ($order->payment_status === 'paid' && $previousPaymentStatus !== 'paid') {
 			$this->inventoryService->deductForOrder($order);
 			$this->sendInvoiceMailIfNeeded($order);
@@ -164,6 +169,7 @@ class BackendOrderController extends Controller
 		]);
 
 		$this->inventoryService->restockForOrder($order);
+		$this->recommendations->forgetForOrder($order->fresh());
 
 		return redirect()->route('admin.orders.show', $order)->with('success', 'Order cancelled successfully.');
 	}
@@ -219,6 +225,7 @@ class BackendOrderController extends Controller
 			if ((float) $order->fresh()->refunded_total >= (float) $order->total) {
 				$this->inventoryService->restockForOrder($order->fresh());
 			}
+			$this->recommendations->forgetForOrder($order->fresh());
 
 			return redirect()->route('admin.orders.show', $order)->with('success', 'Gehna Coins credited successfully.');
 		}
@@ -305,6 +312,7 @@ class BackendOrderController extends Controller
 		if ($createdRefund && ! $createdRefund->emailed_at) {
 			$this->sendCreditNoteMail($order, $createdRefund);
 		}
+		$this->recommendations->forgetForOrder($order->fresh());
 
 		return redirect()->route('admin.orders.show', $order)->with('success', 'Refund processed successfully.');
 	}
