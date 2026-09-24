@@ -11,12 +11,25 @@
                 <div style="background:#fff; border-radius:16px; box-shadow:0 24px 60px rgba(0,0,0,0.5); overflow:hidden; text-align:center;">
 
                     {{-- Success Banner --}}
+                    @php
+                        $isCod = $order->payment_method === 'cod';
+                        $isPaid = $order->payment_status === 'paid';
+                        $isFailed = $order->payment_status === 'failed';
+                        $isProcessing = ! $isCod && ! $isPaid && ! $isFailed;
+                        $bannerTitle = $isCod
+                            ? 'Order Confirmed!'
+                            : ($isPaid ? 'Payment Successful!' : ($isFailed ? 'Payment Not Completed' : 'Payment Processing…'));
+                        $bannerMessage = $isCod
+                            ? 'Your order is confirmed. Payment is due on delivery.'
+                            : ($isPaid ? 'Your payment is confirmed and your order is being prepared.' : ($isFailed ? 'No payment was captured. You can safely retry this order.' : 'Please wait while we confirm your payment. Do not pay again.'));
+                        $bannerIcon = $isPaid || $isCod ? 'bi-check2-circle' : ($isFailed ? 'bi-exclamation-circle' : 'bi-hourglass-split');
+                    @endphp
                     <div style="background:linear-gradient(135deg, #022C2B 0%, #017075 100%); padding:40px 40px 30px;">
                         <div style="width:80px; height:80px; border-radius:50%; background:rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
-                            <i class="bi bi-check2-circle" style="font-size:2.8rem; color:#00e5ff;"></i>
+                            <i class="bi {{ $bannerIcon }}" style="font-size:2.8rem; color:#00e5ff;"></i>
                         </div>
-                        <h1 style="color:#fff; font-size:1.8rem; font-weight:900; margin-bottom:8px;">Order Confirmed!</h1>
-                        <p style="color:rgba(255,255,255,0.7); font-size:0.95rem; margin:0;">Thank you! Your order has been placed successfully.</p>
+                        <h1 style="color:#fff; font-size:1.8rem; font-weight:900; margin-bottom:8px;">{{ $bannerTitle }}</h1>
+                        <p style="color:rgba(255,255,255,0.7); font-size:0.95rem; margin:0;">{{ $bannerMessage }}</p>
                     </div>
 
                     {{-- Order Details --}}
@@ -34,10 +47,10 @@
                                 <div class="col-6">
                                     <p style="font-size:0.7rem; text-transform:uppercase; letter-spacing:1.5px; color:#6C757D; margin:0 0 4px;">Payment Status</p>
                                     @php
-                                        $payColors = ['paid'=>'#198754','pending'=>'#ffc107','failed'=>'#dc3545'];
+                                        $payColors = ['paid'=>'#198754','pending'=>'#ffc107','initiated'=>'#0d6efd','failed'=>'#dc3545'];
                                         $pc = $payColors[$order->payment_status] ?? '#6C757D';
                                     @endphp
-                                    <span style="display:inline-block; padding:3px 10px; border-radius:20px; font-size:0.75rem; font-weight:600; text-transform:uppercase; background:{{ $pc }}22; color:{{ $pc }};">{{ $order->payment_status ?? 'N/A' }}</span>
+                                    <span style="display:inline-block; padding:3px 10px; border-radius:20px; font-size:0.75rem; font-weight:600; text-transform:uppercase; background:{{ $pc }}22; color:{{ $pc }};">{{ $isCod ? 'Due on delivery' : ($order->payment_status ?? 'N/A') }}</span>
                                 </div>
                                 <div class="col-6">
                                     <p style="font-size:0.7rem; text-transform:uppercase; letter-spacing:1.5px; color:#6C757D; margin:0 0 4px;">Total Amount</p>
@@ -53,6 +66,11 @@
                         </div>
 
                         <div class="d-flex flex-column gap-3">
+                            @if($isFailed)
+                                <a href="{{ route('checkout.index') }}" class="btn-gehna btn-teal-gehna w-100 justify-content-center" style="border-radius:8px;">
+                                    <i class="bi bi-arrow-clockwise me-2"></i> Retry Payment Safely
+                                </a>
+                            @endif
                             <a href="{{ route('orders.show', $order) }}" class="btn-gehna btn-teal-gehna w-100 justify-content-center" style="border-radius:8px;">
                                 <i class="bi bi-receipt me-2"></i> View Order Details
                             </a>
@@ -78,3 +96,41 @@
 </section>
 
 @endsection
+
+@if($isProcessing)
+    @push('scripts')
+    <script>
+    (function () {
+        const statusUrl = @json(route('checkout.payment-status', $order));
+        const title = document.querySelector('h1');
+        const message = title?.nextElementSibling;
+        let attempts = 0;
+
+        const poll = async () => {
+            attempts += 1;
+            try {
+                const response = await fetch(statusUrl, {
+                    headers: { 'Accept': 'application/json' },
+                    cache: 'no-store',
+                });
+                if (!response.ok) return;
+                const data = await response.json();
+
+                if (data.state === 'paid' && data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                    return;
+                }
+
+                if (data.message && message) message.textContent = data.message;
+            } catch (error) {
+                // Keep the page visible; the user can safely refresh this read-only page.
+            }
+
+            if (attempts < 20) window.setTimeout(poll, 3000);
+        };
+
+        window.setTimeout(poll, 1500);
+    })();
+    </script>
+    @endpush
+@endif

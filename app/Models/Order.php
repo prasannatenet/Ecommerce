@@ -8,6 +8,7 @@ class Order extends Model
 {
     protected $fillable = [
         'user_id',
+        'checkout_token',
         'payment_provider_id',
         'status',
         'cancel_reason',

@@ -55,8 +55,16 @@
                         No payment method is active. Please contact admin.
                     </div>
                 @else
+                    <div id="checkout-processing-overlay" role="status" aria-live="assertive" style="display:none; position:fixed; inset:0; z-index:2000; background:rgba(7,17,26,0.72); align-items:center; justify-content:center;">
+                        <div style="background:#fff; border-radius:16px; padding:30px 38px; max-width:420px; width:calc(100% - 32px); text-align:center; box-shadow:0 24px 70px rgba(0,0,0,0.35);">
+                            <div class="spinner-border text-success" style="width:3rem; height:3rem;" role="status" aria-hidden="true"></div>
+                            <h2 style="color:#0D0D0D; font-size:1.15rem; font-weight:800; margin:18px 0 8px;">Securing your order…</h2>
+                            <p style="color:#6C757D; margin:0; font-size:0.92rem;">Please wait. Do not refresh this page or submit payment again.</p>
+                        </div>
+                    </div>
                     <form id="checkout-form" action="{{ route('checkout.place') }}" method="POST">
                         @csrf
+                        <input type="hidden" name="checkout_token" value="{{ $checkoutToken }}">
 
                         {{-- Billing Address --}}
                         <div style="background:#fff; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.06); overflow:hidden; margin-bottom:20px;">
@@ -459,6 +467,29 @@
     const shippingFields = document.getElementById('shipping-fields');
     const shippingNotice = document.getElementById('shipping-same-notice');
     const submitButton = document.getElementById('place-order-btn');
+    const processingOverlay = document.getElementById('checkout-processing-overlay');
+    let paymentAttemptStarted = false;
+
+    const showProcessing = (message) => {
+        if (processingOverlay) {
+            const messageNode = processingOverlay.querySelector('p');
+            if (messageNode && message) messageNode.textContent = message;
+            processingOverlay.style.display = 'flex';
+        }
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.style.opacity = '0.6';
+        }
+    };
+
+    const stopProcessing = (message) => {
+        if (processingOverlay) processingOverlay.style.display = 'none';
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.style.opacity = '1';
+        }
+        if (message) alert(message);
+    };
 
     const toggleShipping = () => {
         if (shippingCheckbox.checked) {
@@ -475,11 +506,24 @@
 
     form.addEventListener('submit', async function (event) {
         const paymentMethod = form.querySelector('input[name="payment_method"]:checked');
-        if (!paymentMethod || paymentMethod.value !== 'razorpay') return;
+
+        if (!paymentMethod) return;
+
+        if (paymentMethod.value === 'cod') {
+            if (paymentAttemptStarted) event.preventDefault();
+            paymentAttemptStarted = true;
+            showProcessing('Creating your order… Do not submit again.');
+            return;
+        }
+
+        if (paymentAttemptStarted) {
+            event.preventDefault();
+            return;
+        }
 
         event.preventDefault();
-        submitButton.disabled = true;
-        submitButton.style.opacity = '0.6';
+        paymentAttemptStarted = true;
+        showProcessing('Opening secure payment… Do not submit again.');
 
         try {
             const response = await fetch(form.action, {
@@ -493,6 +537,11 @@
 
             const data = await response.json();
             if (!response.ok) throw new Error(data.message || 'Unable to initiate Razorpay payment.');
+
+            if (data.redirect_url) {
+                window.location.href = data.redirect_url;
+                return;
+            }
 
             const options = {
                 key: data.razorpay.key,
@@ -516,6 +565,7 @@
                             razorpay_signature: paymentResponse.razorpay_signature
                         })
                     });
+                    showProcessing('Confirming your payment… Please do not pay again.');
                     const verifyData = await verify.json();
                     if (!verify.ok) throw new Error(verifyData.message || 'Payment verification failed.');
                     window.location.href = verifyData.redirect_url;
@@ -528,23 +578,21 @@
                 theme: { color: '#017075' },
                 modal: {
                     ondismiss: function () {
-                        submitButton.disabled = false;
-                        submitButton.style.opacity = '1';
+                        paymentAttemptStarted = false;
+                        stopProcessing('Payment was not completed. You can safely retry this order.');
                     }
                 }
             };
 
             const rzp = new Razorpay(options);
             rzp.on('payment.failed', function () {
-                alert('Payment failed. Please try again.');
-                submitButton.disabled = false;
-                submitButton.style.opacity = '1';
+                paymentAttemptStarted = false;
+                stopProcessing('Payment failed. You can safely retry this order.');
             });
             rzp.open();
         } catch (error) {
-            alert(error.message || 'Something went wrong.');
-            submitButton.disabled = false;
-            submitButton.style.opacity = '1';
+            paymentAttemptStarted = false;
+            stopProcessing(error.message || 'Something went wrong. You can safely retry this order.');
         }
     });
 

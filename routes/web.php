@@ -130,6 +130,7 @@ Route::middleware(['auth'])->group(function(){
     Route::delete('/checkout/coins', [FrontendCheckoutController::class, 'removeCoins'])->name('checkout.coins.remove');
     Route::post('/checkout/place-order', [FrontendCheckoutController::class, 'placeOrder'])->name('checkout.place');
     Route::post('/checkout/razorpay/verify', [FrontendCheckoutController::class, 'verifyRazorpay'])->name('checkout.razorpay.verify');
+    Route::get('/checkout/payment-status/{order}', [FrontendCheckoutController::class, 'paymentStatus'])->name('checkout.payment-status');
     Route::get('/checkout/success/{order}', [FrontendCheckoutController::class, 'success'])->name('checkout.success');
     Route::get('/orders', [FrontendOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [FrontendOrderController::class, 'show'])->name('orders.show');
