@@ -8,12 +8,51 @@ use Illuminate\Support\Collection;
 class CouponService
 {
     /**
+     * Return why a coupon cannot be used, or null when it is eligible.
+     */
+    public function ineligibilityReason(Coupon $coupon, float $subtotal, bool $hasAppliedCombo = false): ?string
+    {
+        if ($hasAppliedCombo) {
+            return 'Coupons cannot be combined with combo offers.';
+        }
+
+        if (! $coupon->is_active) {
+            return 'This coupon is inactive.';
+        }
+
+        $now = now();
+
+        if ($coupon->starts_at && $coupon->starts_at->greaterThan($now)) {
+            return 'This coupon is not active yet. It starts on '.$coupon->starts_at->format('d M Y, h:i A').'.';
+        }
+
+        if ($coupon->expires_at && $coupon->expires_at->lessThan($now)) {
+            return 'This coupon expired on '.$coupon->expires_at->format('d M Y, h:i A').'.';
+        }
+
+        if (! is_null($coupon->max_uses) && (int) $coupon->used_count >= (int) $coupon->max_uses) {
+            return 'This coupon has reached its maximum usage limit.';
+        }
+
+        if (! is_null($coupon->min_order_amount) && $subtotal < (float) $coupon->min_order_amount) {
+            return 'Minimum order amount for this coupon is Rs '.number_format((float) $coupon->min_order_amount, 2).'.';
+        }
+
+        return null;
+    }
+
+    public function isApplicable(Coupon $coupon, float $subtotal, bool $hasAppliedCombo = false): bool
+    {
+        return $this->ineligibilityReason($coupon, $subtotal, $hasAppliedCombo) === null;
+    }
+
+    /**
      * Calculate the discount amount a coupon gives against the current cart.
      *
      * For "Buy X Get Y" coupons the cheapest item(s) in the cart become free, so
      * the discount equals the sum of the unit prices of the cheapest free units.
      *
-     * @param \Illuminate\Support\Collection<int, \App\Models\Cart>|array $cartItems
+     * @param  \Illuminate\Support\Collection<int, \App\Models\Cart>|array  $cartItems
      */
     public function calculateDiscount(Coupon $coupon, $cartItems): float
     {
@@ -48,7 +87,7 @@ class CouponService
      *   'free_amount'   => monetary value of the free units,
      * ]
      *
-     * @param \Illuminate\Support\Collection<int, \App\Models\Cart>|array $cartItems
+     * @param  \Illuminate\Support\Collection<int, \App\Models\Cart>|array  $cartItems
      */
     public function freeItemsBreakdown(Coupon $coupon, $cartItems): Collection
     {
@@ -101,7 +140,7 @@ class CouponService
      * Total discount value of a Buy X Get Y coupon: the sum of the unit prices
      * of the cheapest items that are free.
      *
-     * @param \Illuminate\Support\Collection<int, \App\Models\Cart>|array $cartItems
+     * @param  \Illuminate\Support\Collection<int, \App\Models\Cart>|array  $cartItems
      */
     public function calculateBuyGetDiscount(Coupon $coupon, $cartItems): float
     {

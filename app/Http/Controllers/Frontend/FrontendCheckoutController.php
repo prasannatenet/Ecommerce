@@ -48,13 +48,14 @@ class FrontendCheckoutController extends Controller
 
 		$subtotal = $cartItems->sum(fn ($item) => $item->quantity * (float) $item->price);
 		$totalQuantity = (int) $cartItems->sum(fn ($item) => (int) $item->quantity);
-		$appliedCoupon = $this->getAppliedCouponSummary($cartItems);
-		$discount = (float) ($appliedCoupon['discount'] ?? 0);
-		$freeItems = collect($appliedCoupon['free_items'] ?? []);
 
 		// Combo price: when every product of an active combo is in the cart the
 		// customer pays the combo price instead of the individual prices.
 		$comboSummary = $this->comboService->summarize($cartItems);
+		$hasAppliedCombo = $this->comboService->hasAppliedCombo($cartItems, $comboSummary);
+		$appliedCoupon = $this->getAppliedCouponSummary($cartItems, $hasAppliedCombo);
+		$discount = (float) ($appliedCoupon['discount'] ?? 0);
+		$freeItems = collect($appliedCoupon['free_items'] ?? []);
 		$comboDiscount = (float) ($comboSummary['discount'] ?? 0);
 
 		$shippingCharge = (float) $subtotal >= 5000 ? 0.0 : 199.0;
@@ -68,8 +69,8 @@ class FrontendCheckoutController extends Controller
 			->orderByDesc('id')
 			->limit(8)
 			->get()
-			->map(function (Coupon $coupon) use ($subtotal) {
-				$reason = $this->getCouponIneligibilityReason($coupon, (float) $subtotal);
+			->map(function (Coupon $coupon) use ($subtotal, $hasAppliedCombo) {
+				$reason = $this->getCouponIneligibilityReason($coupon, (float) $subtotal, $hasAppliedCombo);
 				$validityParts = [];
 
 				if ($coupon->starts_at) {
@@ -107,6 +108,7 @@ class FrontendCheckoutController extends Controller
 			'discount' => $discount,
 			'comboDiscount' => $comboDiscount,
 			'comboSummary' => $comboSummary,
+			'hasAppliedCombo' => $hasAppliedCombo,
 			'freeItems' => $freeItems,
 			'shippingCharge' => $shippingCharge,
 			'grandTotal' => $grandTotal,
@@ -132,6 +134,11 @@ class FrontendCheckoutController extends Controller
 		}
 
 		$subtotal = (float) $cartItems->sum(fn ($item) => $item->quantity * (float) $item->price);
+		$comboSummary = $this->comboService->summarize($cartItems);
+		$hasAppliedCombo = $this->comboService->hasAppliedCombo($cartItems, $comboSummary);
+		if ($hasAppliedCombo) {
+			session()->forget('checkout_coupon');
+		}
 		$normalizedCode = strtoupper(trim($data['coupon_code']));
 		$coupon = Coupon::whereRaw('UPPER(TRIM(code)) = ?', [$normalizedCode])->first();
 
@@ -139,7 +146,7 @@ class FrontendCheckoutController extends Controller
 			return back()->with('error', 'Coupon code not found.');
 		}
 
-		$ineligibilityReason = $this->getCouponIneligibilityReason($coupon, $subtotal);
+		$ineligibilityReason = $this->getCouponIneligibilityReason($coupon, $subtotal, $hasAppliedCombo);
 		if ($ineligibilityReason !== null) {
 			return back()->with('error', $ineligibilityReason);
 		}
@@ -245,12 +252,10 @@ class FrontendCheckoutController extends Controller
 		}
 
 		$subtotal = (float) $cartItems->sum(fn ($item) => $item->quantity * (float) $item->price);
-		$totalQuantity = (int) $cartItems->sum(fn ($item) => (int) $item->quantity);
-		$appliedCoupon = $this->getAppliedCouponSummary($cartItems);
-		$discount = (float) ($appliedCoupon['discount'] ?? 0);
-
-		// Combo price earned by the cart (all products of an active combo).
 		$comboSummary = $this->comboService->summarize($cartItems);
+		$hasAppliedCombo = $this->comboService->hasAppliedCombo($cartItems, $comboSummary);
+		$appliedCoupon = $this->getAppliedCouponSummary($cartItems, $hasAppliedCombo);
+		$discount = (float) ($appliedCoupon['discount'] ?? 0);
 		$comboDiscount = (float) ($comboSummary['discount'] ?? 0);
 
 		$shippingCharge = $subtotal >= 5000 ? 0.0 : 199.0;
@@ -820,17 +825,24 @@ class FrontendCheckoutController extends Controller
 		]);
 	}
 
-	private function getAppliedCouponSummary($cartItems): ?array
+	private function getAppliedCouponSummary($cartItems, ?bool $hasAppliedCombo = null): ?array
 	{
+		$hasAppliedCombo ??= $this->comboService->hasAppliedCombo($cartItems);
 		$stored = session('checkout_coupon');
 		$code = strtoupper(trim((string) ($stored['code'] ?? '')));
+
+		if ($hasAppliedCombo) {
+			session()->forget('checkout_coupon');
+
+			return null;
+		}
 
 		if ($code === '') {
 			return null;
 		}
 
 		$coupon = Coupon::whereRaw('UPPER(TRIM(code)) = ?', [$code])->first();
-		if (! $coupon || ! $this->isCouponApplicable($coupon, (float) collect($cartItems)->sum(fn ($item) => (int) $item->quantity * (float) $item->price))) {
+		if (! $coupon || ! $this->isCouponApplicable($coupon, (float) collect($cartItems)->sum(fn ($item) => (int) $item->quantity * (float) $item->price), $hasAppliedCombo)) {
 			session()->forget('checkout_coupon');
 			return null;
 		}
@@ -865,36 +877,14 @@ class FrontendCheckoutController extends Controller
 		];
 	}
 
-	private function isCouponApplicable(Coupon $coupon, float $subtotal): bool
+	private function isCouponApplicable(Coupon $coupon, float $subtotal, bool $hasAppliedCombo = false): bool
 	{
-		return $this->getCouponIneligibilityReason($coupon, $subtotal) === null;
+		return $this->getCouponIneligibilityReason($coupon, $subtotal, $hasAppliedCombo) === null;
 	}
 
-	private function getCouponIneligibilityReason(Coupon $coupon, float $subtotal): ?string
+	private function getCouponIneligibilityReason(Coupon $coupon, float $subtotal, bool $hasAppliedCombo = false): ?string
 	{
-		if (! $coupon->is_active) {
-			return 'This coupon is inactive.';
-		}
-
-		$now = now();
-
-		if ($coupon->starts_at && $coupon->starts_at->greaterThan($now)) {
-			return 'This coupon is not active yet. It starts on ' . $coupon->starts_at->format('d M Y, h:i A') . '.';
-		}
-
-		if ($coupon->expires_at && $coupon->expires_at->lessThan($now)) {
-			return 'This coupon expired on ' . $coupon->expires_at->format('d M Y, h:i A') . '.';
-		}
-
-		if (! is_null($coupon->max_uses) && (int) $coupon->used_count >= (int) $coupon->max_uses) {
-			return 'This coupon has reached its maximum usage limit.';
-		}
-
-		if (! is_null($coupon->min_order_amount) && $subtotal < (float) $coupon->min_order_amount) {
-			return 'Minimum order amount for this coupon is Rs ' . number_format((float) $coupon->min_order_amount, 2) . '.';
-		}
-
-		return null;
+		return $this->couponService->ineligibilityReason($coupon, $subtotal, $hasAppliedCombo);
 	}
 
 	private function calculateCouponDiscount(Coupon $coupon, $cartItems): float

@@ -266,21 +266,27 @@
                         <h5>Order Summary</h5>
 
                         {{-- Coupon --}}
-                        <div class="mb-4">
-                            <form action="{{ route('checkout.coupon.apply') }}" method="POST" style="display:flex; gap:8px;">
+                        <div id="cart-coupon-panel" class="mb-4">
+                            <form id="cart-coupon-form" action="{{ route('checkout.coupon.apply') }}" method="POST" style="display:flex; gap:8px;">
                                 @csrf
-                                <input type="text" name="coupon_code" value="{{ old('coupon_code', $appliedCoupon['code'] ?? '') }}"
+                                <input id="cart-coupon-code" type="text" name="coupon_code" value="{{ old('coupon_code', $appliedCoupon['code'] ?? '') }}"
                                        placeholder="Coupon code"
+                                       {{ $hasAppliedCombo ? 'disabled' : '' }}
                                        style="flex:1; border:1.5px solid #DEE2E6; border-radius:8px; padding:9px 14px; font-size:0.88rem; background:#f9f9f9; outline:none; text-transform:uppercase;"
                                        onfocus="this.style.borderColor='#017075'; this.style.background='#fff';"
                                        onblur="this.style.borderColor='#DEE2E6'; this.style.background='#f9f9f9';">
-                                <button type="submit"
+                                <button id="cart-coupon-apply" type="submit"
+                                        {{ $hasAppliedCombo ? 'disabled' : '' }}
                                         style="padding:9px 16px; border-radius:8px; border:1.5px solid #017075; background:#fff; color:#017075; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap; transition:all 0.2s;"
                                         onmouseover="this.style.background='#017075'; this.style.color='#fff';"
                                         onmouseout="this.style.background='#fff'; this.style.color='#017075';">
                                     Apply
                                 </button>
                             </form>
+
+                            <div id="cart-coupon-combo-notice" class="{{ $hasAppliedCombo ? '' : 'd-none' }}" style="margin-top:10px; padding:9px 11px; border:1px solid #f1c40f; border-radius:8px; background:#fff9db; color:#856404; font-size:0.78rem; line-height:1.4;">
+                                <i class="bi bi-exclamation-circle me-1"></i>Coupons cannot be combined with combo offers. Remove or reduce the combo items to use a coupon.
+                            </div>
 
                             @if($appliedCoupon)
                                 <div style="margin-top:10px; display:flex; align-items:center; justify-content:space-between;">
@@ -344,6 +350,7 @@
                                                             @csrf
                                                             <input type="hidden" name="coupon_code" value="{{ $couponItem['code'] }}">
                                                             <button type="submit"
+                                                                    data-coupon-apply="{{ $couponItem['is_applicable'] ? '1' : '0' }}"
                                                                     {{ $couponItem['is_applicable'] ? '' : 'disabled' }}
                                                                     style="padding:6px 10px; border-radius:7px; border:1px solid #017075; background:{{ $couponItem['is_applicable'] ? '#fff' : '#f1f3f5' }}; color:{{ $couponItem['is_applicable'] ? '#017075' : '#adb5bd' }}; font-size:0.75rem; font-weight:700; cursor:{{ $couponItem['is_applicable'] ? 'pointer' : 'not-allowed' }}; white-space:nowrap;">
                                                                 Apply
@@ -719,6 +726,16 @@
 
         setSummary('cart-summary-shipping', data.shipping_charge > 0 ? '₹' + formatCartMoney(data.shipping_charge) : 'FREE');
         setSummary('cart-summary-total', '₹' + formatCartMoney(data.grand_total));
+
+        const couponCode = document.getElementById('cart-coupon-code');
+        const couponApply = document.getElementById('cart-coupon-apply');
+        const couponNotice = document.getElementById('cart-coupon-combo-notice');
+        if (couponCode) couponCode.disabled = !!data.has_applied_combo;
+        if (couponApply) couponApply.disabled = !!data.has_applied_combo;
+        if (couponNotice) couponNotice.classList.toggle('d-none', !data.has_applied_combo);
+        document.querySelectorAll('[data-coupon-apply]').forEach(function (button) {
+            button.disabled = !!data.has_applied_combo || button.dataset.couponApply !== '1';
+        });
 
         // Refresh combo suggestions if available in the AJAX response.
         if (data.combo_suggestions_html) {

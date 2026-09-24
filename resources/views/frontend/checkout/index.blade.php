@@ -211,6 +211,12 @@
                     </div>
                     <div style="padding:24px 28px;">
 
+                        @if($hasAppliedCombo ?? false)
+                            <div style="margin-bottom:16px; padding:10px 12px; border:1px solid #f1c40f; border-radius:8px; background:#fff9db; color:#856404; font-size:0.8rem; line-height:1.45;">
+                                <i class="bi bi-exclamation-circle me-1"></i>Coupons cannot be combined with combo offers. The coupon will remain available for a future non-combo order.
+                            </div>
+                        @endif
+
                         {{-- Cart Items --}}
                         <div style="margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid #f0f0f0;">
                             @php

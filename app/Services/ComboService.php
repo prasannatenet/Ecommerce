@@ -158,6 +158,61 @@ class ComboService
         return (float) $this->summarize($cartItems)['discount'];
     }
 
+    /**
+     * Whether the current cart/order contains an actual applied combo.
+     *
+     * Complete combos detected from ordinary product lines are present in the
+     * summary's `combos` array. Explicit combo offers are stored as cart lines
+     * with combo_id and already carry their allocated combo price, so they must
+     * also be detected directly.
+     *
+     * @param  \Illuminate\Support\Collection<int, mixed>|array<int, mixed>  $cartItems
+     * @param  array<string, mixed>|null  $summary
+     */
+    public function hasAppliedCombo($cartItems, ?array $summary = null): bool
+    {
+        $explicitItems = collect($cartItems)->filter(
+            fn ($item) => ! empty($item->combo_id ?? null)
+        );
+
+        if ($explicitItems->isNotEmpty()) {
+            $comboIds = $explicitItems
+                ->map(fn ($item) => (int) $item->combo_id)
+                ->unique()
+                ->values();
+
+            $requiredProducts = Combo::query()
+                ->whereIn('id', $comboIds)
+                ->with('products:id')
+                ->get()
+                ->mapWithKeys(fn (Combo $combo) => [
+                    $combo->id => $combo->products->pluck('id')->map(fn ($id) => (int) $id),
+                ]);
+
+            $hasCompleteExplicitCombo = $explicitItems
+                ->groupBy(fn ($item) => (int) $item->combo_id)
+                ->contains(function ($items, int $comboId) use ($requiredProducts): bool {
+                    $required = $requiredProducts->get($comboId, collect());
+                    $present = $items
+                        ->pluck('product_id')
+                        ->filter()
+                        ->map(fn ($id) => (int) $id)
+                        ->unique()
+                        ->values();
+
+                    return $required->count() >= 2 && $required->diff($present)->isEmpty();
+                });
+
+            if ($hasCompleteExplicitCombo) {
+                return true;
+            }
+        }
+
+        $summary ??= $this->summarize($cartItems);
+
+        return ! empty($summary['combos']);
+    }
+
     /** Regular (pre-combo) value of a single cart line. */
     public function lineTotal($cartItem): float
     {
