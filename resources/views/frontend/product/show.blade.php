@@ -28,6 +28,12 @@
         $firstProductImage = $product->images->first();
         $firstProductImagePath = $firstProductImage->path ?? ($firstProductImage->image_path ?? null);
         $firstProductImageUrl = $firstProductImagePath ? asset('storage/' . ltrim($firstProductImagePath, '/')) : null;
+
+        // Product videos are shown in the gallery after the images; the primary
+        // clip (or the newest one) is loaded in the main media area.
+        $productVideos = $product->videos->sortByDesc('is_primary')->values();
+        $primaryVideo = $productVideos->first();
+        $primaryVideoUrl = $primaryVideo?->stream_url;
     @endphp
 
 
@@ -67,14 +73,24 @@
                                 <img src="{{ $firstProductImageUrl }}" alt="{{ $product->name }}" id="mainProductImg" data-zoom-src="{{ $firstProductImageUrl }}">
                             @else
                                 <img src="{{ asset('frontend/images/dumbbell.png') }}" alt="{{ $product->name }}"
-                                    id="mainProductImg" class="main-product-img-placeholder" data-zoom-src="{{ asset('frontend/images/dumbbell.png') }}">
+                                    id="mainProductImg" class="main-product-img-placeholder"
+                                    style="{{ $primaryVideoUrl ? 'display:none;' : '' }}"
+                                    data-zoom-src="{{ asset('frontend/images/dumbbell.png') }}">
                             @endif
+
+                            @if ($primaryVideoUrl)
+                                {{-- Video-only products show the clip straight away; otherwise it waits behind a thumb. --}}
+                                <video id="mainProductVideo" class="main-product-video" src="{{ $primaryVideoUrl }}"
+                                    controls playsinline preload="metadata"
+                                    style="{{ $firstProductImageUrl ? 'display:none;' : '' }}"></video>
+                            @endif
+
                             <div id="productZoomPreview" class="product-zoom-preview" aria-hidden="true">
                                 <div class="product-zoom-preview-image"></div>
                             </div>
                         </div>
 
-                        @if ($product->images->count() > 1)
+                        @if ($product->images->count() > 1 || $productVideos->isNotEmpty())
                             <div class="gallery-thumbs mt-3">
                                 @foreach ($product->images as $image)
                                     @php
@@ -85,6 +101,21 @@
                                     <div class="gallery-thumb {{ $loop->first ? 'active' : '' }}"
                                         onclick="switchImage(this, '{{ $imageUrl }}')">
                                         <img src="{{ $imageUrl }}" alt="Thumbnail">
+                                    </div>
+                                @endforeach
+
+                                @foreach ($productVideos as $video)
+                                    @php
+                                        // stream_url serves the file in byte ranges so playback starts at once.
+                                        $videoUrl = $video->stream_url;
+                                    @endphp
+                                    @continue(!$videoUrl)
+                                    <div class="gallery-thumb gallery-thumb-video {{ $loop->first && !$firstProductImageUrl ? 'active' : '' }}"
+                                        title="Play video"
+                                        onclick="switchToVideo(this, '{{ $videoUrl }}')">
+                                        {{-- The #t=0.1 media fragment makes the browser paint a real frame instead of a black box. --}}
+                                        <video src="{{ $videoUrl }}#t=0.1" muted preload="metadata" playsinline></video>
+                                        <span class="thumb-play-badge"><i class="bi bi-play-fill"></i></span>
                                     </div>
                                 @endforeach
                             </div>
@@ -639,6 +670,41 @@
             background: #fdf1f4;
         }
 
+        .product-gallery .main-product-video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #000;
+            border-radius: 14px;
+            display: block;
+        }
+
+        .gallery-thumb.gallery-thumb-video {
+            position: relative;
+            overflow: hidden;
+            padding: 0;
+        }
+
+        .gallery-thumb.gallery-thumb-video video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            border-radius: 6px;
+        }
+
+        .gallery-thumb .thumb-play-badge {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.4rem;
+            background: rgba(0, 0, 0, 0.28);
+            pointer-events: none;
+        }
+
         .tabs-gehna .nav-tabs {
             border-bottom-color: #eadfd9;
         }
@@ -658,6 +724,10 @@
             }
 
             .product-gallery #mainProductImg {
+                height: 260px;
+            }
+
+            .product-gallery .main-product-video {
                 height: 260px;
             }
 
@@ -854,10 +924,19 @@
 
 @push('scripts')
     <script>
-        // Gallery thumbnail switcher
+        // Gallery thumbnail switcher — images
         function switchImage(thumb, src) {
             const mainImage = document.getElementById('mainProductImg');
+            const mainVideo = document.getElementById('mainProductVideo');
+
+            // Stop and hide the video when an image thumb is picked.
+            if (mainVideo) {
+                mainVideo.pause();
+                mainVideo.style.display = 'none';
+            }
+
             if (mainImage) {
+                mainImage.style.display = '';
                 mainImage.onload = function() {
                     if (typeof window.refreshProductZoom === 'function') {
                         window.refreshProductZoom(src);
@@ -873,6 +952,39 @@
             if (typeof window.refreshProductZoom === 'function') {
                 window.refreshProductZoom(src);
             }
+        }
+
+        // Gallery thumbnail switcher — short videos
+        function switchToVideo(thumb, src) {
+            const mainImage = document.getElementById('mainProductImg');
+            const mainVideo = document.getElementById('mainProductVideo');
+            if (!mainVideo) return;
+
+            if (mainImage) {
+                mainImage.style.display = 'none';
+            }
+
+            if (mainVideo.getAttribute('src') !== src) {
+                mainVideo.setAttribute('src', src);
+            }
+            mainVideo.style.display = 'block';
+
+            const preview = document.getElementById('productZoomPreview');
+            if (preview) {
+                preview.classList.remove('visible');
+                preview.setAttribute('aria-hidden', 'true');
+            }
+
+            const playPromise = mainVideo.play();
+            if (playPromise && typeof playPromise.catch === 'function') {
+                // Browsers may block autoplay with sound — the controls remain available.
+                playPromise.catch(function() {});
+            }
+
+            document.querySelectorAll('.gallery-thumb').forEach(function(t) {
+                t.classList.remove('active');
+            });
+            thumb.classList.add('active');
         }
 
         function initProductZoom() {
@@ -894,6 +1006,12 @@
             }
 
             function moveLens(event) {
+                // Zoom only applies to the image — skip while a video is showing.
+                if (mainImage.style.display === 'none') {
+                    preview.classList.remove('visible');
+                    return;
+                }
+
                 const rect = zoomArea.getBoundingClientRect();
                 const x = event.clientX - rect.left;
                 const y = event.clientY - rect.top;

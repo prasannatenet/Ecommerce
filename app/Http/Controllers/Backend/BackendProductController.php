@@ -10,6 +10,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\ProductVariation;
+use App\Models\ProductVideo;
 use App\Models\Tag;
 use App\Models\VariationImage;
 use Illuminate\Http\Request;
@@ -93,6 +94,8 @@ class BackendProductController extends Controller
             'primary_image'     => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'images'            => 'nullable|array',
             'images.*'          => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'videos'            => 'nullable|array|max:5',
+            'videos.*'          => 'nullable|file|mimes:mp4,webm,mov|max:51200',
             'tag_ids'           => 'nullable|array',
             'tag_ids.*'         => 'exists:tags,id',
         ];
@@ -121,7 +124,7 @@ class BackendProductController extends Controller
 
         try {
             $productData = $validated;
-            unset($productData['images'], $productData['tag_ids'], $productData['attribute_ids'], $productData['attribute_values']);
+            unset($productData['images'], $productData['videos'], $productData['tag_ids'], $productData['attribute_ids'], $productData['attribute_values']);
 
             if ($request->hasFile('primary_image')) {
                 $productData['primary_image'] = $request->file('primary_image')->store('products', 'public');
@@ -172,6 +175,22 @@ class BackendProductController extends Controller
                 }
             }
 
+            // Upload videos — the first clip becomes the primary gallery video.
+            if ($request->hasFile('videos')) {
+                foreach ($request->file('videos') as $file) {
+                    if (! $file->isValid()) {
+                        continue;
+                    }
+
+                    $path = $file->store('products/videos', 'public');
+                    ProductVideo::create([
+                        'product_id' => $product->id,
+                        'path'       => $path,
+                        'is_primary' => ! $product->videos()->exists(),
+                    ]);
+                }
+            }
+
             DB::commit();
 
             return redirect()->route('admin.products.show', $product->id)
@@ -184,7 +203,7 @@ class BackendProductController extends Controller
 
     public function edit(Product $product)
     {
-        $product->load('images', 'variations', 'attributes', 'tags');
+        $product->load('images', 'videos', 'variations', 'attributes', 'tags');
         $brands = Brand::all();
         $categories = Category::whereNull('parent_id')->with('childrenRecursive')->get();
         $allCategories = Category::all();
@@ -214,6 +233,8 @@ class BackendProductController extends Controller
             'primary_image'     => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'images'            => 'nullable|array',
             'images.*'          => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'videos'            => 'nullable|array|max:5',
+            'videos.*'          => 'nullable|file|mimes:mp4,webm,mov|max:51200',
             'tag_ids'           => 'nullable|array',
             'tag_ids.*'         => 'exists:tags,id',
         ];
@@ -240,7 +261,7 @@ class BackendProductController extends Controller
 
         try {
             $productData = $validated;
-            unset($productData['images'], $productData['tag_ids'], $productData['attribute_ids'], $productData['attribute_values']);
+            unset($productData['images'], $productData['videos'], $productData['tag_ids'], $productData['attribute_ids'], $productData['attribute_values']);
 
             if ($request->hasFile('primary_image')) {
                 $productData['primary_image'] = $request->file('primary_image')->store('products', 'public');
@@ -305,6 +326,22 @@ class BackendProductController extends Controller
                 }
             }
 
+            // Upload new videos — only the first clip on a product stays primary.
+            if ($request->hasFile('videos')) {
+                foreach ($request->file('videos') as $file) {
+                    if (! $file->isValid()) {
+                        continue;
+                    }
+
+                    $path = $file->store('products/videos', 'public');
+                    ProductVideo::create([
+                        'product_id' => $product->id,
+                        'path'       => $path,
+                        'is_primary' => ! $product->videos()->exists(),
+                    ]);
+                }
+            }
+
             DB::commit();
 
             return redirect()->route('admin.products.show', $product->id)
@@ -317,7 +354,7 @@ class BackendProductController extends Controller
 
     public function show(Product $product)
     {
-        $product->load('brand', 'category', 'images', 'variations.images', 'attributes.values', 'tags');
+        $product->load('brand', 'category', 'images', 'videos', 'variations.images', 'attributes.values', 'tags');
         return view('backend.product.show', compact('product'));
     }
 
@@ -542,8 +579,40 @@ class BackendProductController extends Controller
         return back()->with('success', 'Product image deleted successfully.');
     }
 
+    public function destroyVideo(Product $product, ProductVideo $video)
+    {
+        if ((int) $video->product_id !== (int) $product->id) {
+            abort(404);
+        }
+
+        $deletedPath = $video->path;
+        $wasPrimary  = (bool) $video->is_primary;
+
+        $video->delete();
+
+        // Keep a primary clip around so the gallery still has a lead video.
+        if ($wasPrimary) {
+            $product->videos()->orderBy('id')->first()?->update(['is_primary' => true]);
+        }
+
+        if (! empty($deletedPath) && ! ProductVideo::where('path', $deletedPath)->exists()) {
+            if (Storage::disk('public')->exists($deletedPath)) {
+                Storage::disk('public')->delete($deletedPath);
+            }
+        }
+
+        return back()->with('success', 'Product video deleted successfully.');
+    }
+
     public function destroy(Product $product)
     {
+        // Remove stored video files before the cascade delete wipes the rows.
+        foreach ($product->videos as $video) {
+            if (! empty($video->path) && Storage::disk('public')->exists($video->path)) {
+                Storage::disk('public')->delete($video->path);
+            }
+        }
+
         $product->tags()->detach();
         $product->attributes()->detach();
         $product->delete();

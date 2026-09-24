@@ -103,7 +103,7 @@ class FrontendProductController extends Controller
     public function show($slug)
     {
         $product = Product::where('slug', $slug)
-            ->with('variations.images', 'images', 'brand', 'category')
+            ->with('variations.images', 'images', 'videos', 'brand', 'category')
             ->firstOrFail();
 
         $reviews = $product->reviews()->with('user')->latest()->get();
@@ -284,7 +284,7 @@ class FrontendProductController extends Controller
 
         $product = Product::where('id', $id)
             ->where('is_active', true)
-            ->with('variations', 'images', 'brand', 'category')
+            ->with('variations', 'images', 'videos', 'brand', 'category')
             ->firstOrFail();
 
         return view('frontend.partials.quick-view', compact('product'));

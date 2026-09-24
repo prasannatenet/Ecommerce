@@ -42,6 +42,7 @@ use App\Http\Controllers\Frontend\FrontendNewsletterController;
 use App\Http\Controllers\Frontend\FrontendPageController;
 use App\Http\Controllers\Frontend\FrontendSearchController;
 use App\Http\Controllers\Frontend\SiteLocationController;
+use App\Http\Controllers\ProductVideoStreamController;
 
 
 
@@ -70,6 +71,9 @@ Route::get('/', [HomeController::class,'index'])->name('home');
 Route::get('/products', [FrontendProductController::class,'index'])->name('products.index');
 Route::get('/product/{slug}', [FrontendProductController::class,'show'])->name('product.show');
 Route::get('/product/{id}/quick-view', [FrontendProductController::class,'quickView'])->name('product.quick-view');
+// Videos are streamed through the app so the browser can fetch them in byte ranges
+// (PHP's built-in server and some hosts ignore the Range header and push the whole file).
+Route::get('/product-videos/{productVideo}', ProductVideoStreamController::class)->name('product.videos.stream');
 Route::get('/search', [FrontendSearchController::class,'search'])->name('search');
 Route::get('/categories', [FrontendCategoryController::class,'index'])->name('categories.index');
 Route::get('/category/{slug}', [FrontendCategoryController::class,'show'])->name('category.show');
@@ -137,6 +141,7 @@ Route::prefix('admin')->middleware(['auth','admin'])->name('admin.')->group(func
     Route::get('/', DashboardController::class . '@index')->name('dashboard');
     Route::resource('products', BackendProductController::class);
     Route::delete('products/{product}/images/{image}', [BackendProductController::class, 'destroyImage'])->name('products.images.destroy');
+    Route::delete('products/{product}/videos/{video}', [BackendProductController::class, 'destroyVideo'])->name('products.videos.destroy');
     
     // Product variation routes
     Route::post('products/{product}/variations', [BackendProductController::class, 'storeVariation'])->name('products.variations.store');

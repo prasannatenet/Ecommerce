@@ -91,6 +91,35 @@
                 </div>
             @endif
 
+            {{-- Current Videos --}}
+            @if($product->videos->count())
+                <div class="df-card">
+                    <div class="df-card-header">
+                        <h5 class="df-card-title"><i class="bi bi-camera-video"></i> Current Videos</h5>
+                    </div>
+                    <div class="df-card-body">
+                        <div class="d-flex flex-wrap gap-3">
+                            @foreach($product->videos as $video)
+                                <div class="position-relative">
+                                    @if($video->is_primary)
+                                        <span class="df-badge df-badge-info position-absolute"
+                                              style="top:6px;left:6px;z-index:1;">Primary</span>
+                                    @endif
+                                    <video src="{{ $video->stream_url }}" controls preload="metadata"
+                                           style="width:220px;height:140px;object-fit:cover;border-radius:12px;border:1px solid var(--df-border-color);background:#000;"></video>
+                                    <button type="button"
+                                            class="btn btn-sm btn-danger position-absolute"
+                                            style="top:6px;right:6px;line-height:1;"
+                                            onclick="deleteProductImage('{{ route('admin.products.videos.destroy', [$product, $video]) }}', 'this video')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             {{-- Upload New --}}
             <div class="df-card">
                 <div class="df-card-header">
@@ -116,6 +145,31 @@
                     <input type="file" id="product-images" name="images[]" multiple accept="image/*"
                            style="display:none" onchange="previewGalleryImages(this)">
                     <div id="gallery-image-preview" class="d-flex flex-wrap gap-3 mt-3"></div>
+                </div>
+            </div>
+
+            {{-- Upload New Videos --}}
+            <div class="df-card">
+                <div class="df-card-header">
+                    <h5 class="df-card-title"><i class="bi bi-camera-video-fill"></i> Upload New Videos</h5>
+                </div>
+                <div class="df-card-body">
+                    <label class="df-form-label">Short Videos (Multiple)</label>
+                    <div class="df-upload-zone" onclick="document.getElementById('product-videos').click()">
+                        <div class="upload-icon"><i class="bi bi-camera-video-fill"></i></div>
+                        <p>Drop short videos here or <span class="browse-link">click to browse</span></p>
+                    </div>
+                    <input type="file" id="product-videos" name="videos[]" multiple
+                           accept="video/mp4,video/webm,video/quicktime"
+                           style="display:none" onchange="previewProductVideos(this)">
+                    <div id="product-video-preview" class="d-flex flex-wrap gap-3 mt-3"></div>
+                    <p class="df-form-hint mt-2">MP4 / WebM up to 50 MB each, max 5 videos per save. New videos are added to the existing ones.</p>
+                    @error('videos')
+                        <p class="text-danger small mb-0">{{ $message }}</p>
+                    @enderror
+                    @error('videos.*')
+                        <p class="text-danger small mb-0">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
 
@@ -425,6 +479,21 @@ function previewGalleryImages(input) {
             preview.appendChild(img);
         };
         reader.readAsDataURL(file);
+    });
+}
+
+function previewProductVideos(input) {
+    const preview = document.getElementById('product-video-preview');
+    preview.innerHTML = '';
+
+    Array.from(input.files).forEach(file => {
+        const video = document.createElement('video');
+        video.src = URL.createObjectURL(file);
+        video.controls = true;
+        video.muted = true;
+        video.preload = 'metadata';
+        video.style.cssText = 'width:160px;height:110px;object-fit:cover;border-radius:12px;border:1px solid var(--df-border-color);background:#000;';
+        preview.appendChild(video);
     });
 }
 

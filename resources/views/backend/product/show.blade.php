@@ -50,6 +50,34 @@
             </div>
         </div>
 
+        {{-- Videos --}}
+        <div class="df-card">
+            <div class="df-card-header">
+                <h5 class="df-card-title"><i class="bi bi-camera-video"></i> Product Videos</h5>
+            </div>
+            <div class="df-card-body">
+                @if($product->videos->count())
+                    <div class="d-flex flex-wrap gap-3">
+                        @foreach($product->videos as $video)
+                            <div class="position-relative">
+                                @if($video->is_primary)
+                                    <span class="df-badge df-badge-info position-absolute"
+                                          style="top:6px;left:6px;z-index:1;">Primary</span>
+                                @endif
+                                <video src="{{ $video->stream_url }}" controls preload="metadata"
+                                       style="width:240px;height:150px;object-fit:cover;border-radius:14px;border:1px solid var(--df-border-color);background:#000;"></video>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="df-empty-state py-4">
+                        <div class="empty-icon"><i class="bi bi-camera-video"></i></div>
+                        <p>No videos uploaded</p>
+                    </div>
+                @endif
+            </div>
+        </div>
+
         {{-- General Info --}}
         <div class="df-card">
             <div class="df-card-header">

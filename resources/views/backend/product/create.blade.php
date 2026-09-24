@@ -63,6 +63,31 @@
                 </div>
             </div>
 
+            {{-- Upload Videos --}}
+            <div class="df-card">
+                <div class="df-card-header">
+                    <h5 class="df-card-title"><i class="bi bi-camera-video"></i> Upload Product Videos</h5>
+                </div>
+                <div class="df-card-body">
+                    <label class="df-form-label">Short Videos (Multiple)</label>
+                    <div class="df-upload-zone" onclick="document.getElementById('product-videos').click()">
+                        <div class="upload-icon"><i class="bi bi-camera-video-fill"></i></div>
+                        <p>Drop short videos here or <span class="browse-link">click to browse</span></p>
+                    </div>
+                    <input type="file" id="product-videos" name="videos[]" multiple
+                           accept="video/mp4,video/webm,video/quicktime"
+                           style="display:none" onchange="previewProductVideos(this)">
+                    <div id="product-video-preview" class="d-flex flex-wrap gap-3 mt-3"></div>
+                    <p class="df-form-hint mt-2">MP4 / WebM up to 50 MB each, max 5 videos. The first video becomes the main clip in the product gallery.</p>
+                    @error('videos')
+                        <p class="text-danger small mb-0">{{ $message }}</p>
+                    @enderror
+                    @error('videos.*')
+                        <p class="text-danger small mb-0">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+
             {{-- Product Type --}}
             <div class="df-card">
                 <div class="df-card-header">
@@ -387,6 +412,21 @@ function previewGalleryImages(input) {
             preview.appendChild(img);
         };
         reader.readAsDataURL(file);
+    });
+}
+
+function previewProductVideos(input) {
+    const preview = document.getElementById('product-video-preview');
+    preview.innerHTML = '';
+
+    Array.from(input.files).forEach(file => {
+        const video = document.createElement('video');
+        video.src = URL.createObjectURL(file);
+        video.controls = true;
+        video.muted = true;
+        video.preload = 'metadata';
+        video.style.cssText = 'width:160px;height:110px;object-fit:cover;border-radius:12px;border:1px solid var(--df-border-color);background:#000;';
+        preview.appendChild(video);
     });
 }
 
