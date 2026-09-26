@@ -18,7 +18,7 @@
     </div>
 </div>
 
-@if(session('success'))
+@if (session('success'))
     <div class="df-alert df-alert-success">
         <i class="bi bi-check-circle-fill"></i> {{ session('success') }}
     </div>
@@ -115,24 +115,67 @@
                 <h5 class="df-card-title"><i class="bi bi-currency-rupee"></i> Pricing</h5>
             </div>
             <div class="df-card-body">
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <div class="df-form-label">Regular Price</div>
-                        <span class="df-price-regular" style="font-size:1.2rem;">₹{{ number_format($product->base_price, 2) }}</span>
-                    </div>
-                    @if($product->sale_price)
+                @php
+                    $pricing = $product->pricingSummary();
+                    $formatPercentage = fn ($percentage) => rtrim(rtrim(number_format((float) $percentage, 2), '0'), '.');
+                @endphp
+
+                @if($product->hasVariations())
+                    {{-- Variable products are priced per variation, so the product
+                         record's own price is not what customers pay. --}}
+                    <div class="row g-3">
                         <div class="col-md-4">
-                            <div class="df-form-label">Sale Price</div>
-                            <span class="df-price-sale" style="font-size:1.2rem;">₹{{ number_format($product->sale_price, 2) }}</span>
+                            <div class="df-form-label">Regular Price</div>
+                            <span class="df-price-regular" style="font-size:1.2rem;">
+                                ₹{{ number_format($pricing['regular_min'], 2) }}@if($pricing['regular_max'] > $pricing['regular_min']) &ndash; ₹{{ number_format($pricing['regular_max'], 2) }}@endif
+                            </span>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="df-form-label">Selling Price</div>
+                            <span class="df-price-sale" style="font-size:1.2rem;">
+                                ₹{{ number_format($pricing['effective_min'], 2) }}@if($pricing['effective_max'] > $pricing['effective_min']) &ndash; ₹{{ number_format($pricing['effective_max'], 2) }}@endif
+                            </span>
                         </div>
                         <div class="col-md-4">
                             <div class="df-form-label">Discount</div>
-                            <span class="df-badge df-badge-danger" style="font-size:0.85rem;">
-                                {{ round(100 - ($product->sale_price / $product->base_price * 100)) }}% OFF
-                            </span>
+                            @if($pricing['discount_percentage'] !== null)
+                                <span class="df-badge df-badge-danger" style="font-size:0.85rem;">
+                                    {{ $formatPercentage($pricing['discount_percentage']) }}% OFF
+                                </span>
+                            @else
+                                <span class="df-badge df-badge-muted">No discount</span>
+                            @endif
                         </div>
-                    @endif
-                </div>
+                    </div>
+                    <p class="df-form-hint" style="margin-top:12px;">
+                        <i class="bi bi-info-circle"></i> Prices come from the variations below &mdash;
+                        open a variation to change its price or discount.
+                    </p>
+                @else
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="df-form-label">Regular Price</div>
+                            <span class="df-price-regular" style="font-size:1.2rem;">₹{{ number_format((float) $product->base_price, 2) }}</span>
+                        </div>
+                        @if($product->hasDiscount())
+                            <div class="col-md-4">
+                                <div class="df-form-label">Sale Price</div>
+                                <span class="df-price-sale" style="font-size:1.2rem;">₹{{ number_format($product->effectivePrice(), 2) }}</span>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="df-form-label">Discount</div>
+                                <span class="df-badge df-badge-danger" style="font-size:0.85rem;">
+                                    {{ $formatPercentage($product->discountPercentage()) }}% OFF
+                                </span>
+                            </div>
+                        @else
+                            <div class="col-md-8">
+                                <div class="df-form-label">Discount</div>
+                                <span class="df-badge df-badge-muted">No discount</span>
+                            </div>
+                        @endif
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -302,25 +345,48 @@
                 @if($product->variations->count())
                     <div class="df-card-body-flush">
                         @foreach($product->variations as $index => $variation)
+                            @php
+                                $primaryVariationImage = $variation->images->firstWhere('is_primary', true) ?? $variation->images->first();
+                                // Saved variations open expanded so their photo, description
+                                // and price are visible without an extra click.
+                                $expandVariation = true;
+                            @endphp
                             <div class="variation-panel" style="border-bottom:1px solid var(--df-border-color);">
                                 {{-- Variation Header (clickable to expand) --}}
-                                <div class="d-flex align-items-center justify-content-between"
+                                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3"
                                      style="padding:14px 20px; cursor:pointer; transition:background 0.2s;"
                                      onmouseover="this.style.background='var(--df-body-bg)'"
                                      onmouseout="this.style.background='transparent'"
                                      onclick="toggleVariation({{ $variation->id }})">
                                     <div class="d-flex align-items-center gap-3">
-                                        <span style="font-weight:700; color:var(--df-primary); font-size:0.85rem;">#{{ $index + 1 }}</span>
-                                        <div class="d-flex flex-wrap gap-1">
-                                            @if($variation->attributes && is_array($variation->attributes))
-                                                @foreach($variation->attributes as $key => $val)
-                                                    <span class="df-badge df-badge-info">{{ $key }}: {{ $val }}</span>
-                                                @endforeach
-                                            @endif
+                                        @if($primaryVariationImage)
+                                            <img src="{{ $primaryVariationImage->url }}"
+                                                 alt="Variation photo for {{ $product->name }}"
+                                                 style="width:64px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--df-border-color);">
+                                        @else
+                                            <span class="d-inline-flex align-items-center justify-content-center"
+                                                  aria-label="No variation photo"
+                                                  title="No variation photo"
+                                                  style="width:64px;height:64px;border-radius:10px;background:var(--df-body-bg);border:1px dashed var(--df-border-color);color:var(--df-text-muted);">
+                                                <i class="bi bi-image fs-4"></i>
+                                            </span>
+                                        @endif
+                                        <div>
+                                            <div class="d-flex flex-wrap align-items-center gap-1">
+                                                <span style="font-weight:700; color:var(--df-primary); font-size:0.85rem;">#{{ $index + 1 }}</span>
+                                                @if($variation->attributes && is_array($variation->attributes))
+                                                    @foreach($variation->attributes as $key => $val)
+                                                        <span class="df-badge df-badge-info">{{ $key }}: {{ $val }}</span>
+                                                    @endforeach
+                                                @endif
+                                                <code style="font-size:0.82rem; color:var(--df-text-secondary);">{{ $variation->sku ?? '—' }}</code>
+                                            </div>
+                                            <div style="margin-top:5px;max-width:480px;color:var(--df-text-secondary);font-size:0.82rem;line-height:1.4;overflow-wrap:anywhere;">
+                                                {{ $variation->description ?: 'No description provided.' }}
+                                            </div>
                                         </div>
-                                        <code style="font-size:0.82rem; color:var(--df-text-secondary);">{{ $variation->sku ?? '—' }}</code>
                                     </div>
-                                    <div class="d-flex align-items-center gap-3">
+                                    <div class="d-flex flex-wrap align-items-center justify-content-end gap-2">
                                         <span class="df-price-regular">₹{{ number_format($variation->price, 2) }}</span>
                                         @if($variation->effectivePrice() < (float) $variation->price)
                                             <span class="df-badge df-badge-success">Sale ₹{{ number_format($variation->effectivePrice(), 2) }}</span>
@@ -337,12 +403,13 @@
                                         <span class="df-badge {{ $variation->is_active ? 'df-badge-success' : 'df-badge-muted' }}">
                                             {{ $variation->is_active ? 'Active' : 'Inactive' }}
                                         </span>
-                                        <i class="bi bi-chevron-down" id="chevron-{{ $variation->id }}" style="transition:transform 0.3s; color:var(--df-text-muted);"></i>
+                                        <i class="bi bi-chevron-down" id="chevron-{{ $variation->id }}"
+                                           style="transition:transform 0.3s; color:var(--df-text-muted);transform:{{ $expandVariation ? 'rotate(180deg)' : 'none' }};"></i>
                                     </div>
                                 </div>
 
                                 {{-- Variation Edit Form (collapsible) --}}
-                                <div id="variation-{{ $variation->id }}" style="display:none; padding:16px 20px; background:var(--df-body-bg); border-top:1px solid var(--df-border-color);">
+                                <div id="variation-{{ $variation->id }}" style="display:{{ $expandVariation ? 'block' : 'none' }}; padding:16px 20px; background:var(--df-body-bg); border-top:1px solid var(--df-border-color);">
                                     <form action="{{ route('admin.variations.update', $variation) }}" method="POST" enctype="multipart/form-data">
                                         @csrf
                                         @method('PUT')
@@ -388,19 +455,18 @@
                                                 <div class="d-flex flex-wrap gap-2">
                                                     @foreach($variation->images as $vImage)
                                                         <div class="position-relative">
-                                                            <img src="{{ asset('storage/' . $vImage->path) }}" alt=""
+                                                            <img src="{{ $vImage->url }}" alt="Variation photo for {{ $product->name }}"
                                                                  style="width:80px;height:80px;object-fit:cover;border-radius:10px;border:1px solid var(--df-border-color);">
                                                             @if($vImage->is_primary)
                                                                 <span class="df-badge df-badge-success position-absolute" style="top:4px;left:4px;font-size:0.6rem;">Main</span>
                                                             @endif
-                                                            <form action="{{ route('admin.variations.images.destroy', [$variation, $vImage]) }}" method="POST"
-                                                                  onsubmit="return confirm('Delete this image?')" style="position:absolute;top:4px;right:4px;">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit" class="btn btn-sm btn-danger" style="line-height:1;padding:2px 6px;font-size:0.7rem;">
-                                                                    <i class="bi bi-trash"></i>
-                                                                </button>
-                                                            </form>
+                                                            <button type="submit"
+                                                                    form="deleteVariationImage-{{ $variation->id }}-{{ $vImage->id }}"
+                                                                    class="btn btn-sm btn-danger"
+                                                                    aria-label="Delete variation image"
+                                                                    style="position:absolute;top:4px;right:4px;line-height:1;padding:2px 6px;font-size:0.7rem;">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
                                                         </div>
                                                     @endforeach
                                                 </div>
@@ -411,6 +477,13 @@
                                         <div class="mb-3">
                                             <label class="df-form-label">Add More Images</label>
                                             <input type="file" name="images[]" class="df-form-control" accept="image/jpeg,image/png,image/webp" multiple>
+                                        </div>
+
+                                        {{-- Description --}}
+                                        <div class="mb-3">
+                                            <label class="df-form-label">Description</label>
+                                            <textarea name="description" class="df-form-control" rows="3"
+                                                      placeholder="Describe this variation (e.g. material, finish, what makes it different)">{{ $variation->description }}</textarea>
                                         </div>
 
                                         {{-- Discount --}}
@@ -438,7 +511,13 @@
                                             <div class="col-md-4">
                                                 <label class="df-form-label">Sale Price</label>
                                                 <p class="df-form-hint" id="varSalePricePreview-{{ $variation->id }}" style="margin-top:8px;">
-                                                    {{ $variation->effectivePrice() < (float) $variation->price ? 'Currently ₹' . number_format($variation->effectivePrice(), 2) : 'No discount selected.' }}
+                                                    @if($variation->discountPercentage() !== null)
+                                                        ₹{{ number_format((float) $variation->price, 2) }} &rarr;
+                                                        ₹{{ number_format($variation->effectivePrice(), 2) }}
+                                                        ({{ rtrim(rtrim(number_format($variation->discountPercentage(), 2), '0'), '.') }}% OFF)
+                                                    @else
+                                                        No discount selected.
+                                                    @endif
                                                 </p>
                                             </div>
                                         </div>
@@ -452,6 +531,17 @@
                                             </button>
                                         </div>
                                     </form>
+
+                                    {{-- Image delete forms are outside the update form to keep the HTML valid. --}}
+                                    @foreach($variation->images as $vImage)
+                                        <form id="deleteVariationImage-{{ $variation->id }}-{{ $vImage->id }}"
+                                              action="{{ route('admin.variations.images.destroy', [$variation, $vImage]) }}"
+                                              method="POST" hidden
+                                              onsubmit="return confirm('Delete this image?')">
+                                            @csrf
+                                            @method('DELETE')
+                                        </form>
+                                    @endforeach
 
                                     {{-- Delete --}}
                                     <div style="margin-top:12px; padding-top:12px; border-top:1px dashed var(--df-border-color);">
@@ -592,14 +682,19 @@ function calculateVariationSalePrice(priceId, typeId, valueId, previewId) {
     const discountAmount = type === 'percentage' ? price * value / 100 : value;
     const salePrice = Math.max(0, price - discountAmount);
 
-    if (salePrice >= price) {
+    if (salePrice >= price || salePrice <= 0) {
         previewEl.textContent = '⚠ Discount must lower the price.';
         previewEl.style.color = 'var(--df-danger)';
         return;
     }
 
+    const discountPercent = type === 'percentage'
+        ? value
+        : (discountAmount / price) * 100;
+
     previewEl.style.color = '';
-    previewEl.textContent = `Sale price: ₹${salePrice.toFixed(2)} (saves ₹${discountAmount.toFixed(2)})`;
+    previewEl.textContent =
+        `Sale price: ₹${salePrice.toFixed(2)} (${Math.round(discountPercent * 100) / 100}% OFF, saves ₹${discountAmount.toFixed(2)})`;
 }
 
 function previewVariationImages(inputId, previewId) {

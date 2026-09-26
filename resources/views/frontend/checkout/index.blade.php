@@ -234,6 +234,9 @@
                                 @php
                                     $freeQty = !empty($freeItemsByCartId[$item->id]) ? (int) $freeItemsByCartId[$item->id]['free_quantity'] : 0;
                                     $chargedQty = max(0, (int) $item->quantity - $freeQty);
+                                    // Price without the combo offer; the amount charged after it.
+                                    $checkoutOriginalPrice = app(\App\Services\ComboService::class)->regularUnitPrice($item);
+                                    $checkoutHasCombo = (float) $item->price < $checkoutOriginalPrice - 0.005;
                                 @endphp
                                 <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:10px;">
                                     <div style="color:#495057; font-size:0.88rem; flex:1;">
@@ -242,9 +245,17 @@
                                         @if($freeQty > 0)
                                             <span style="color:#198754; font-weight:700; font-size:0.75rem;"> ({{ $freeQty }} FREE)</span>
                                         @endif
+                                        @if($checkoutHasCombo)
+                                            <div style="color:#198754; font-weight:700; font-size:0.72rem;">
+                                                <i class="bi bi-gift-fill me-1"></i>combo price
+                                            </div>
+                                        @endif
                                     </div>
                                     <div style="font-weight:700; color:#0D0D0D; font-size:0.9rem; white-space:nowrap;">
-                                        @if($freeQty > 0)
+                                        @if($checkoutHasCombo)
+                                            <s style="color:#aaa; font-weight:400;">Rs {{ number_format($checkoutOriginalPrice, 2) }}</s>
+                                            <span style="color:#198754;">Rs {{ number_format($item->price, 2) }}</span>
+                                        @elseif($freeQty > 0)
                                             <s style="color:#aaa; font-weight:400;">Rs {{ number_format($item->quantity * $item->price, 2) }}</s>
                                             <span style="color:#198754;">Rs {{ number_format($chargedQty * $item->price, 2) }}</span>
                                         @else

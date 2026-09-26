@@ -122,11 +122,9 @@
                                 <a href="{{ route('product.show', $product->slug) }}"
                                     class="product-name">{{ $product->name }}</a>
                                 <div class="product-price">
-                                    @if ($product->sale_price)
-                                        <span class="price-sale">Rs {{ number_format($product->sale_price, 2) }}</span>
-                                        <span class="price-original">Rs {{ number_format($product->base_price, 2) }}</span>
-                                    @else
-                                        <span class="price-sale">Rs {{ number_format($product->base_price, 2) }}</span>
+                                    <span class="price-sale">Rs {{ number_format($product->effectivePrice(), 2) }}</span>
+                                    @if ($product->hasDiscount())
+                                        <span class="price-original">Rs {{ number_format($product->regularPrice(), 2) }}</span>
                                     @endif
                                 </div>
                             </div>

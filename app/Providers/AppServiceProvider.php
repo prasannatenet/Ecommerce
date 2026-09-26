@@ -6,6 +6,8 @@ use App\Models\Cart;
 use App\Models\Page;
 use App\Models\Setting;
 use App\Models\Wishlist;
+use App\Services\CouponService;
+use App\Services\MetalPriceService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
@@ -79,6 +81,14 @@ class AppServiceProvider extends ServiceProvider
                 ->with('simpleCartQuantities', $simpleCartQuantities);
         });
 
+        View::composer('frontend.partials.floating-offers', function ($view): void {
+            // The offer tab is part of the global chrome, so it needs its own
+            // tiny query rather than borrowing a controller's cart-aware list.
+            $view->with('offerCoupons', Schema::hasTable('coupons')
+                ? app(CouponService::class)->offerSummaries()
+                : collect());
+        });
+
         View::composer(['layouts.footer'], function ($view): void {
             $aboutUsPage = null;
 
@@ -111,6 +121,11 @@ class AppServiceProvider extends ServiceProvider
             }
 
             $view->with('contactPage', $contactPage);
+
+            // Live gold & silver spot rates for the top bar's LIVE button. The
+            // service is cached and never throws, so a provider outage cannot
+            // take the page down with it.
+            $view->with('liveRates', app(MetalPriceService::class)->displayPayload());
         });
     }
 }

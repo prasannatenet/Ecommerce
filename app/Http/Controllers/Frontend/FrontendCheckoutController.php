@@ -7,6 +7,7 @@ use App\Jobs\SendOrderInvoiceMail;
 use App\Mail\OrderCreditNoteMail;
 use App\Models\Cart;
 use App\Models\Coupon;
+use App\Models\CouponUse;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderRefund;
@@ -64,7 +65,7 @@ class FrontendCheckoutController extends Controller
         $appliedCoins = $this->getAppliedCoinsSummary($orderTotal);
         $coinsDiscount = (float) ($appliedCoins['discount'] ?? 0);
         $coinsBalance = (int) ($appliedCoins['balance'] ?? 0);
-        $grandTotal = max(0, $orderTotal - $coinsDiscount);
+        $grandTotal = Order::roundAmount((float) $orderTotal - $coinsDiscount);
         $availableCoupons = Coupon::query()
             ->where('is_active', true)
             ->orderByDesc('id')
@@ -298,7 +299,10 @@ class FrontendCheckoutController extends Controller
         $appliedCoins = $this->getAppliedCoinsSummary($orderTotal);
         $coinsUsed = (int) ($appliedCoins['coins'] ?? 0);
         $coinsDiscount = (float) $coinsUsed;
-        $orderTotal = max(0, $orderTotal - $coinsDiscount);
+        // Round the final amount, after coins. This same value is stored on the
+        // order, shown on the page and sent to the gateway, so the customer is
+        // never quoted a fraction they are not charged.
+        $orderTotal = Order::roundAmount((float) $orderTotal - $coinsDiscount);
         $shippingSame = $request->boolean('shipping_same_as_billing', true);
 
         if ($data['payment_method'] === 'razorpay' && $orderTotal < 1) {
@@ -394,6 +398,19 @@ class FrontendCheckoutController extends Controller
 
                 if ($appliedCoupon) {
                     Coupon::whereKey($appliedCoupon['id'])->increment('used_count');
+
+                    // Remember which customer burned this code so the coupon is
+                    // disabled for them from now on. firstOrCreate keeps a
+                    // retried checkout from tripping the one-per-customer index.
+                    if (Auth::id()) {
+                        CouponUse::firstOrCreate(
+                            [
+                                'coupon_id' => $appliedCoupon['id'],
+                                'user_id' => Auth::id(),
+                            ],
+                            ['order_id' => $order->id],
+                        );
+                    }
 
                     // Credit Gehna Coins when the order used a coins reward coupon.
                     if (($appliedCoupon['type'] ?? '') === 'gehna_coins' && (int) ($appliedCoupon['reward_coins'] ?? 0) > 0) {
@@ -736,12 +753,19 @@ class FrontendCheckoutController extends Controller
         return response()->json(['status' => 'ok']);
     }
 
+    /**
+     * Combo lines whose combo is no longer complete are put back on their
+     * regular price here, before the page, the coupon checks and the order
+     * placement each work out their own totals from the cart rows.
+     */
     private function loadUserCart()
     {
-        return Cart::with('product', 'variation')
+        $cartItems = Cart::with('product', 'variation')
             ->where('user_id', Auth::id())
             ->get()
             ->filter(fn ($item) => $item->product);
+
+        return $this->comboService->applyExplicitComboPrices($cartItems);
     }
 
     private function razorpayHttpClient(): \Illuminate\Http\Client\PendingRequest

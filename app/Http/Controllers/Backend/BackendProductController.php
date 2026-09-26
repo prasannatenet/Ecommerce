@@ -119,6 +119,7 @@ class BackendProductController extends Controller
         $validated = $request->validate($rules);
 
         $validated['sale_price'] = $this->calculateSalePrice($request, $validated['base_price'], $validated['sale_price'] ?? null);
+        $validated = $this->normalizeDiscountFields($validated);
 
         DB::beginTransaction();
 
@@ -256,6 +257,7 @@ class BackendProductController extends Controller
         $validated = $request->validate($rules);
 
         $validated['sale_price'] = $this->calculateSalePrice($request, $validated['base_price'], $validated['sale_price'] ?? null);
+        $validated = $this->normalizeDiscountFields($validated);
 
         DB::beginTransaction();
 
@@ -363,14 +365,28 @@ class BackendProductController extends Controller
         $type = $request->input('discount_type');
         $value = $request->input('discount_value');
 
-        if ($type === null || $value === null || $value === '') {
+        // No discount type: keep whatever sale price was submitted (or clear it),
+        // so removing the discount stops the old discounted price being shown.
+        if ($type === null || $type === '') {
             return $fallbackSalePrice !== null && $fallbackSalePrice !== ''
                 ? round((float) $fallbackSalePrice, 2)
                 : null;
         }
 
+        if ($value === null || $value === '') {
+            throw ValidationException::withMessages([
+                'discount_value' => 'Enter a discount value for the selected discount type.',
+            ]);
+        }
+
         $basePrice = (float) $basePrice;
         $value = (float) $value;
+
+        if ($value <= 0) {
+            throw ValidationException::withMessages([
+                'discount_value' => 'Discount value must be greater than 0.',
+            ]);
+        }
 
         if ($type === 'percentage' && $value > 100) {
             throw ValidationException::withMessages([
@@ -383,13 +399,37 @@ class BackendProductController extends Controller
             : $value;
         $salePrice = round($basePrice - $discountAmount, 2);
 
-        if ($salePrice < 0 || $salePrice >= $basePrice) {
+        if ($salePrice <= 0 || $salePrice >= $basePrice) {
             throw ValidationException::withMessages([
                 'discount_value' => 'Discount must produce a sale price below the regular price.',
             ]);
         }
 
         return $salePrice;
+    }
+
+    /**
+     * A product without a sale price must not keep stale discount metadata,
+     * otherwise the admin form and storefront disagree about the discount.
+     */
+    private function normalizeDiscountFields(array $data): array
+    {
+        if (empty($data['sale_price'])) {
+            $data['sale_price'] = null;
+            $data['discount_type'] = null;
+            $data['discount_value'] = null;
+
+            return $data;
+        }
+
+        // A sale price entered without a discount type must not keep a stale
+        // discount value behind it.
+        if (($data['discount_type'] ?? null) === null || $data['discount_type'] === '') {
+            $data['discount_type'] = null;
+            $data['discount_value'] = null;
+        }
+
+        return $data;
     }
 
     /* ───── Variation Methods ───── */
@@ -414,6 +454,7 @@ class BackendProductController extends Controller
             $validated['discount_type'] ?? null,
             $validated['discount_value'] ?? null
         );
+        $validated = $this->normalizeDiscountFields($validated);
 
         $validated['product_id'] = $product->id;
 
@@ -444,6 +485,7 @@ class BackendProductController extends Controller
             $validated['discount_type'] ?? null,
             $validated['discount_value'] ?? null
         );
+        $validated = $this->normalizeDiscountFields($validated);
 
         $variation->update($validated);
 
@@ -476,7 +518,7 @@ class BackendProductController extends Controller
             : $value;
         $salePrice = round($price - $discountAmount, 2);
 
-        if ($salePrice < 0 || $salePrice >= $price) {
+        if ($salePrice <= 0 || $salePrice >= $price) {
             throw ValidationException::withMessages([
                 'discount_value' => 'Discount must produce a sale price below the variation price.',
             ]);

@@ -31,4 +31,25 @@ class Coupon extends Model
         'expires_at' => 'datetime',
         'is_active' => 'boolean',
     ];
+
+    /**
+     * Every redemption of this coupon, one row per customer.
+     *
+     * A coupon is a one-per-customer offer, so this is what tells us whether a
+     * given shopper has already spent it.
+     */
+    public function uses()
+    {
+        return $this->hasMany(CouponUse::class);
+    }
+
+    /** Has this specific customer already redeemed this coupon? */
+    public function isRedeemedBy(?int $userId): bool
+    {
+        if (! $userId) {
+            return false;
+        }
+
+        return $this->uses()->where('user_id', $userId)->exists();
+    }
 }

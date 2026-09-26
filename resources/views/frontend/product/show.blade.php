@@ -6,12 +6,24 @@
 
     @php
         $activeVariations = $product->variations->where('is_active', true)->values();
+        $hasVariations = $product->variations->isNotEmpty();
         $isVariableProduct = $activeVariations->isNotEmpty();
+        // Resolve the quoted variation through the model so this page and the
+        // product cards always show the exact same price.
         $defaultVariation = $isVariableProduct
-            ? $activeVariations->first(fn($variation) => (int) ($variation->stock ?? 0) > 0) ??
-                $activeVariations->first()
+            ? $product->defaultVariation()
             : null;
-        $firstVariationPrice = $defaultVariation ? (float) ($defaultVariation->price ?? 0) : null;
+        // Price of the initially selected variation (or of the product itself).
+        $selectedRegularPrice = $defaultVariation
+            ? (float) $defaultVariation->price
+            : (float) ($product->base_price ?? 0);
+        $selectedEffectivePrice = $defaultVariation
+            ? $defaultVariation->effectivePrice()
+            : (float) ($product->sale_price ?? $product->base_price ?? 0);
+        $selectedDiscountPercentage = ($selectedRegularPrice > 0 && $selectedEffectivePrice < $selectedRegularPrice)
+            ? round((($selectedRegularPrice - $selectedEffectivePrice) / $selectedRegularPrice) * 100)
+            : null;
+        $defaultVariationDescription = $defaultVariation ? trim((string) ($defaultVariation->description ?? '')) : '';
         $defaultVariationId = $defaultVariation?->id;
         $defaultVariationStock = $defaultVariation ? (int) ($defaultVariation->stock ?? 0) : 0;
         $defaultVariationAttrs = $defaultVariation ? $defaultVariation->attributes ?? [] : [];
@@ -25,15 +37,44 @@
                 ->implode(' | ') ?:
             'Variation #' . $defaultVariation->id)
             : '';
-        $firstProductImage = $product->images->first();
-        $firstProductImagePath = $firstProductImage->path ?? ($firstProductImage->image_path ?? null);
-        $firstProductImageUrl = $firstProductImagePath ? asset('storage/' . ltrim($firstProductImagePath, '/')) : null;
+        $toGalleryImageUrl = fn ($path) => filled($path)
+            ? asset('storage/' . ltrim($path, '/'))
+            : null;
 
-        // Product videos are shown in the gallery after the images; the primary
-        // clip (or the newest one) is loaded in the main media area.
-        $productVideos = $product->videos->sortByDesc('is_primary')->values();
+        $productGalleryImages = $product->images
+            ->map(fn ($image) => $toGalleryImageUrl($image->path ?? ($image->image_path ?? null)))
+            ->filter()
+            ->values();
+
+        $variationGalleryImages = $activeVariations->mapWithKeys(fn ($variation) => [
+            $variation->id => $variation->images
+                ->sortByDesc(fn ($image) => (int) $image->is_primary)
+                ->map(fn ($image) => $toGalleryImageUrl($image->path))
+                ->filter()
+                ->values(),
+        ]);
+
+        // A product that has variations shows only the selected variation's
+        // images, description and price — the parent product's media is never
+        // mixed in, not even as a fallback.
+        $initialGalleryImages = ($hasVariations
+            ? $variationGalleryImages->get($defaultVariationId, collect())
+            : $productGalleryImages)->unique()->values();
+        $firstProductImageUrl = $initialGalleryImages->first();
+        $descriptionImageUrl = $firstProductImageUrl;
+
+        // Videos belong to the simple-product gallery only.
+        $productVideos = $hasVariations
+            ? collect()
+            : $product->videos->sortByDesc('is_primary')->values();
         $primaryVideo = $productVideos->first();
         $primaryVideoUrl = $primaryVideo?->stream_url;
+
+        // Encoded without JSON_HEX_QUOT so the browser can JSON.parse the value
+        // straight from the data attribute (Blade escapes the quotes for HTML).
+        $galleryJson = fn ($images) => json_encode($images, JSON_UNESCAPED_SLASHES);
+        $productGalleryImagesJson = $hasVariations ? '[]' : $galleryJson($productGalleryImages->all());
+        $variationGalleryImagesJson = $galleryJson($variationGalleryImages->all());
     @endphp
 
 
@@ -67,7 +108,10 @@
 
                 {{-- GALLERY --}}
                 <div class="col-lg-6">
-                    <div class="product-gallery">
+                    <div class="product-gallery" id="productGallery"
+                        data-product-images="{{ $productGalleryImagesJson }}"
+                        data-variation-images="{{ $variationGalleryImagesJson }}"
+                        data-placeholder-image="{{ asset('frontend/images/dumbbell.png') }}">
                         <div class="gallery-main product-zoom-area" data-zoom-src="{{ $firstProductImageUrl ?? asset('frontend/images/dumbbell.png') }}">
                             @if ($firstProductImageUrl)
                                 <img src="{{ $firstProductImageUrl }}" alt="{{ $product->name }}" id="mainProductImg" data-zoom-src="{{ $firstProductImageUrl }}">
@@ -90,17 +134,13 @@
                             </div>
                         </div>
 
-                        @if ($product->images->count() > 1 || $productVideos->isNotEmpty())
-                            <div class="gallery-thumbs mt-3">
-                                @foreach ($product->images as $image)
-                                    @php
-                                        $imagePath = $image->path ?? ($image->image_path ?? null);
-                                        $imageUrl = $imagePath ? asset('storage/' . ltrim($imagePath, '/')) : null;
-                                    @endphp
-                                    @continue(!$imageUrl)
-                                    <div class="gallery-thumb {{ $loop->first ? 'active' : '' }}"
-                                        onclick="switchImage(this, '{{ $imageUrl }}')">
-                                        <img src="{{ $imageUrl }}" alt="Thumbnail">
+                        @if ($initialGalleryImages->count() > 1 || $productVideos->isNotEmpty())
+                            <div class="gallery-thumbs mt-3" id="productGalleryThumbs">
+                                @foreach ($initialGalleryImages as $imageUrl)
+                                    <div class="gallery-thumb gallery-thumb-image {{ $loop->first ? 'active' : '' }}"
+                                        data-gallery-image="{{ $imageUrl }}"
+                                        onclick="switchImage(this, this.dataset.galleryImage)">
+                                        <img src="{{ $imageUrl }}" alt="{{ $product->name }} image thumbnail">
                                     </div>
                                 @endforeach
 
@@ -144,25 +184,27 @@
                             </span>
                         </div>
 
-                        <div class="d-flex align-items-center gap-3 mb-4">
-                            <span class="product-detail-price" id="product-price">
-                                @if ($isVariableProduct)
-                                    ₹{{ number_format($firstVariationPrice, 0) }}
-                                @elseif($product->sale_price)
-                                    ₹{{ number_format($product->sale_price, 0) }}
-                                @else
-                                    ₹{{ number_format($product->base_price, 0) }}
-                                @endif
+                        <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
+                            {{-- 2 decimals, matching the product cards, quick view and the
+                                 cart, so a price never changes shape between pages. --}}
+                            <span class="product-detail-price" id="product-price">₹{{ number_format($selectedEffectivePrice, 2) }}</span>
+                            <span class="product-detail-price-old" id="product-price-old"
+                                style="{{ $selectedDiscountPercentage === null ? 'display:none;' : '' }}">
+                                ₹{{ number_format($selectedRegularPrice, 2) }}
                             </span>
-                            @if (!$isVariableProduct && $product->sale_price)
-                                <span class="product-detail-price-old">₹{{ number_format($product->base_price, 0) }}</span>
-                                @php $disc = round((($product->base_price - $product->sale_price) / $product->base_price) * 100); @endphp
-                                <span class="badge-sale fs-6">{{ $disc }}% OFF</span>
-                            @endif
+                            <span class="badge-sale fs-6" id="product-price-discount"
+                                style="{{ $selectedDiscountPercentage === null ? 'display:none;' : '' }}">@if ($selectedDiscountPercentage !== null){{ $selectedDiscountPercentage }}% OFF @endif</span>
                         </div>
 
-                        <p class="text-muted mb-4">
-                            {{ $product->short_description ?? 'Thoughtfully crafted jewellery designed to add a refined touch to every occasion.' }}
+                        {{-- A product with variations describes only the selected variation. --}}
+                        <p class="text-muted mb-4" id="product-short-description">
+                            @if ($hasVariations)
+                                {{ $defaultVariationDescription !== ''
+                                    ? Str::limit(strip_tags($defaultVariationDescription), 180)
+                                    : 'Select an option to see the details of this piece.' }}
+                            @else
+                                {{ $product->short_description ?? 'Thoughtfully crafted jewellery designed to add a refined touch to every occasion.' }}
+                            @endif
                         </p>
 
                         {{-- Variation selector as weight options --}}
@@ -192,12 +234,19 @@
                                         <button type="button"
                                             class="weight-option variation-option {{ $variation->id === $defaultVariationId ? 'active' : '' }}"
                                             data-variation-id="{{ $variation->id }}"
-                                            data-price="{{ (float) $variation->price }}" data-stock="{{ $stock }}"
-                                            data-label="{{ $label }}" onclick="selectVariation(this)">
+                                            data-price="{{ $variation->effectivePrice() }}" data-stock="{{ $stock }}"
+                                            data-regular-price="{{ (float) $variation->price }}"
+                                            data-discount="{{ $variation->discountPercentage() ?? 0 }}"
+                                            data-label="{{ $label }}" data-description="{{ $variation->description }}"
+                                            onclick="selectVariation(this)">
                                             <span class="variation-option-title">{{ $label }}</span>
                                             <span class="variation-option-meta">
                                                 <span
-                                                    class="variation-option-price">&#8377;{{ number_format((float) $variation->price, 0) }}</span>
+                                                    class="variation-option-price">&#8377;{{ number_format($variation->effectivePrice(), 2) }}</span>
+                                                @if ($variation->discountPercentage())
+                                                    <span class="variation-option-price-old text-decoration-line-through text-muted"
+                                                        style="font-size:0.78rem;">&#8377;{{ number_format((float) $variation->price, 0) }}</span>
+                                                @endif
                                                 <span class="variation-option-stock {{ $isOutOfStock ? 'out' : 'in' }}">
                                                     {{ $isOutOfStock ? 'Out of stock' : $stock . ' in stock' }}
                                                 </span>
@@ -348,24 +397,24 @@
                     <div class="tab-pane fade show active" id="tabDesc">
                         <div class="row g-4">
                             <div class="col-md-8">
-                                @if ($product->description)
-                                    <div>{!! $product->description !!}</div>
-                                @else
-                                    <h5 class="fw-bold mb-3">Transform Your Workout</h5>
-                                    <p class="text-muted">{{ $product->name }} is engineered for serious home fitness.
-                                        High-quality materials and precision manufacturing ensure balanced, consistent
-                                        performance every workout.</p>
-                                    <h6 class="fw-bold mt-4 mb-2">What's in the Box:</h6>
-                                    <ul class="text-muted">
-                                        <li>1x {{ $product->name }}</li>
-                                        <li>1x User Manual & Workout Guide</li>
-                                        <li>1x Warranty Card</li>
-                                    </ul>
-                                @endif
+                                <div id="product-description" class="product-description-content">
+                                    @if ($hasVariations)
+                                        @if ($defaultVariationDescription !== '')
+                                            <div>{!! $defaultVariationDescription !!}</div>
+                                        @else
+                                            <p class="text-muted mb-0">No description is available for this variation.</p>
+                                        @endif
+                                    @elseif ($product->description)
+                                        <div>{!! $product->description !!}</div>
+                                    @else
+                                        <h5 class="fw-bold mb-3">Product Details</h5>
+                                        <p class="text-muted">{{ $product->name }} is ready to explore.</p>
+                                    @endif
+                                </div>
                             </div>
                             <div class="col-md-4 text-center">
-                                @if ($firstProductImageUrl)
-                                    <img src="{{ $firstProductImageUrl }}" alt="{{ $product->name }}"
+                                @if ($descriptionImageUrl)
+                                    <img id="description-product-image" src="{{ $descriptionImageUrl }}" alt="{{ $product->name }}"
                                         style="max-height:250px; object-fit:contain; filter:drop-shadow(0 10px 20px rgba(0,0,0,0.15));">
                                 @endif
                             </div>
@@ -407,13 +456,13 @@
                                     @endphp
                                     <tr>
                                         <td>{{ $attrs ?: 'Variation #' . $variation->id }}</td>
-                                        <td>₹{{ number_format((float) $variation->price, 0) }}</td>
+                                        <td>₹{{ number_format($variation->effectivePrice(), 2) }}</td>
                                     </tr>
                                 @endforeach
                             @else
                                 <tr>
                                     <td>Price</td>
-                                    <td>₹{{ number_format($product->sale_price ?? $product->base_price, 0) }}</td>
+                                    <td>₹{{ number_format($product->sale_price ?? $product->base_price, 2) }}</td>
                                 </tr>
                             @endif
                             <tr>
@@ -1034,7 +1083,9 @@
             document.querySelectorAll('.gallery-thumb').forEach(function(t) {
                 t.classList.remove('active');
             });
-            thumb.classList.add('active');
+            if (thumb) {
+                thumb.classList.add('active');
+            }
             if (typeof window.refreshProductZoom === 'function') {
                 window.refreshProductZoom(src);
             }
@@ -1137,6 +1188,79 @@
             });
         }
 
+        function readGalleryData(gallery, key, fallback) {
+            try {
+                const data = JSON.parse(gallery.dataset[key] || '');
+                return data && typeof data === 'object' ? data : fallback;
+            } catch (error) {
+                return fallback;
+            }
+        }
+
+        // Show only the selected variation's photos. A product that has
+        // variations never borrows the parent product's gallery.
+        function renderGalleryForVariation(variationId) {
+            const gallery = document.getElementById('productGallery');
+            const mainImage = document.getElementById('mainProductImg');
+            if (!gallery || !mainImage) return;
+
+            const productImages = readGalleryData(gallery, 'productImages', []);
+            const variationImages = readGalleryData(gallery, 'variationImages', {});
+            const selectedImages = Array.isArray(variationImages[String(variationId)])
+                ? variationImages[String(variationId)]
+                : [];
+            const images = (selectedImages.length ? selectedImages : productImages).filter(
+                (src) => typeof src === 'string' && src.length > 0
+            );
+            const placeholder = gallery.dataset.placeholderImage || mainImage.src;
+
+            let thumbs = document.getElementById('productGalleryThumbs');
+            if (!thumbs && images.length > 1) {
+                thumbs = document.createElement('div');
+                thumbs.id = 'productGalleryThumbs';
+                thumbs.className = 'gallery-thumbs mt-3';
+                gallery.appendChild(thumbs);
+            }
+
+            if (thumbs) {
+                thumbs.querySelectorAll('.gallery-thumb-image').forEach(function(thumb) {
+                    thumb.remove();
+                });
+
+                const fragment = document.createDocumentFragment();
+                images.forEach(function(src) {
+                    const thumb = document.createElement('div');
+                    thumb.className = 'gallery-thumb gallery-thumb-image';
+                    thumb.dataset.galleryImage = src;
+                    thumb.setAttribute('onclick', 'switchImage(this, this.dataset.galleryImage)');
+
+                    const image = document.createElement('img');
+                    image.src = src;
+                    image.alt = 'Product image thumbnail';
+                    thumb.appendChild(image);
+                    fragment.appendChild(thumb);
+                });
+
+                const firstVideoThumb = thumbs.querySelector('.gallery-thumb-video');
+                thumbs.insertBefore(fragment, firstVideoThumb);
+            }
+
+            if (images.length) {
+                switchImage(thumbs ? thumbs.querySelector('.gallery-thumb-image') : null, images[0]);
+                return;
+            }
+
+            // A variation without photos must not leave another variation's
+            // photo on screen; show the neutral placeholder instead.
+            mainImage.classList.add('main-product-img-placeholder');
+            mainImage.style.display = '';
+            mainImage.src = placeholder;
+            mainImage.dataset.zoomSrc = placeholder;
+            if (typeof window.refreshProductZoom === 'function') {
+                window.refreshProductZoom(placeholder);
+            }
+        }
+
         // Variation selector
         function selectVariation(el) {
             document.querySelectorAll('.weight-option').forEach(function(opt) {
@@ -1145,13 +1269,36 @@
             el.classList.add('active');
 
             const price = parseFloat(el.dataset.price || 0);
+            const regularPrice = parseFloat(el.dataset.regularPrice || '0');
+            const discount = parseFloat(el.dataset.discount || '0');
             const varId = el.dataset.variationId;
             const stock = parseInt(el.dataset.stock || '0', 10);
             const label = el.dataset.label || 'Variant';
+            const hasDiscount = discount > 0 && regularPrice > price;
 
             const priceEl = document.getElementById('product-price');
             if (priceEl) {
-                priceEl.textContent = '₹' + price.toLocaleString('en-IN');
+                priceEl.textContent = '\u20B9' + price.toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+
+            // The struck-through regular price and the % OFF badge follow the
+            // selected variation (both hidden when it is not discounted).
+            const oldPriceEl = document.getElementById('product-price-old');
+            if (oldPriceEl) {
+                oldPriceEl.textContent = '\u20B9' + regularPrice.toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+                oldPriceEl.style.display = hasDiscount ? '' : 'none';
+            }
+
+            const discountEl = document.getElementById('product-price-discount');
+            if (discountEl) {
+                discountEl.textContent = Math.round(discount) + '% OFF';
+                discountEl.style.display = hasDiscount ? '' : 'none';
             }
 
             const varInput = document.getElementById('product_variation_id');
@@ -1162,6 +1309,45 @@
 
             const selectedLabel = document.getElementById('selected-variation-label');
             if (selectedLabel) selectedLabel.textContent = 'Selected: ' + label;
+
+            const productDescription = document.getElementById('product-description');
+            if (productDescription) {
+                const variationDescription = el.dataset.description || '';
+                productDescription.innerHTML = variationDescription.trim()
+                    ? variationDescription
+                    : '<p class="text-muted mb-0">No description is available for this variation.</p>';
+            }
+
+            const shortDescription = document.getElementById('product-short-description');
+            if (shortDescription) {
+                const shortText = (el.dataset.description || '')
+                    .replace(/<[^>]*>/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                shortDescription.textContent = shortText
+                    ? (shortText.length > 180 ? shortText.slice(0, 177) + '...' : shortText)
+                    : 'Select an option to see the details of this piece.';
+            }
+
+            renderGalleryForVariation(varId);
+
+            const descriptionImage = document.getElementById('description-product-image');
+            const variationImages = readGalleryData(
+                document.getElementById('productGallery') || document.createElement('div'),
+                'variationImages',
+                {}
+            );
+            if (descriptionImage) {
+                const firstVariationImage = Array.isArray(variationImages[String(varId)])
+                    ? variationImages[String(varId)][0]
+                    : '';
+                if (firstVariationImage) {
+                    descriptionImage.src = firstVariationImage;
+                    descriptionImage.hidden = false;
+                } else {
+                    descriptionImage.hidden = true;
+                }
+            }
 
             const stockLabel = document.getElementById('selected-variation-stock');
             if (stockLabel) stockLabel.textContent = stock > 0 ? 'In stock' : 'Out of stock';

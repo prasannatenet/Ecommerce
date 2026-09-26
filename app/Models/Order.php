@@ -6,6 +6,21 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
+    /**
+     * Order amounts are always whole rupees.
+     *
+     * Paise are never charged, never shown and never handed to a payment
+     * gateway, so every place that derives an order amount runs it through here.
+     * Rounding at the point the amount is derived (rather than at display time)
+     * is what keeps the figure on the checkout page, the figure stored on the
+     * order and the figure sent to Razorpay identical, instead of showing a
+     * customer one number and charging them another.
+     */
+    public static function roundAmount(float $amount): float
+    {
+        return round(max(0, $amount));
+    }
+
     protected $fillable = [
         'user_id',
         'checkout_token',

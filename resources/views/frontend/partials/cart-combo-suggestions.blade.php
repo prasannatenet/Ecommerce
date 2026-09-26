@@ -99,18 +99,51 @@
                     <span class="fw-bold text-white" style="font-size: 0.88rem;">{{ $combo->name }}</span>
                     <span class="ms-auto badge"
                           style="background: rgba(255,255,255,0.2); color: #fff; font-size: 0.7rem; font-weight: 600;">
-                        Save {{ $suggestion['savings_percent'] }}% when complete
+                        @if($suggestion['is_restorable'])
+                            Save {{ $suggestion['savings_percent'] }}% when restored
+                        @else
+                            Save {{ $suggestion['savings_percent'] }}% when complete
+                        @endif
                     </span>
                 </div>
 
                 <div class="px-3 py-3">
                     {{-- Hint text --}}
-                    <p class="mb-3" style="font-size: 0.82rem; color: #78350f;">
-                        <i class="bi bi-check-circle-fill text-success me-1"></i>
-                        <strong>{{ $suggestion['in_cart']->count() }}</strong>
-                        item(s) already in your cart. Add the item(s) below to unlock
-                        <strong>₹{{ number_format($suggestion['discount_amount'], 2) }}</strong> combo discount!
-                    </p>
+                    @if($suggestion['is_restorable'])
+                        <p class="mb-3" style="font-size: 0.82rem; color: #78350f;">
+                            <i class="bi bi-exclamation-triangle-fill me-1" style="color: #d97706;"></i>
+                            You removed an item from <strong>{{ $combo->name }}</strong>, so the combo
+                            price no longer applies and your remaining items are back at their
+                            regular price.
+                        </p>
+
+                        {{--
+                            One click puts the removed item back and re-arms the whole combo.
+                            Adding the product on its own from the product page would create a
+                            plain cart line, which the combo engine ignores, so the discount
+                            would never come back.
+                        --}}
+                        <form action="{{ route('cart.restore-combo') }}" method="POST"
+                              class="combo-suggest-form mb-3">
+                            @csrf
+                            <input type="hidden" name="combo_id" value="{{ $combo->id }}">
+                            <button type="submit"
+                                    class="btn btn-sm fw-bold"
+                                    style="background: linear-gradient(135deg, #b45309, #d97706);
+                                           color: #fff; border: none; border-radius: 999px;
+                                           padding: 7px 16px; font-size: 0.8rem;">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i>
+                                Restore combo &amp; save ₹{{ number_format($suggestion['discount_amount'], 2) }}
+                            </button>
+                        </form>
+                    @else
+                        <p class="mb-3" style="font-size: 0.82rem; color: #78350f;">
+                            <i class="bi bi-check-circle-fill text-success me-1"></i>
+                            <strong>{{ $suggestion['in_cart']->count() }}</strong>
+                            item(s) already in your cart. Add the item(s) below to unlock
+                            <strong>₹{{ number_format($suggestion['discount_amount'], 2) }}</strong> combo discount!
+                        </p>
+                    @endif
 
                     {{-- Missing products — show original price ONLY (no combo price) --}}
                     <div class="d-flex flex-column gap-2">

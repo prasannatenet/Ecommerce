@@ -72,8 +72,23 @@
                                         @endphp
                                         <div style="font-size: 14px; color:#6C757D; margin-bottom:2px;">{{ $attrs }}</div>
                                     @endif
+                                    @php
+                                        $wishlistVariation = $item->variation;
+                                        $wishlistPrice = $wishlistVariation
+                                            ? $wishlistVariation->effectivePrice()
+                                            : $item->product->effectivePrice();
+                                        $wishlistRegularPrice = $wishlistVariation
+                                            ? (float) $wishlistVariation->price
+                                            : $item->product->regularPrice();
+                                    @endphp
                                     <div class="fw-bold" style="color: #017075;">
-                                        ₹{{ number_format($item->product->sale_price ?? $item->product->base_price, 2) }}
+                                        ₹{{ number_format($wishlistPrice, 2) }}
+                                        @if ($wishlistRegularPrice > $wishlistPrice)
+                                            <span class="text-muted text-decoration-line-through"
+                                                style="font-size:0.85rem; font-weight:500;">
+                                                ₹{{ number_format($wishlistRegularPrice, 2) }}
+                                            </span>
+                                        @endif
                                     </div>
                                 </div>
                             </div>

@@ -237,6 +237,189 @@ function initBackToTop() {
   btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 }
 
+// ===== FLOATING OFFER TAB =====
+// Left-edge tab that travels with the shopper and opens every running coupon.
+function initFloatingOffers() {
+  const wrap = document.getElementById('offerTab');
+  if (!wrap) return;
+
+  const btn = document.getElementById('offerTabBtn');
+  const panel = document.getElementById('offerTabPanel');
+  const closeBtn = document.getElementById('offerTabClose');
+  const backdrop = document.getElementById('offerTabBackdrop');
+  if (!btn || !panel) return;
+
+  const isOpen = () => wrap.classList.contains('is-open');
+
+  const open = () => {
+    wrap.classList.add('is-open');
+    btn.setAttribute('aria-expanded', 'true');
+    panel.setAttribute('aria-hidden', 'false');
+    if (backdrop) backdrop.hidden = false;
+  };
+
+  const close = () => {
+    wrap.classList.remove('is-open');
+    btn.setAttribute('aria-expanded', 'false');
+    panel.setAttribute('aria-hidden', 'true');
+    if (backdrop) backdrop.hidden = true;
+  };
+
+  btn.addEventListener('click', () => (isOpen() ? close() : open()));
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      close();
+      btn.focus();
+    });
+  }
+
+  // The shield sits behind the panel, so tapping it dismisses the popup.
+  if (backdrop) backdrop.addEventListener('click', close);
+
+  // Any click outside the widget closes it (the tab itself is inside, so the
+  // toggle above still wins).
+  document.addEventListener('click', (e) => {
+    if (isOpen() && !wrap.contains(e.target)) close();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isOpen()) {
+      close();
+      btn.focus();
+    }
+  });
+
+  // Copy a coupon code straight out of the panel.
+  panel.querySelectorAll('[data-offer-code]').forEach((copyBtn) => {
+    copyBtn.addEventListener('click', () => {
+      const code = (copyBtn.dataset.offerCode || '').trim();
+      if (!code) return;
+
+      const done = () => showToast('Coupon code ' + code.toUpperCase() + ' copied!');
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(done).catch(() => showToast('Coupon code: ' + code.toUpperCase()));
+      } else {
+        showToast('Coupon code: ' + code.toUpperCase());
+      }
+    });
+  });
+}
+
+// ===== LIVE METAL RATES =====
+// Top bar "LIVE" button: opens the gold & silver panel and keeps it current.
+function initLiveRates() {
+  const wrap = document.getElementById('liveRates');
+  if (!wrap) return;
+
+  const btn = document.getElementById('liveRatesBtn');
+  const panel = document.getElementById('liveRatesPanel');
+  const closeBtn = document.getElementById('liveRatesClose');
+  const refreshBtn = document.getElementById('liveRatesRefresh');
+  const url = wrap.getAttribute('data-live-rates-url');
+  if (!btn || !panel || !url) return;
+
+  const REFRESH_MS = 5 * 60 * 1000;
+  const CARET_ICONS = {
+    up: 'bi-caret-up-fill',
+    down: 'bi-caret-down-fill',
+    flat: 'bi-dash'
+  };
+
+  const isOpen = () => wrap.classList.contains('is-open');
+
+  const open = () => {
+    wrap.classList.add('is-open');
+    btn.setAttribute('aria-expanded', 'true');
+    panel.setAttribute('aria-hidden', 'false');
+  };
+
+  const close = () => {
+    wrap.classList.remove('is-open');
+    btn.setAttribute('aria-expanded', 'false');
+    panel.setAttribute('aria-hidden', 'true');
+  };
+
+  btn.addEventListener('click', () => (isOpen() ? close() : open()));
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      close();
+      btn.focus();
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    if (isOpen() && !wrap.contains(e.target)) close();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isOpen()) {
+      close();
+      btn.focus();
+    }
+  });
+
+  /* The server sends the same pre-formatted strings the blade rendered, so a
+     refresh can only ever replace text — never reformat it differently. */
+  const apply = (data) => {
+    if (!data) return;
+
+    const flat = data.flat || {};
+    const metals = data.metals || {};
+
+    panel.querySelectorAll('[data-live]').forEach((el) => {
+      const value = flat[el.getAttribute('data-live')];
+      if (typeof value === 'string') el.textContent = value;
+    });
+
+    panel.querySelectorAll('[data-live-dir]').forEach((el) => {
+      const dir = flat[el.getAttribute('data-live-dir')];
+      if (!dir) return;
+
+      el.classList.remove('is-up', 'is-down', 'is-flat');
+      el.classList.add('is-' + dir);
+
+      const icon = el.querySelector('i');
+      if (icon) icon.className = 'bi ' + (CARET_ICONS[dir] || CARET_ICONS.flat);
+    });
+
+    panel.querySelectorAll('[data-live-metal]').forEach((el) => {
+      const metal = metals[el.getAttribute('data-live-metal')];
+      if (metal && metal.direction) el.setAttribute('data-live-direction', metal.direction);
+    });
+
+    btn.classList.toggle('is-offline', !data.available);
+  };
+
+  const refresh = () => {
+    if (refreshBtn) refreshBtn.classList.add('is-loading');
+
+    fetch(url, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      credentials: 'same-origin'
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(apply)
+      .catch(() => {
+        // Keep showing the last known rates rather than blanking the panel.
+      })
+      .then(() => {
+        if (refreshBtn) refreshBtn.classList.remove('is-loading');
+      });
+  };
+
+  if (refreshBtn) refreshBtn.addEventListener('click', refresh);
+
+  window.setInterval(() => {
+    if (document.visibilityState === 'visible') refresh();
+  }, REFRESH_MS);
+}
+
 // ===== SCROLL ANIMATIONS =====
 function initScrollAnimations() {
   const elements = document.querySelectorAll('.animate-on-scroll');
@@ -1415,6 +1598,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initSiteSearch();
   initSiteLocation();
   initBackToTop();
+  initFloatingOffers();
+  initLiveRates();
   initScrollAnimations();
   initHomepageProducts();
   initPMHomepage();

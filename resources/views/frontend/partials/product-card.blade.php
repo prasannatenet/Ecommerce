@@ -20,10 +20,9 @@
         @endif
 
         {{-- Sale Badge --}}
-        @if($product->sale_price)
-            @php $discount = round((($product->base_price - $product->sale_price) / $product->base_price) * 100); @endphp
+        @if($product->hasDiscount())
             <span style="position:absolute; top:10px; right:10px; background:#dc3545; color:#fff; font-size:0.7rem; font-weight:700; padding:4px 8px; border-radius:4px; z-index:2;">
-                -{{ $discount }}%
+                -{{ round($product->discountPercentage()) }}%
             </span>
         @endif
     </div>
@@ -42,11 +41,9 @@
         </a>
 
         <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
-            @if($product->sale_price)
-                <span class="pm-product-price" style="color:#017075;">Rs {{ number_format($product->sale_price, 2) }}</span>
-                <span class="pm-product-price-old">Rs {{ number_format($product->base_price, 2) }}</span>
-            @else
-                <span class="pm-product-price" style="color:#017075;">Rs {{ number_format($product->base_price, 2) }}</span>
+            <span class="pm-product-price" style="color:#017075;">Rs {{ number_format($product->effectivePrice(), 2) }}</span>
+            @if($product->hasDiscount())
+                <span class="pm-product-price-old">Rs {{ number_format($product->regularPrice(), 2) }}</span>
             @endif
         </div>
 

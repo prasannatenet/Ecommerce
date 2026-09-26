@@ -362,7 +362,7 @@ class FrontendProductController extends Controller
 
         $product = Product::where('id', $id)
             ->where('is_active', true)
-            ->with('variations', 'images', 'videos', 'brand', 'category')
+            ->with('variations.images', 'images', 'videos', 'brand', 'category')
             ->firstOrFail();
 
         return view('frontend.partials.quick-view', compact('product'));

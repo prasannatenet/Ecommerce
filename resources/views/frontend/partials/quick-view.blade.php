@@ -1,27 +1,43 @@
 {{-- Quick View Modal Body --}}
 @php
     $activeVariations = $product->variations->where('is_active', true)->values();
-    $mainImagePath = optional($product->images->first())->path ?? optional($product->images->first())->image_path ?? null;
-    $mainImageUrl = $mainImagePath ? asset('storage/' . ltrim($mainImagePath, '/')) : null;
+    $hasVariations = $product->variations->isNotEmpty();
+    // Same resolver as the product cards and the product detail page, so the
+    // quick view can never quote a different price than the card it was opened
+    // from.
+    $defaultVariation = $product->defaultVariation();
+    $toQuickViewImageUrl = fn ($path) => filled($path)
+        ? asset('storage/' . ltrim($path, '/'))
+        : null;
+
+    // A product with variations previews only the default variation's photos,
+    // never the parent product's.
+    $galleryImages = $hasVariations
+        ? ($defaultVariation?->images
+            ->sortByDesc(fn ($image) => (int) $image->is_primary)
+            ->map(fn ($image) => $toQuickViewImageUrl($image->path))
+            ->filter()
+            ->values() ?? collect())
+        : $product->images
+            ->map(fn ($image) => $toQuickViewImageUrl($image->path ?? ($image->image_path ?? null)))
+            ->filter()
+            ->values();
+
+    $mainImageUrl = $galleryImages->first();
     $mainQuickViewImageId = 'quick-view-main-image-' . $product->id;
 @endphp
 
 <div class="row g-4">
     {{-- Product Image --}}
     <div class="col-md-5">
-        @if($product->images->isNotEmpty())
+        @if($galleryImages->isNotEmpty())
             <img id="{{ $mainQuickViewImageId }}"
                  src="{{ $mainImageUrl }}"
                  alt="{{ $product->name }}"
                  style="width:100%; border-radius:10px; object-fit:contain; background:#f9f9f9; padding:16px; max-height:320px;">
-            @if($product->images->count() > 1)
+            @if($galleryImages->count() > 1)
                 <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
-                    @foreach($product->images->take(4) as $img)
-                        @php
-                            $thumbPath = $img->path ?? $img->image_path ?? null;
-                            $thumbUrl = $thumbPath ? asset('storage/' . ltrim($thumbPath, '/')) : null;
-                        @endphp
-                        @continue(!$thumbUrl)
+                    @foreach($galleryImages->take(4) as $thumbUrl)
                         <img src="{{ $thumbUrl }}"
                              alt="{{ $product->name }}"
                              style="width:60px; height:60px; object-fit:contain; border-radius:6px; background:#f9f9f9; padding:4px; border:1.5px solid #DEE2E6; cursor:pointer;"
@@ -51,7 +67,13 @@
 
         {{-- Price --}}
         <div style="margin-bottom:16px;">
-            @if($product->sale_price)
+            @if($hasVariations && $defaultVariation)
+                <span style="font-size:1.6rem; font-weight:900; color:#017075;">Rs {{ number_format($defaultVariation->effectivePrice(), 2) }}</span>
+                @if($defaultVariation->discountPercentage() !== null)
+                    <span style="font-size:1rem; color:#aaa; text-decoration:line-through; margin-left:8px;">Rs {{ number_format((float) $defaultVariation->price, 2) }}</span>
+                    <span style="display:inline-block; padding:2px 8px; background:#dc3545; color:#fff; font-size:0.75rem; font-weight:700; border-radius:4px; margin-left:8px;">-{{ $defaultVariation->discountPercentage() }}%</span>
+                @endif
+            @elseif($product->sale_price)
                 <span style="font-size:1.6rem; font-weight:900; color:#017075;">Rs {{ number_format($product->sale_price, 2) }}</span>
                 <span style="font-size:1rem; color:#aaa; text-decoration:line-through; margin-left:8px;">Rs {{ number_format($product->base_price, 2) }}</span>
                 @php
@@ -66,9 +88,10 @@
         </div>
 
         {{-- Short Description --}}
-        @if($product->description)
+        @php $quickViewDescription = $hasVariations ? $defaultVariation?->description : $product->description; @endphp
+        @if($quickViewDescription)
             <p style="color:#6C757D; font-size:0.9rem; line-height:1.6; margin-bottom:16px; max-height:80px; overflow:hidden;">
-                {{ Str::limit(strip_tags($product->description), 180) }}
+                {{ Str::limit(strip_tags($quickViewDescription), 180) }}
             </p>
         @endif
 

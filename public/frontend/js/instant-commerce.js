@@ -104,7 +104,7 @@
     function ajaxSubmit(form, btn) {
         var action = form.getAttribute('action') || '';
         var isCart = action.indexOf('/cart/add') !== -1;
-        var isCombo = action.indexOf('/cart/add-combo') !== -1;
+        var isCombo = action.indexOf('/cart/add-combo') !== -1 || action.indexOf('/cart/restore-combo') !== -1;
         var isWish = action.indexOf('/wishlist') !== -1 && action.indexOf('toggle') !== -1;
         if (!isCart && !isCombo && !isWish) return false;
         setBusy(btn, true);
@@ -176,7 +176,7 @@
         var form = e.target;
         if (!form || form.tagName !== 'FORM') return;
         var action = form.getAttribute('action') || '';
-        if (action.indexOf('/cart/add') === -1 && action.indexOf('/cart/add-combo') === -1 && action.indexOf('/wishlist/toggle') === -1) return;
+        if (action.indexOf('/cart/add') === -1 && action.indexOf('/cart/restore-combo') === -1 && action.indexOf('/wishlist/toggle') === -1) return;
         if (form.classList.contains('js-cart-qty-form')) return;
         var btn = (e.submitter && e.submitter.tagName === 'BUTTON') ? e.submitter : form.querySelector('button[type="submit"]');
         if (ajaxSubmit(form, btn)) e.preventDefault();

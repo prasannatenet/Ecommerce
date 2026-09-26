@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\Combo;
 use App\Models\Coupon;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductVariation;
 use App\Models\Wishlist;
@@ -47,7 +48,9 @@ class FrontendCartController extends Controller
         $freeItems = collect($appliedCoupon['free_items'] ?? []);
         $shippingCharge = $subtotal >= 5000 ? 0.0 : 199.0;
         $comboDiscount = (float) ($comboSummary['discount'] ?? 0);
-        $grandTotal = max(0, $subtotal - $comboDiscount - $discount) + $shippingCharge;
+        // Whole rupees, the same rule the order itself is created with, so the
+        // cart total never differs from what checkout charges.
+        $grandTotal = Order::roundAmount((float) max(0, $subtotal - $comboDiscount - $discount) + $shippingCharge);
             $availableCoupons = Coupon::query()
                 ->where('is_active', true)
                 ->orderByDesc('id')
@@ -83,7 +86,18 @@ class FrontendCartController extends Controller
 
             $comboSuggestions = $this->getComboSuggestions($cartItems, $comboSummary);
 
-            return view('frontend.cart.index', compact('cartItems', 'subtotal', 'discount', 'shippingCharge', 'grandTotal', 'appliedCoupon', 'availableCoupons', 'freeItems', 'comboSuggestions', 'comboSummary', 'comboDiscount', 'hasAppliedCombo'));
+            // What each line costs without any combo offer, keyed by cart line id.
+            // The price column shows this while the total column shows the charge,
+            // so a combo line reads "1,000 -> 950" instead of only the discounted
+            // number. regularUnitPrice() is the single source of truth: it keeps
+            // a variation line on its own variation price rather than the
+            // product's cheapest one.
+            $lineOriginalPrices = $cartItems
+                ->mapWithKeys(fn ($item) => [
+                    $item->id => round($this->comboService->regularUnitPrice($item), 2),
+                ]);
+
+            return view('frontend.cart.index', compact('cartItems', 'subtotal', 'discount', 'shippingCharge', 'grandTotal', 'appliedCoupon', 'availableCoupons', 'freeItems', 'comboSuggestions', 'comboSummary', 'comboDiscount', 'hasAppliedCombo', 'lineOriginalPrices'));
     }
 
     public function add(Request $request)
@@ -120,7 +134,11 @@ class FrontendCartController extends Controller
         }
 
         $variationId = $selectedVariation?->id;
-        $unitPrice = $selectedVariation ? (float) $selectedVariation->price : (float) ($product->sale_price ?? $product->base_price);
+        // The customer pays the discounted (effective) price of the selected
+        // variation, not its regular price.
+        $unitPrice = $selectedVariation
+            ? $selectedVariation->effectivePrice()
+            : $product->effectivePrice();
 
         if (! Auth::check()) {
             return $this->addToGuestCart($request, $product->id, $variationId, $unitPrice, (int) $data['quantity']);
@@ -182,26 +200,7 @@ class FrontendCartController extends Controller
         }
 
         // Allocate the combo price across products proportionally
-        $totalOriginal = (float) $products->sum(fn ($p) => (float) $p->display_price);
-        $comboTotalPrice = $combo->comboPrice();
-        $allocatedPrices = [];
-
-        foreach ($products as $product) {
-            $origPrice = (float) $product->display_price;
-            if ($totalOriginal > 0) {
-                $allocatedPrices[$product->id] = round(($origPrice / $totalOriginal) * $comboTotalPrice, 2);
-            } else {
-                $allocatedPrices[$product->id] = 0.0;
-            }
-        }
-
-        // Adjust for rounding so the sum equals comboTotalPrice
-        $allocatedSum = round(array_sum($allocatedPrices), 2);
-        $diff = round($comboTotalPrice - $allocatedSum, 2);
-        if (abs($diff) > 0.001 && $products->isNotEmpty()) {
-            $firstProductId = $products->first()->id;
-            $allocatedPrices[$firstProductId] = round($allocatedPrices[$firstProductId] + $diff, 2);
-        }
+        $allocatedPrices = $this->comboUnitPrices($combo, $products);
 
         $message = 'Combo added to cart successfully.';
 
@@ -221,6 +220,11 @@ class FrontendCartController extends Controller
 
             if ($cartItem) {
                 $cartItem->quantity += $quantity;
+                // Re-apply the allocated combo price. This line may still be
+                // holding a restored regular price after the customer removed a
+                // sibling product from this combo, and bumping the quantity
+                // alone would leave the discount permanently switched off.
+                $cartItem->price = $unitPrice;
                 $cartItem->save();
             } else {
                 Cart::create([
@@ -236,7 +240,112 @@ class FrontendCartController extends Controller
         return $this->cartActionResponse($request, true, $message);
     }
 
-    private function addToGuestComboCart(Request $request, Combo $combo, $products, array $allocatedPrices, int $quantity, string $message)
+    /**
+     * Split the combo price across its products in proportion to the price the
+     * customer sees, so the allocated unit prices add up to exactly comboPrice().
+     *
+     * @param  \Illuminate\Support\Collection<int, \App\Models\Product>  $products
+     * @return array<int, float>  product id => allocated unit price
+     */
+    private function comboUnitPrices(Combo $combo, $products): array
+    {
+        $totalOriginal = (float) $products->sum(fn ($p) => (float) $p->display_price);
+        $comboTotalPrice = $combo->comboPrice();
+        $allocatedPrices = [];
+
+        foreach ($products as $product) {
+            $origPrice = (float) $product->display_price;
+            if ($totalOriginal > 0) {
+                $allocatedPrices[$product->id] = round(($origPrice / $totalOriginal) * $comboTotalPrice, 2);
+            } else {
+                $allocatedPrices[$product->id] = 0.0;
+            }
+        }
+
+        // Adjust for rounding so the sum equals comboTotalPrice
+        $allocatedSum = round(array_sum($allocatedPrices), 2);
+        $diff = round($comboTotalPrice - $allocatedSum, 2);
+
+        if (abs($diff) > 0.001 && $products->isNotEmpty()) {
+            $firstProductId = $products->first()->id;
+            $allocatedPrices[$firstProductId] = round($allocatedPrices[$firstProductId] + $diff, 2);
+        }
+
+        return $allocatedPrices;
+    }
+
+    /**
+     * Put a broken combo back together after the customer removed one of its
+     * products.
+     *
+     * This deliberately does not go through addCombo(): that action means "add
+     * another set", so it would also bump the quantity of the products the
+     * customer kept. Restoring only has to re-add whatever is missing and put
+     * the surviving lines back on their allocated combo price, leaving the
+     * quantities exactly as they are.
+     */
+    public function restoreCombo(Request $request)
+    {
+        try {
+            $data = $request->validate([
+                'combo_id' => 'required|exists:combos,id',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->cartActionResponse($request, false, 'Invalid combo selected.', 422);
+        }
+
+        $combo = Combo::where('id', $data['combo_id'])
+            ->with(['products' => fn ($q) => $q->with('images')])
+            ->first();
+
+        if (! $combo || ! $combo->isLive()) {
+            return $this->cartActionResponse($request, false, 'This combo is no longer available.');
+        }
+
+        $products = $combo->products;
+
+        if ($products->isEmpty()) {
+            return $this->cartActionResponse($request, false, 'This combo has no products.');
+        }
+
+        $allocatedPrices = $this->comboUnitPrices($combo, $products);
+        $message = 'Combo restored — the combo price is applied again.';
+
+        if (! Auth::check()) {
+            return $this->addToGuestComboCart($request, $combo, $products, $allocatedPrices, 1, $message, true);
+        }
+
+        $this->mergeGuestCartToUser(Auth::id());
+
+        foreach ($products as $product) {
+            $unitPrice = $allocatedPrices[$product->id];
+
+            $cartItem = Cart::where('user_id', Auth::id())
+                ->where('product_id', $product->id)
+                ->where('combo_id', $combo->id)
+                ->first();
+
+            if ($cartItem) {
+                // Already there from before the removal: only the price changed,
+                // because applyExplicitComboPrices() had put it back on its
+                // regular price while the combo was incomplete.
+                $cartItem->price = $unitPrice;
+                $cartItem->save();
+            } else {
+                Cart::create([
+                    'user_id' => Auth::id(),
+                    'product_id' => $product->id,
+                    'combo_id' => $combo->id,
+                    'quantity' => 1,
+                    'price' => $unitPrice,
+                ]);
+            }
+        }
+
+        return $this->cartActionResponse($request, true, $message);
+    }
+
+    private function addToGuestComboCart(Request $request, Combo $combo, $products, array $allocatedPrices, int $quantity, string $message, bool $keepQuantities = false)
     {
         $entries = (array) (session('guest_cart', []) ?? []);
 
@@ -247,7 +356,12 @@ class FrontendCartController extends Controller
             $found = false;
             foreach ($entries as $i => $entry) {
                 if (($entry['key'] ?? '') === $key) {
-                    $entries[$i]['quantity'] = (int) ($entries[$i]['quantity'] ?? 1) + $quantity;
+                    if (! $keepQuantities) {
+                        $entries[$i]['quantity'] = (int) ($entries[$i]['quantity'] ?? 1) + $quantity;
+                    }
+                    // Same as the logged-in path: restore the allocated combo
+                    // price so putting a removed product back re-arms the offer.
+                    $entries[$i]['price'] = $unitPrice;
                     $found = true;
                     break;
                 }
@@ -359,7 +473,7 @@ class FrontendCartController extends Controller
             return $this->cartActionResponse($request, false, 'Only ' . (int) ($product->stock ?? 0) . ' available in stock.', 422);
         }
 
-        $unitPrice = (float) ($product->sale_price ?? $product->base_price);
+        $unitPrice = $product->effectivePrice();
 
         if (! Auth::check()) {
             $entries = array_values((array) (session('guest_cart', []) ?? []));
@@ -406,12 +520,16 @@ class FrontendCartController extends Controller
         $cartItem = Cart::where('user_id', Auth::id())
             ->where('product_id', $productId)
             ->whereNull('product_variation_id')
+            // Combo lines also have no variation, but their price is the
+            // allocated combo price and must not be reset to the plain one.
+            ->whereNull('combo_id')
             ->first();
 
         if (! $cartItem) {
             $cartItem = Cart::where('user_id', Auth::id())
                 ->where('product_id', $productId)
                 ->where('product_variation_id', 0)
+                ->whereNull('combo_id')
                 ->first();
         }
 
@@ -503,7 +621,8 @@ class FrontendCartController extends Controller
 
             $variation = null;
             if (! empty($entry['product_variation_id'])) {
-                $variation = ProductVariation::find((int) $entry['product_variation_id']);
+                $variation = ProductVariation::with('images')
+                    ->find((int) $entry['product_variation_id']);
             }
 
             $items[] = (object) [
@@ -512,7 +631,7 @@ class FrontendCartController extends Controller
                 'variation' => $variation,
                 'combo_id' => $entry['combo_id'] ?? null,
                 'quantity' => (int) ($entry['quantity'] ?? 1),
-                'price' => (float) ($entry['price'] ?? ($product->sale_price ?? $product->base_price)),
+                'price' => (float) ($entry['price'] ?? ($variation ? $variation->effectivePrice() : $product->effectivePrice())),
             ];
         }
 
@@ -654,6 +773,15 @@ class FrontendCartController extends Controller
                 continue;
             }
 
+            // A guest entry without a stored price (or a stale zero) falls back
+            // to the current discounted price of the variation/product.
+            if ($price <= 0) {
+                $variation = $variationId ? ProductVariation::find($variationId) : null;
+                $price = $variation
+                    ? $variation->effectivePrice()
+                    : Product::find($productId)->effectivePrice();
+            }
+
             $existing = Cart::where('user_id', $userId)
                 ->where('product_id', $productId)
                 ->where('product_variation_id', $variationId)
@@ -688,8 +816,10 @@ class FrontendCartController extends Controller
     {
         $comboSummary ??= $this->comboService->summarize($cartItems);
 
+        // Lines added through a combo offer count towards "already in the cart"
+        // too. They used to be skipped, which meant that removing one product
+        // from a combo the customer picked directly left no suggestion at all.
         $cartProductIds = $cartItems
-            ->filter(fn ($item) => empty($item->combo_id))
             ->map(fn ($item) => (int) ($item->product_id ?? optional($item->product)->id ?? 0))
             ->filter(fn ($id) => $id > 0)
             ->unique()
@@ -709,6 +839,10 @@ class FrontendCartController extends Controller
         // and the order summary always quote the same combo price.
         $appliedCombos = collect($comboSummary['combos'] ?? [])->keyBy(fn ($row) => (int) $row['combo']->id);
 
+        // Explicit combo offers carry their own stored price rather than a
+        // summary allocation, so they are tracked separately here.
+        $explicitGroups = $this->comboService->explicitComboGroups($cartItems);
+
         $incomplete = [];   // some products in cart, some missing
         $complete   = [];   // all products in cart → show combo price
 
@@ -717,17 +851,33 @@ class FrontendCartController extends Controller
             $inCart  = $combo->products->filter(fn ($p) =>  in_array($p->id, $cartProductIds, true));
             $missing = $combo->products->filter(fn ($p) => !in_array($p->id, $cartProductIds, true));
 
+            $explicit = $explicitGroups->get((int) $combo->id);
+
             if ($missing->isEmpty() && $inCart->isNotEmpty()) {
                 // Every product of this combo is in the cart → combo is complete
                 $applied = $appliedCombos->get((int) $combo->id);
 
+                if (! $applied && $explicit && $explicit['complete']) {
+                    // Quote the amounts this cart's own combo lines are charged
+                    // at, which is what the order total will actually use.
+                    [$comboPrice, $regularTotal] = $this->explicitComboAmounts($explicit['lines']);
+                    $discountAmount = round(max(0, $regularTotal - $comboPrice), 2);
+                    $savingsPercent = $regularTotal > 0 ? round(($discountAmount / $regularTotal) * 100, 1) : 0.0;
+                } else {
+                    $comboPrice     = $applied['combo_price'] ?? $combo->comboPrice();
+                    $regularTotal   = $applied['regular_total'] ?? $combo->productsTotal();
+                    $discountAmount = $applied['discount'] ?? $combo->discountAmount();
+                    $savingsPercent = $applied['savings_percent'] ?? $combo->savingsPercent();
+                }
+
                 $complete[] = [
                     'combo'           => $combo,
                     'in_cart'         => $inCart,
-                    'combo_price'     => $applied['combo_price'] ?? $combo->comboPrice(),
-                    'original_total'  => $applied['regular_total'] ?? $combo->productsTotal(),
-                    'discount_amount' => $applied['discount'] ?? $combo->discountAmount(),
-                    'savings_percent' => $applied['savings_percent'] ?? $combo->savingsPercent(),
+                    'combo_price'     => $comboPrice,
+                    'original_total'  => $regularTotal,
+                    'discount_amount' => $discountAmount,
+                    'savings_percent' => $savingsPercent,
+                    'is_explicit'     => ! empty($explicit),
                 ];
             } elseif ($inCart->isNotEmpty()) {
                 // Partial match → show suggestion to add missing products
@@ -739,6 +889,9 @@ class FrontendCartController extends Controller
                     'original_total'  => $combo->productsTotal(),
                     'discount_amount' => $combo->discountAmount(),
                     'savings_percent' => $combo->savingsPercent(),
+                    // A combo the customer picked directly can be put back with a
+                    // single click, because its other lines are already here.
+                    'is_restorable'   => ! empty($explicit) && ! $explicit['complete'],
                 ];
             }
         }
@@ -749,18 +902,46 @@ class FrontendCartController extends Controller
         ];
     }
 
+    /**
+     * Charged and regular totals for an explicit combo's own cart lines, read
+     * straight from the lines so the banner matches what is actually billed.
+     *
+     * @param  \Illuminate\Support\Collection<int, mixed>  $lines
+     * @return array{0: float, 1: float}  [charged total, regular total]
+     */
+    private function explicitComboAmounts($lines): array
+    {
+        $chargedTotal = 0.0;
+        $regularTotal = 0.0;
 
+        foreach ($lines as $line) {
+            $quantity = max(0, (int) ($line->quantity ?? 0));
+            $chargedTotal += $quantity * (float) ($line->price ?? 0);
+            $regularTotal += $quantity * $this->comboService->regularUnitPrice($line);
+        }
+
+        return [round($chargedTotal, 2), round($regularTotal, 2)];
+    }
+
+
+    /**
+     * Every cart read funnels through here, so this is the single place where
+     * combo lines that can no longer be honoured get put back on their regular
+     * price before anything is totalled or rendered.
+     */
     private function currentCartItems()
     {
         if (! Auth::check()) {
-            return $this->guestCartItems();
+            return $this->comboService->applyExplicitComboPrices($this->guestCartItems());
         }
 
-        return Cart::with('product.images', 'variation', 'combo')
-            ->where('user_id', Auth::id())
-            ->get()
-            ->filter(fn ($item) => $item->product)
-            ->values();
+        return $this->comboService->applyExplicitComboPrices(
+            Cart::with('product.images', 'variation.images', 'combo')
+                ->where('user_id', Auth::id())
+                ->get()
+                ->filter(fn ($item) => $item->product)
+                ->values()
+        );
     }
 
     /**
@@ -784,7 +965,7 @@ class FrontendCartController extends Controller
         $comboDiscount = (float) ($comboSummary['discount'] ?? 0);
 
         $shippingCharge = $subtotal >= 5000 ? 0.0 : 199.0;
-        $grandTotal = max(0, $subtotal - $comboDiscount - $discount) + $shippingCharge;
+        $grandTotal = Order::roundAmount((float) max(0, $subtotal - $comboDiscount - $discount) + $shippingCharge);
 
         return [
             'success' => true,
@@ -813,6 +994,9 @@ class FrontendCartController extends Controller
                         'combo_units' => (int) ($allocation['combo_units'] ?? 0),
                         'line_total' => $lineTotal,
                         'line_gross_total' => round((int) $item->quantity * (float) $item->price, 2),
+                        // What this line costs without the combo offer, so the
+                        // price cell can show the original against the charge.
+                        'original_unit_price' => round($this->comboService->regularUnitPrice($item), 2),
                     ];
                 })
                 ->values()

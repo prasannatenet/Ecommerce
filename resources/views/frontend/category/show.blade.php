@@ -71,12 +71,11 @@
                 <div class="row g-3">
                     @foreach($category->products as $product)
                         @php
-                            $effPrice = $product->sale_price ?? $product->base_price;
+                            $effPrice = $product->effectivePrice();
+                            $regularPrice = $product->regularPrice();
+                            $discount = $product->discountPercentage() ?? 0;
                             $hasImages = $product->images->isNotEmpty();
                             $hasVars = $product->variations->isNotEmpty();
-                            $discount = $product->sale_price
-                                ? round((($product->base_price - $product->sale_price) / $product->base_price) * 100)
-                                : 0;
                         @endphp
                         <div class="col-md-4 col-lg-3">
                             <div class="shop-card">
@@ -117,8 +116,8 @@
 
                                     <div class="shop-card-price-row">
                                         <span class="shop-card-price">Rs {{ number_format($effPrice, 2) }}</span>
-                                        @if($product->sale_price)
-                                            <span class="shop-card-price-old">Rs {{ number_format($product->base_price, 2) }}</span>
+                                        @if($discount > 0)
+                                            <span class="shop-card-price-old">Rs {{ number_format($regularPrice, 2) }}</span>
                                         @endif
                                     </div>
 

@@ -275,7 +275,7 @@
                             <label class="df-form-label">Calculated Sale Price (₹)</label>
                             <input type="number" name="sale_price" id="salePrice" class="df-form-control" step="0.01"
                                    value="{{ old('sale_price', $product->sale_price) }}" placeholder="Calculated automatically">
-                            <p class="df-form-hint" id="discountSummary">Choose a discount type to calculate the sale price. Leave the existing sale price unchanged if no discount is selected.</p>
+                            <p class="df-form-hint" id="discountSummary">Choose a discount type to calculate the sale price. Selecting &quot;No discount&quot; removes the discount.</p>
                         </div>
                     </div>
                 </div>
@@ -436,10 +436,17 @@ function calculateSalePrice() {
 
     discountInput.disabled = !type;
 
-    if (!type || basePrice <= 0 || !discountInput.value) {
-        summary.textContent = type
-            ? 'Enter a discount value to calculate the sale price.'
-            : 'Choose a discount type to calculate the sale price. Leave the existing sale price unchanged if no discount is selected.';
+    if (!type) {
+        // "No discount" removes the discount entirely, so the previous sale
+        // price must not be submitted again.
+        salePrice.value = '';
+        summary.textContent = 'Choose a discount type to calculate the sale price.';
+        return;
+    }
+
+    if (basePrice <= 0 || !discountInput.value) {
+        salePrice.value = '';
+        summary.textContent = 'Enter a discount value to calculate the sale price.';
         return;
     }
 

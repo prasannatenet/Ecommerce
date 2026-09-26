@@ -42,7 +42,9 @@ use App\Http\Controllers\Frontend\FrontendWishlistController;
 use App\Http\Controllers\Frontend\FrontendNewsletterController;
 use App\Http\Controllers\Frontend\FrontendPageController;
 use App\Http\Controllers\Frontend\FrontendSearchController;
+use App\Http\Controllers\Frontend\FrontendMetalPriceController;
 use App\Http\Controllers\Frontend\SiteLocationController;
+use App\Http\Controllers\Frontend\ApiDemoController;
 use App\Http\Controllers\ProductVideoStreamController;
 
 
@@ -82,14 +84,20 @@ Route::get('/brands', [FrontendBrandController::class,'index'])->name('brands.in
 Route::get('/brand/{slug}', [FrontendBrandController::class,'show'])->name('brand.show');
 Route::get('/pages/{slug}', [FrontendPageController::class, 'show'])->name('pages.show');
 Route::post('/newsletter/subscribe', [FrontendNewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+// Live gold & silver rates behind the top bar's LIVE button.
+Route::get('/metal-prices', [FrontendMetalPriceController::class, 'index'])->name('metal-prices.index');
 
 // Delivery location (pincode) — auto-detect via GPS or manual entry
 Route::get('/location/pincode', [SiteLocationController::class, 'show'])->name('location.show');
 Route::post('/location/pincode', [SiteLocationController::class, 'store'])->name('location.store');
 Route::post('/location/detect', [SiteLocationController::class, 'detect'])->name('location.detect');
 Route::post('/location/clear', [SiteLocationController::class, 'clear'])->name('location.clear');
+// Live API demo: renders products, categories and login straight from the
+// JSON API in the browser, using the same client file the React app uses.
+Route::get('/api-demo', ApiDemoController::class)->name('api-demo');
 Route::post('/cart/add', [FrontendCartController::class, 'add'])->name('cart.add');
 Route::post('/cart/add-combo', [FrontendCartController::class, 'addCombo'])->name('cart.add-combo');
+Route::post('/cart/restore-combo', [FrontendCartController::class, 'restoreCombo'])->name('cart.restore-combo');
 Route::get('/cart/quantities', [FrontendCartController::class, 'quantities'])->name('cart.quantities');
 Route::post('/cart/set-quantity', [FrontendCartController::class, 'setQuantityByProduct'])->name('cart.set-quantity');
 Route::get('/cart', [FrontendCartController::class, 'index'])->name('cart.index');

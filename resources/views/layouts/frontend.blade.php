@@ -173,6 +173,10 @@
     <!-- ===== BACK TO TOP ===== -->
     <button class="back-to-top" id="backToTop"><i class="bi bi-chevron-up"></i></button>
 
+    {{-- Global left-edge offer tab: follows the shopper down every page and
+         lists every running coupon. --}}
+    @include('frontend.partials.floating-offers')
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Swiper JS -->

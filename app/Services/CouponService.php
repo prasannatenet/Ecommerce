@@ -3,10 +3,54 @@
 namespace App\Services;
 
 use App\Models\Coupon;
+use App\Models\CouponUse;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 
 class CouponService
 {
+    /**
+     * Coupon ids the current customer has already redeemed, loaded at most once
+     * per request.
+     *
+     * @var array<int, int>|null
+     */
+    protected ?array $usedCouponIds = null;
+
+    /**
+     * Ids of every coupon $userId has already redeemed.
+     *
+     * The cart and checkout pages evaluate the whole visible coupon list, so
+     * this is fetched in one query and reused rather than asked per coupon.
+     *
+     * @return array<int, int>
+     */
+    public function usedCouponIdsFor(?int $userId = null): array
+    {
+        $userId ??= Auth::id();
+
+        // Guests are not tracked, so there is nothing to limit them by.
+        if (! $userId) {
+            return [];
+        }
+
+        if ($this->usedCouponIds === null) {
+            $this->usedCouponIds = CouponUse::where('user_id', $userId)
+                ->distinct()
+                ->pluck('coupon_id')
+                ->map(fn ($id) => (int) $id)
+                ->all();
+        }
+
+        return $this->usedCouponIds;
+    }
+
+    /** Has this customer already spent this coupon? */
+    public function hasRedeemed(Coupon $coupon, ?int $userId = null): bool
+    {
+        return in_array((int) $coupon->id, $this->usedCouponIdsFor($userId), true);
+    }
+
     /**
      * Return why a coupon cannot be used, or null when it is eligible.
      */
@@ -34,6 +78,13 @@ class CouponService
             return 'This coupon has reached its maximum usage limit.';
         }
 
+        // Checked after the global limits so a dead coupon still explains itself
+        // to everyone, and a live one the customer has already spent tells them
+        // personally.
+        if ($this->hasRedeemed($coupon)) {
+            return 'You have already used this coupon.';
+        }
+
         if (! is_null($coupon->min_order_amount) && $subtotal < (float) $coupon->min_order_amount) {
             return 'Minimum order amount for this coupon is Rs '.number_format((float) $coupon->min_order_amount, 2).'.';
         }
@@ -45,6 +96,75 @@ class CouponService
     {
         return $this->ineligibilityReason($coupon, $subtotal, $hasAppliedCombo) === null;
     }
+
+    /**
+     * Display-ready summaries of the running coupons, for the storefront's
+     * always-on offer tab (see frontend.partials.floating-offers).
+     *
+     * Two deliberate differences from the cart's coupon list:
+     *
+     *  - Expired coupons are dropped instead of being listed as unusable, so
+     *    the promotional tab never advertises a dead offer.
+     *  - The minimum order value is copy, not a gate, because this tab is shown
+     *    while browsing and the shopper's cart is irrelevant here. Hence the
+     *    "infinite" subtotal handed to ineligibilityReason().
+     *
+     * @return Collection<int, array<string, mixed>>
+     */
+    public function offerSummaries(int $limit = 12): Collection
+    {
+        $now = now();
+
+        return Coupon::query()
+            ->where('is_active', true)
+            ->where(function ($query) use ($now): void {
+                $query->whereNull('expires_at')->orWhere('expires_at', '>', $now);
+            })
+            ->orderByDesc('id')
+            ->limit($limit)
+            ->get()
+            ->map(function (Coupon $coupon) {
+                $validityParts = [];
+
+                if ($coupon->starts_at) {
+                    $validityParts[] = 'From '.$coupon->starts_at->format('d M Y');
+                }
+
+                if ($coupon->expires_at) {
+                    $validityParts[] = 'Till '.$coupon->expires_at->format('d M Y');
+                }
+
+                $reason = $this->ineligibilityReason($coupon, PHP_FLOAT_MAX);
+
+                return [
+                    'code' => (string) $coupon->code,
+                    'offer_text' => $this->offerText($coupon),
+                    'min_order_amount' => (float) ($coupon->min_order_amount ?? 0),
+                    'validity_text' => $validityParts !== [] ? implode(' · ', $validityParts) : 'No expiry',
+                    'is_available' => $reason === null,
+                    'ineligible_reason' => $reason,
+                    'is_redeemed' => $this->hasRedeemed($coupon),
+                ];
+            });
+    }
+
+    /**
+     * The headline a coupon is advertised with, e.g. "10% OFF" or
+     * "Buy 1, Get 1 Free".
+     */
+    public function offerText(Coupon $coupon): string
+    {
+        $amount = rtrim(rtrim(number_format((float) $coupon->amount, 2), '0'), '.');
+
+        return match ($coupon->type) {
+            'percent' => $amount.'% OFF',
+            'fixed' => '₹'.$amount.' OFF',
+            'buy_get' => 'Buy '.max(1, (int) $coupon->buy_quantity)
+                .', Get '.max(1, (int) $coupon->get_quantity).' Free',
+            default => $amount.' Gehna Coins',
+        };
+    }
+
 
     /**
      * Calculate the discount amount a coupon gives against the current cart.

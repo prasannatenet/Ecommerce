@@ -171,46 +171,150 @@ class ComboService
      */
     public function hasAppliedCombo($cartItems, ?array $summary = null): bool
     {
-        $explicitItems = collect($cartItems)->filter(
-            fn ($item) => ! empty($item->combo_id ?? null)
-        );
-
-        if ($explicitItems->isNotEmpty()) {
-            $comboIds = $explicitItems
-                ->map(fn ($item) => (int) $item->combo_id)
-                ->unique()
-                ->values();
-
-            $requiredProducts = Combo::query()
-                ->whereIn('id', $comboIds)
-                ->with('products:id')
-                ->get()
-                ->mapWithKeys(fn (Combo $combo) => [
-                    $combo->id => $combo->products->pluck('id')->map(fn ($id) => (int) $id),
-                ]);
-
-            $hasCompleteExplicitCombo = $explicitItems
-                ->groupBy(fn ($item) => (int) $item->combo_id)
-                ->contains(function ($items, int $comboId) use ($requiredProducts): bool {
-                    $required = $requiredProducts->get($comboId, collect());
-                    $present = $items
-                        ->pluck('product_id')
-                        ->filter()
-                        ->map(fn ($id) => (int) $id)
-                        ->unique()
-                        ->values();
-
-                    return $required->count() >= 2 && $required->diff($present)->isEmpty();
-                });
-
-            if ($hasCompleteExplicitCombo) {
-                return true;
-            }
+        if ($this->explicitComboGroups($cartItems)->contains('complete', true)) {
+            return true;
         }
 
         $summary ??= $this->summarize($cartItems);
 
         return ! empty($summary['combos']);
+    }
+
+    /**
+     * Group the cart lines that came from an explicit combo offer (lines
+     * carrying a combo_id) by combo and work out whether the customer still
+     * has every product of that combo sitting in the cart.
+     *
+     * The returned collection is keyed by combo id:
+     *
+     * [
+     *   3 => [
+     *     'combo'    => Combo|null,
+     *     'lines'    => Collection<int, mixed>,  // the combo cart lines
+     *     'required' => Collection<int, int>,    // product ids of the combo
+     *     'present'  => Collection<int, int>,    // product ids still in the cart
+     *     'missing'  => Collection<int, int>,    // product ids taken out
+     *     'complete' => bool,
+     *   ],
+     * ]
+     *
+     * @param  \Illuminate\Support\Collection<int, mixed>|array<int, mixed>  $cartItems
+     * @return \Illuminate\Support\Collection<int, array<string, mixed>>
+     */
+    public function explicitComboGroups($cartItems): Collection
+    {
+        $explicitItems = collect($cartItems)
+            ->filter(fn ($item) => ! empty($item->combo_id ?? null))
+            ->values();
+
+        if ($explicitItems->isEmpty()) {
+            return collect();
+        }
+
+        $comboIds = $explicitItems
+            ->map(fn ($item) => (int) $item->combo_id)
+            ->unique()
+            ->values();
+
+        $combos = Combo::query()
+            ->whereIn('id', $comboIds)
+            ->with('products:id')
+            ->get()
+            ->keyBy(fn (Combo $combo) => (int) $combo->id);
+
+        return $explicitItems
+            ->groupBy(fn ($item) => (int) $item->combo_id)
+            ->map(function (Collection $lines, int $comboId) use ($combos): array {
+                /** @var Combo|null $combo */
+                $combo = $combos->get($comboId);
+
+                $required = $combo
+                    ? $combo->products->pluck('id')->map(fn ($id) => (int) $id)->unique()->values()
+                    : collect();
+
+                $present = $lines
+                    ->map(fn ($item) => (int) ($item->product_id ?? optional($item->product)->id ?? 0))
+                    ->filter(fn ($id) => $id > 0)
+                    ->unique()
+                    ->values();
+
+                // A combo needs at least two different products to be an offer,
+                // and a combo whose row has been deleted can no longer apply.
+                $complete = $combo !== null
+                    && $required->count() >= 2
+                    && $required->diff($present)->isEmpty();
+
+                return [
+                    'combo'    => $combo,
+                    'lines'    => $lines,
+                    'required' => $required,
+                    'present'  => $present,
+                    'missing'  => $required->diff($present)->values(),
+                    'complete' => $complete,
+                ];
+            });
+    }
+
+    /**
+     * The price a cart line should carry whenever no combo pricing applies:
+     * the variation price for a variation line, otherwise the product's own
+     * effective (sale or base) price.
+     */
+    public function regularUnitPrice($cartItem): float
+    {
+        // isset() keeps this from lazy-loading the relation, so a cart that was
+        // queried without eager loading still stays on a single query.
+        $variation = isset($cartItem->variation) ? $cartItem->variation : null;
+
+        if ($variation) {
+            return round((float) $variation->effectivePrice(), 2);
+        }
+
+        $product = isset($cartItem->product) ? $cartItem->product : null;
+
+        if ($product) {
+            return round((float) $product->effectivePrice(), 2);
+        }
+
+        return round((float) ($cartItem->price ?? 0), 2);
+    }
+
+    /**
+     * Put the original price back on combo lines whose combo is no longer
+     * complete.
+     *
+     * Lines added through a combo offer are stored with the allocated combo
+     * price already applied. When the customer removes one of those products at
+     * the cart or at checkout the offer can no longer be honoured, so the
+     * surviving lines have to fall back to their regular price rather than
+     * quietly keeping a discount they have not earned.
+     *
+     * The correction is applied to the in-memory models only, so it is
+     * recalculated on every cart read (page load, AJAX summary, order
+     * placement) and a GET request never writes to the carts table.
+     *
+     * @param  \Illuminate\Support\Collection<int, mixed>|array<int, mixed>  $cartItems
+     * @return \Illuminate\Support\Collection<int, mixed>
+     */
+    public function applyExplicitComboPrices($cartItems): Collection
+    {
+        foreach ($this->explicitComboGroups($cartItems) as $group) {
+            if ($group['complete']) {
+                continue;
+            }
+
+            foreach ($group['lines'] as $line) {
+                $line->price = $this->regularUnitPrice($line);
+
+                if (method_exists($line, 'syncOriginalAttribute')) {
+                    // Keep the model clean so a later save() can never persist
+                    // this derived price back to the database.
+                    $line->syncOriginalAttribute('price');
+                }
+            }
+        }
+
+        return collect($cartItems)->values();
     }
 
     /** Regular (pre-combo) value of a single cart line. */

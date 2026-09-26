@@ -118,20 +118,33 @@
                             <tbody>
                                 @foreach($cartItems as $item)
                                     <tr>
-                                        {{-- Product Image --}}
+                                        {{-- Product Image: the image of the variation the customer
+                                             actually picked, falling back to the product's own
+                                             image when the variation has none of its own. --}}
                                         <td>
                                             <a href="{{ route('product.show', $item->product->slug) }}">
-                                                @if($item->product->images->count() > 0)
-                                                    @php
-                                                        $firstImage = $item->product->images->first();
-                                                        $imagePath = $firstImage->path ?? $firstImage->image_path ?? null;
-                                                    @endphp
-                                                    <img src="{{ $imagePath ? asset('storage/' . ltrim($imagePath, '/')) : asset('frontend/images/dumbbell.png') }}"
-                                                         alt="{{ $item->product->name }}" class="cart-item-img">
-                                                @else
-                                                    <img src="{{ asset('frontend/images/dumbbell.png') }}"
-                                                         alt="{{ $item->product->name }}" class="cart-item-img" style="opacity:0.5;">
-                                                @endif
+                                                @php
+                                                    $variationImage = null;
+
+                                                    if ($item->variation && $item->variation->relationLoaded('images')) {
+                                                        $variationImage = $item->variation->images
+                                                            ->sortByDesc(fn ($image) => (int) $image->is_primary)
+                                                            ->first();
+                                                    }
+
+                                                    $fallbackImage = $item->product->images->first();
+                                                    $imagePath = null;
+
+                                                    if ($variationImage) {
+                                                        $imagePath = $variationImage->path ?? null;
+                                                    } elseif ($fallbackImage) {
+                                                        $imagePath = $fallbackImage->path ?? $fallbackImage->image_path ?? null;
+                                                    }
+                                                @endphp
+                                                <img src="{{ $imagePath ? asset('storage/' . ltrim($imagePath, '/')) : asset('frontend/images/dumbbell.png') }}"
+                                                     alt="{{ $item->product->name }}"
+                                                     class="cart-item-img"
+                                                     @if(! $imagePath) style="opacity:0.5;" @endif>
                                             </a>
                                         </td>
 
@@ -144,15 +157,32 @@
                                                 <i class="bi bi-gift me-1"></i>{{ $freeItemsByCartId[$item->id]['free_quantity'] ?? 0 }} FREE with Buy {{ $appliedCoupon['buy_quantity'] ?? 1 }} Get {{ $appliedCoupon['get_quantity'] ?? 1 }}
                                             </span>
                                             @php
+                                                // Combos the customer broke by removing one of their
+                                                // products. Those lines are back on their regular
+                                                // price, so the badge must not promise a discount.
+                                                $brokenComboIds = collect($comboSuggestions['incomplete'] ?? [])
+                                                    ->filter(fn ($suggestion) => $suggestion['is_restorable'])
+                                                    ->map(fn ($suggestion) => (int) $suggestion['combo']->id);
+
                                                 $comboName = isset($item->combo) && $item->combo ? $item->combo->name : null;
                                                 if (!$comboName && !empty($item->combo_id)) {
                                                     $comboName = 'Combo';
                                                 }
+                                                $isBrokenCombo = $comboName && $brokenComboIds->contains((int) $item->combo_id);
                                             @endphp
                                             @if($comboName)
-                                                <span class="badge mt-1" style="background: linear-gradient(135deg, #013a3c, #02AAB1); color: #fff; font-size:0.72rem; font-weight:700;">
-                                                    <i class="bi bi-gift me-1"></i>Combo: {{ $comboName }}
-                                                </span>
+                                                @if($isBrokenCombo)
+                                                    <span class="badge mt-1" style="background:#b45309; color: #fff; font-size:0.72rem; font-weight:700;">
+                                                        <i class="bi bi-exclamation-triangle me-1"></i>Combo price no longer applies
+                                                    </span>
+                                                    <div style="font-size:0.68rem; color:#92400e; margin-top:2px;">
+                                                        {{ $comboName }} &mdash; shown at regular price
+                                                    </div>
+                                                @else
+                                                    <span class="badge mt-1" style="background: linear-gradient(135deg, #013a3c, #02AAB1); color: #fff; font-size:0.72rem; font-weight:700;">
+                                                        <i class="bi bi-gift me-1"></i>Combo: {{ $comboName }}
+                                                    </span>
+                                                @endif
                                             @endif
                                             @if($item->variation)
                                                 @php
@@ -187,8 +217,21 @@
                                             @endif
                                         </td>
 
-                                        {{-- Price --}}
-                                        <td>₹{{ number_format($item->price, 0) }}</td>
+                                        {{-- Price: the original price, without the combo offer.
+                                             The post-combo amount is shown in the Total column. --}}
+                                        @php
+                                            $originalUnitPrice = (float) ($lineOriginalPrices[$item->id] ?? $item->price);
+                                            $hasComboDiscount = $isBrokenCombo
+                                                ? false
+                                                : (float) $item->price < $originalUnitPrice - 0.005;
+                                        @endphp
+                                        <td id="cart-line-price-{{ $item->id }}">
+                                            @if($hasComboDiscount)
+                                                <s class="text-muted" style="font-weight:600;">₹{{ number_format($originalUnitPrice, 2) }}</s>
+                                            @else
+                                                ₹{{ number_format($originalUnitPrice, 2) }}
+                                            @endif
+                                        </td>
 
                                         {{-- Quantity --}}
                                         <td>
@@ -219,17 +262,24 @@
                                                     : $lineGrossTotal;
                                             @endphp
                                             @if($freeQty > 0)
-                                                <s class="text-muted" style="font-weight:400;">₹{{ number_format($item->quantity * $item->price, 0) }}</s>
-                                                <span style="color:#198754;">₹{{ number_format($chargedQty * $item->price, 0) }}</span>
+                                                <s class="text-muted" style="font-weight:400;">₹{{ number_format($item->quantity * $item->price, 2) }}</s>
+                                                <span style="color:#198754;">₹{{ number_format($chargedQty * $item->price, 2) }}</span>
                                                 <div style="font-size:0.72rem; color:#198754; font-weight:700;">{{ $freeQty }} FREE</div>
                                             @elseif($lineComboUnits > 0)
-                                                <s class="text-muted" style="font-weight:400;">₹{{ number_format($lineGrossTotal, 0) }}</s>
-                                                <span style="color:#198754;">₹{{ number_format($lineChargedTotal, 0) }}</span>
+                                                <s class="text-muted" style="font-weight:400;">₹{{ number_format($lineGrossTotal, 2) }}</s>
+                                                <span style="color:#198754;">₹{{ number_format($lineChargedTotal, 2) }}</span>
                                                 <div style="font-size:0.72rem; color:#198754; font-weight:700;">
                                                     <i class="bi bi-gift-fill me-1"></i>{{ $lineComboUnits }} at combo price
                                                 </div>
+                                            @elseif($hasComboDiscount)
+                                                {{-- Combo added directly: the line already carries its
+                                                     share of the combo price, so only the total is shown. --}}
+                                                <span style="color:#198754;">₹{{ number_format($lineGrossTotal, 2) }}</span>
+                                                <div style="font-size:0.72rem; color:#198754; font-weight:700;">
+                                                    <i class="bi bi-gift-fill me-1"></i>at combo price
+                                                </div>
                                             @else
-                                                ₹{{ number_format($lineGrossTotal, 0) }}
+                                                ₹{{ number_format($lineGrossTotal, 2) }}
                                             @endif
                                         </td>
 
@@ -657,6 +707,23 @@
             if (input) {
                 input.value = item.quantity;
                 input.dataset.qtyCurrent = item.quantity;
+            }
+
+            // The price cell shows the original (pre-combo) unit price and is
+            // struck through whenever the line is actually discounted, matching
+            // the server-rendered markup.
+            const linePrice = document.getElementById('cart-line-price-' + item.id);
+            if (linePrice) {
+                const original = typeof item.original_unit_price === 'number'
+                    ? item.original_unit_price
+                    : null;
+                const charged = (item.line_gross_total / (item.quantity || 1));
+                if (original !== null && original > charged + 0.005) {
+                    linePrice.innerHTML = '<s class="text-muted" style="font-weight:600;">₹' +
+                        formatCartMoneyExact(original) + '</s>';
+                } else {
+                    linePrice.textContent = '₹' + formatCartMoneyExact(original === null ? charged : original);
+                }
             }
 
             const lineTotal = document.getElementById('cart-line-total-' + item.id);
