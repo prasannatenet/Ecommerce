@@ -1,0 +1,3376 @@
+{
+  "products.list": {
+    "method": "GET",
+    "path": "/products",
+    "query": {
+      "per_page": "3"
+    },
+    "auth": false,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "data": [
+        {
+          "id": 9,
+          "name": "Silver Elegant Butterflies Bracelet",
+          "slug": "silver-elegant-butterflies-bracelet",
+          "sku": null,
+          "url": "http://127.0.0.1:8123/product/silver-elegant-butterflies-bracelet",
+          "audience": "women",
+          "material_type": "silver",
+          "product_type": "simple",
+          "is_simple": true,
+          "is_variable": false,
+          "short_description": "The Silver Elegant Butterflies Bracelet is inspired by the moon showing up unexpectedly on a rainy night with a group of three twinkling stars.",
+          "description": "The Design:\r\nThis silver bracelet has a moon motif studded with zircon at the centre with two stars to its left and one star to its right.\r\n\r\n925 Silver\r\nPerfect for sensitive skin\r\nMotif Size: Height - 0.85 cm, Motif Width - 1.35 cm\r\nThe length of the bracelet is 15 cm with a 4 cm adjustable portion\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Bracelet\r\nNet Qty- 1 unit\r\nStyling Tip:\r\nStyle this bracelet with a pink patchwork cocktail dress.",
+          "price": 2999.5,
+          "regular_price": 5999,
+          "sale_price": 2999.5,
+          "base_price": 5999,
+          "discount_type": "percentage",
+          "discount_value": 50,
+          "discount_percentage": 50,
+          "is_on_sale": true,
+          "price_range": null,
+          "primary_image": "http://127.0.0.1:8123/storage/products/JZBDIxaCw2LrKudyhdATWUjMKIHiRtHPMNwoSypB.png",
+          "images": [
+            "http://127.0.0.1:8123/storage/products/JZBDIxaCw2LrKudyhdATWUjMKIHiRtHPMNwoSypB.png",
+            "http://127.0.0.1:8123/storage/products/nFr8k7kOaGrKgqbLlsD7OYXDicRj40PnimAgOtQT.webp",
+            "http://127.0.0.1:8123/storage/products/33ghQTfgYvweacmeZQ63l0nwrgkkGqnNRBixGfNS.webp"
+          ],
+          "manage_stock": true,
+          "stock": 497,
+          "in_stock": true,
+          "category": {
+            "id": 7,
+            "name": "Bracelets",
+            "slug": "bracelets",
+            "parent_id": null
+          },
+          "brand": null,
+          "variations": [],
+          "reviews_count": 1
+        },
+        {
+          "id": 8,
+          "name": "Rose Gold My Love Bracelet",
+          "slug": "rose-gold-my-love-bracelet",
+          "sku": null,
+          "url": "http://127.0.0.1:8123/product/rose-gold-my-love-bracelet",
+          "audience": "women",
+          "material_type": "gold",
+          "product_type": "simple",
+          "is_simple": true,
+          "is_variable": false,
+          "short_description": "Don't hesitate any longer, it's the season of love -the perfect time to convey your feelings to that special someone.",
+          "description": "The Design:\r\nThis rose gold open-type bracelet features a heart motif that rotates and studded with zircons on one end and other end has a zircon studded heart in a circle, that has an open heart mechanism where you can custom inscribe the message. Celebrate your moments of passion with GIVA’s Red Romance Collection.\r\n\r\n925 Silver with Rose Gold Plating\r\nPerfect for sensitive skin\r\nBracelet Diameter: 5.5 cm + Adjustable\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Bracelet\r\nNet Qty- 1 unit\r\nStyling Tip:\r\nThis bracelet would go well with a sheath dress.",
+          "price": 10895.39,
+          "regular_price": 19799,
+          "sale_price": 10895.39,
+          "base_price": 19799,
+          "discount_type": "percentage",
+          "discount_value": 44.97,
+          "discount_percentage": 44.97,
+          "is_on_sale": true,
+          "price_range": null,
+          "primary_image": "http://127.0.0.1:8123/storage/products/9IOxM3tY8wYLuJ0Nbz8cVHTumtdTZWffq7aw8TKL.png",
+          "images": [
+            "http://127.0.0.1:8123/storage/products/9IOxM3tY8wYLuJ0Nbz8cVHTumtdTZWffq7aw8TKL.png",
+            "http://127.0.0.1:8123/storage/products/IqCtkrj5wdrGVCaZj4WlQFYvgboxyw7lVTBjeI4o.webp",
+            "http://127.0.0.1:8123/storage/products/pXTsmDE8r4oOJ1N6BoVZ5i342vpztE1OWVDJQyLA.webp",
+            "http://127.0.0.1:8123/storage/products/Y58I2LtT5qBTKi9p6QPT5QTjn3PJBhjHJxS8R3gK.webp"
+          ],
+          "manage_stock": false,
+          "stock": 0,
+          "in_stock": false,
+          "category": {
+            "id": 7,
+            "name": "Bracelets",
+            "slug": "bracelets",
+            "parent_id": null
+          },
+          "brand": null,
+          "variations": [],
+          "reviews_count": 0
+        },
+        {
+          "id": 7,
+          "name": "Rose Gold For My Dear Bracelet",
+          "slug": "rose-gold-for-my-dear-bracelet",
+          "sku": null,
+          "url": "http://127.0.0.1:8123/product/rose-gold-for-my-dear-bracelet",
+          "audience": "men",
+          "material_type": "gold",
+          "product_type": "simple",
+          "is_simple": true,
+          "is_variable": false,
+          "short_description": "The Rose Gold For My Dear Bracelet is inspired by the special moments captured in the camera of our hearts that we keep encapsulated in a treasure box of memories.",
+          "description": "The Design:\r\n\r\nThe rose gold bracelet has a design of the antlers of a reindeer with a zircon on the head.\r\n\r\n925 silver with Rose Gold plating\r\nPerfect for sensitive skin\r\nAdjustable size\r\nLength of the bracelet - 16.5 cm+ 4 cm adjustable\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nNet Qty- 1 piece\r\nStyling Tip:\r\n\r\nStyle this with a beige ribbed top and blue jeans.",
+          "price": 4388.43,
+          "regular_price": 7699,
+          "sale_price": 4388.43,
+          "base_price": 7699,
+          "discount_type": "percentage",
+          "discount_value": 43,
+          "discount_percentage": 43,
+          "is_on_sale": true,
+          "price_range": null,
+          "primary_image": "http://127.0.0.1:8123/storage/products/lmjp2W1sXyGGN8e54MUXgPmMGcEi7V7DfT4MVwmn.png",
+          "images": [
+            "http://127.0.0.1:8123/storage/products/lmjp2W1sXyGGN8e54MUXgPmMGcEi7V7DfT4MVwmn.png",
+            "http://127.0.0.1:8123/storage/products/2d8xGFiDZgDbCm5BvIEAgodEsmtfkqtX5DPUnpe6.webp",
+            "http://127.0.0.1:8123/storage/products/mU9q8NWxS3eiDTigzzbFGphU18Dtb8MtALvHAo4b.webp"
+          ],
+          "manage_stock": false,
+          "stock": 0,
+          "in_stock": false,
+          "category": {
+            "id": 7,
+            "name": "Bracelets",
+            "slug": "bracelets",
+            "parent_id": null
+          },
+          "brand": null,
+          "variations": [],
+          "reviews_count": 1
+        }
+      ],
+      "meta": {
+        "current_page": 1,
+        "last_page": 3,
+        "per_page": 3,
+        "total": 9,
+        "from": 1,
+        "to": 3,
+        "sort": "latest",
+        "filters": []
+      }
+    }
+  },
+  "categories.index": {
+    "method": "GET",
+    "path": "/categories",
+    "query": null,
+    "auth": false,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "OK",
+      "data": [
+        {
+          "id": 5,
+          "name": "Anklets",
+          "slug": "anklets",
+          "parent_id": null,
+          "is_root": true,
+          "position": 0,
+          "description": "Anklets",
+          "image": "http://127.0.0.1:8123/storage/categories/2STL6Liwt0Nqua8Ye4KFn6PCjHRYqied8cCHgW0q.jpg",
+          "breadcrumb": "Anklets",
+          "products_count": 0,
+          "url": "http://127.0.0.1:8123/category/anklets"
+        },
+        {
+          "id": 13,
+          "name": "Bangles",
+          "slug": "bangles",
+          "parent_id": null,
+          "is_root": true,
+          "position": 0,
+          "description": null,
+          "image": "http://127.0.0.1:8123/storage/categories/cw3tw1TIfn9yq4G762JJg9EwKNdPY5JoX6EqQyuh.jpg",
+          "breadcrumb": "Bangles",
+          "products_count": 0,
+          "url": "http://127.0.0.1:8123/category/bangles"
+        },
+        {
+          "id": 7,
+          "name": "Bracelets",
+          "slug": "bracelets",
+          "parent_id": null,
+          "is_root": true,
+          "position": 0,
+          "description": "Bracelets",
+          "image": "http://127.0.0.1:8123/storage/categories/zI3pukSqDOszpmONt48DinTED9GwhKNRe2XE20jj.jpg",
+          "breadcrumb": "Bracelets",
+          "products_count": 3,
+          "url": "http://127.0.0.1:8123/category/bracelets"
+        },
+        {
+          "id": 8,
+          "name": "Chains",
+          "slug": "chains",
+          "parent_id": null,
+          "is_root": true,
+          "position": 0,
+          "description": "Chains",
+          "image": "http://127.0.0.1:8123/storage/categories/SdputSypD8iiEi37dwoIwEOypOydi0JuNR1gNLdk.jpg",
+          "breadcrumb": "Chains",
+          "products_count": 0,
+          "url": "http://127.0.0.1:8123/category/chains"
+        },
+        {
+          "id": 4,
+          "name": "Earrings",
+          "slug": "earrings",
+          "parent_id": null,
+          "is_root": true,
+          "position": 0,
+          "description": "Earrings",
+          "image": "http://127.0.0.1:8123/storage/categories/203NWk2VUQioJWpfeyVcQt5Xa0lvFtqAVyfOMUOK.jpg",
+          "breadcrumb": "Earrings",
+          "products_count": 2,
+          "url": "http://127.0.0.1:8123/category/earrings"
+        },
+        {
+          "id": 12,
+          "name": "Men's Jewellery",
+          "slug": "mens-jewellery",
+          "parent_id": null,
+          "is_root": true,
+          "position": 0,
+          "description": null,
+          "image": "http://127.0.0.1:8123/storage/categories/rJNgx5yoL61P1tfwhHdB3S4LLjNPTCmQC8STDJJ0.jpg",
+          "breadcrumb": "Men's Jewellery",
+          "products_count": 0,
+          "url": "http://127.0.0.1:8123/category/mens-jewellery"
+        },
+        {
+          "id": 11,
+          "name": "Nose Pin",
+          "slug": "nose-pin",
+          "parent_id": null,
+          "is_root": true,
+          "position": 0,
+          "description": null,
+          "image": "http://127.0.0.1:8123/storage/categories/hveDuL6lrZ6toEOTptfYoA9lWPkaxIEMlttoGFEn.jpg",
+          "breadcrumb": "Nose Pin",
+          "products_count": 0,
+          "url": "http://127.0.0.1:8123/category/nose-pin"
+        },
+        {
+          "id": 6,
+          "name": "Pendants",
+          "slug": "pendants",
+          "parent_id": null,
+          "is_root": true,
+          "position": 0,
+          "description": "Pendants",
+          "image": "http://127.0.0.1:8123/storage/categories/vz0r3lDgqY23iqABC0008KeC3zYg9CnEKjOQ3hZw.jpg",
+          "breadcrumb": "Pendants",
+          "products_count": 0,
+          "url": "http://127.0.0.1:8123/category/pendants"
+        },
+        {
+          "id": 3,
+          "name": "Rings",
+          "slug": "rings",
+          "parent_id": null,
+          "is_root": true,
+          "position": 0,
+          "description": "Timeless Rings, Made to Celebrate Every Moment.\r\nElegant designs crafted to sparkle today and be cherished forever.",
+          "image": "http://127.0.0.1:8123/storage/categories/LRb2d62xnkA918FHqY6FSirXx1X4icYWWA4kmNye.jpg",
+          "breadcrumb": "Rings",
+          "products_count": 4,
+          "url": "http://127.0.0.1:8123/category/rings"
+        },
+        {
+          "id": 14,
+          "name": "Solitaires",
+          "slug": "solitaires",
+          "parent_id": null,
+          "is_root": true,
+          "position": 0,
+          "description": null,
+          "image": "http://127.0.0.1:8123/storage/categories/eh79bjmFeVOTzsNV9wUZ5XrINkysMUpYe6Q6m7xk.jpg",
+          "breadcrumb": "Solitaires",
+          "products_count": 0,
+          "url": "http://127.0.0.1:8123/category/solitaires"
+        }
+      ],
+      "meta": {
+        "total": 10
+      }
+    }
+  },
+  "brands.index": {
+    "method": "GET",
+    "path": "/brands",
+    "query": null,
+    "auth": false,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "OK",
+      "data": [
+        {
+          "id": 1,
+          "name": "API Docs Brand",
+          "slug": "api-docs-brand",
+          "logo": "http://127.0.0.1:8123/storage/brands/api-docs-brand.png",
+          "description": "A temporary brand created only to capture its API response for the documentation.",
+          "products_count": 0,
+          "url": "http://127.0.0.1:8123/brand/api-docs-brand"
+        }
+      ],
+      "meta": {
+        "total": 1
+      }
+    }
+  },
+  "combos.index": {
+    "method": "GET",
+    "path": "/combos",
+    "query": null,
+    "auth": false,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "OK",
+      "data": [
+        {
+          "id": 1,
+          "name": "try",
+          "slug": "try",
+          "description": null,
+          "discount_type": "percent",
+          "discount_value": 5,
+          "products_total": 12787.13,
+          "discount_amount": 639.36,
+          "combo_price": 12147.77,
+          "savings_percent": 5,
+          "is_live": true,
+          "starts_at": null,
+          "expires_at": null,
+          "products": [
+            {
+              "id": 4,
+              "name": "Golden Star Constellation Tiny Studs",
+              "slug": "golden-star-constellation-tiny-studs",
+              "sku": null,
+              "url": "http://127.0.0.1:8123/product/golden-star-constellation-tiny-studs",
+              "audience": "women",
+              "material_type": "gold",
+              "product_type": "simple",
+              "is_simple": true,
+              "is_variable": false,
+              "short_description": "The night sky devoid of any stars is unimaginable and incomplete. Likewise, your accessory collection, without these earrings, would be incomplete.",
+              "description": "The Design:\r\nThese golden earrings feature a star motif set with zircons.\r\n\r\n925 Silver with Gold Plating\r\nPerfect for sensitive skin\r\nEarring Size: Height - 0.5 cm, Width - 0.5 cm\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Earrings\r\nNet Qty- 1 pair\r\nStyling Tip:\r\nTeam these with a purple ruffle dress.",
+              "price": 999.75,
+              "regular_price": 3999,
+              "sale_price": 999.75,
+              "base_price": 3999,
+              "discount_type": "percentage",
+              "discount_value": 75,
+              "discount_percentage": 75,
+              "is_on_sale": true,
+              "price_range": null,
+              "primary_image": "http://127.0.0.1:8123/storage/products/0sp8aUfrXeY9JNRAZYxe89EkgjeFpu70sQg6IHob.png",
+              "images": [
+                "http://127.0.0.1:8123/storage/products/0sp8aUfrXeY9JNRAZYxe89EkgjeFpu70sQg6IHob.png",
+                "http://127.0.0.1:8123/storage/products/vTMnfpRpo8Mn0rLkWsOzmMoRQfy3PWw9NxmkjByF.webp",
+                "http://127.0.0.1:8123/storage/products/l53QZdhYsrJn8s4G13N1qYMyZv84np6YkprH2D0L.webp",
+                "http://127.0.0.1:8123/storage/products/tV62bwAPIlIq1GyEDmCGGQa1mzQWcwvufSQzS0D1.webp"
+              ],
+              "manage_stock": false,
+              "stock": 0,
+              "in_stock": false,
+              "variations": []
+            },
+            {
+              "id": 7,
+              "name": "Rose Gold For My Dear Bracelet",
+              "slug": "rose-gold-for-my-dear-bracelet",
+              "sku": null,
+              "url": "http://127.0.0.1:8123/product/rose-gold-for-my-dear-bracelet",
+              "audience": "men",
+              "material_type": "gold",
+              "product_type": "simple",
+              "is_simple": true,
+              "is_variable": false,
+              "short_description": "The Rose Gold For My Dear Bracelet is inspired by the special moments captured in the camera of our hearts that we keep encapsulated in a treasure box of memories.",
+              "description": "The Design:\r\n\r\nThe rose gold bracelet has a design of the antlers of a reindeer with a zircon on the head.\r\n\r\n925 silver with Rose Gold plating\r\nPerfect for sensitive skin\r\nAdjustable size\r\nLength of the bracelet - 16.5 cm+ 4 cm adjustable\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nNet Qty- 1 piece\r\nStyling Tip:\r\n\r\nStyle this with a beige ribbed top and blue jeans.",
+              "price": 4388.43,
+              "regular_price": 7699,
+              "sale_price": 4388.43,
+              "base_price": 7699,
+              "discount_type": "percentage",
+              "discount_value": 43,
+              "discount_percentage": 43,
+              "is_on_sale": true,
+              "price_range": null,
+              "primary_image": "http://127.0.0.1:8123/storage/products/lmjp2W1sXyGGN8e54MUXgPmMGcEi7V7DfT4MVwmn.png",
+              "images": [
+                "http://127.0.0.1:8123/storage/products/lmjp2W1sXyGGN8e54MUXgPmMGcEi7V7DfT4MVwmn.png",
+                "http://127.0.0.1:8123/storage/products/2d8xGFiDZgDbCm5BvIEAgodEsmtfkqtX5DPUnpe6.webp",
+                "http://127.0.0.1:8123/storage/products/mU9q8NWxS3eiDTigzzbFGphU18Dtb8MtALvHAo4b.webp"
+              ],
+              "manage_stock": false,
+              "stock": 0,
+              "in_stock": false,
+              "variations": []
+            },
+            {
+              "id": 6,
+              "name": "Silver Cupid Arrow Couple Bands",
+              "slug": "silver-cupid-arrow-couple-bands",
+              "sku": null,
+              "url": "http://127.0.0.1:8123/product/silver-cupid-arrow-couple-bands",
+              "audience": "unisex",
+              "material_type": "silver",
+              "product_type": "simple",
+              "is_simple": true,
+              "is_variable": false,
+              "short_description": "Show off how you and your partner make a perfect fit for each other just like the jigsaw puzzle pieces with these rings.",
+              "description": "The Design:\r\nThese silver rings feature a V-shaped cut-out design, with one ring set with zircons.\r\n\r\n925 Silver\r\nPerfect for sensitive skin\r\nAdjustable size to ensure no fitting issues\r\nFemale ring size: 1.62 cm\r\nMale ring size: 2 cm + adjustable\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Couple Bands\r\nNet Qty - 1 unit\r\nStyling Tip:\r\nMatch these rings with casual wear.",
+              "price": 4399.45,
+              "regular_price": 7999,
+              "sale_price": 4399.45,
+              "base_price": 7999,
+              "discount_type": "percentage",
+              "discount_value": 45,
+              "discount_percentage": 45,
+              "is_on_sale": true,
+              "price_range": null,
+              "primary_image": "http://127.0.0.1:8123/storage/products/bVmcUjnGkuIIwcM2U2r0aIvUp80THAmVeGc3rDhr.png",
+              "images": [
+                "http://127.0.0.1:8123/storage/products/bVmcUjnGkuIIwcM2U2r0aIvUp80THAmVeGc3rDhr.png",
+                "http://127.0.0.1:8123/storage/products/bHMrMJ2xbgslL4fVUfCbk7gOjSXpbt4i00w5CQ8k.webp",
+                "http://127.0.0.1:8123/storage/products/HPLHcEsI7QMJXI3KmzMWuKwtaY1kTFNaNaqtVYGh.webp",
+                "http://127.0.0.1:8123/storage/products/QnJPvFuh1vFDZJD66b5omgD7oZyw2lvhURORpYB9.webp"
+              ],
+              "manage_stock": false,
+              "stock": 0,
+              "in_stock": false,
+              "variations": []
+            },
+            {
+              "id": 9,
+              "name": "Silver Elegant Butterflies Bracelet",
+              "slug": "silver-elegant-butterflies-bracelet",
+              "sku": null,
+              "url": "http://127.0.0.1:8123/product/silver-elegant-butterflies-bracelet",
+              "audience": "women",
+              "material_type": "silver",
+              "product_type": "simple",
+              "is_simple": true,
+              "is_variable": false,
+              "short_description": "The Silver Elegant Butterflies Bracelet is inspired by the moon showing up unexpectedly on a rainy night with a group of three twinkling stars.",
+              "description": "The Design:\r\nThis silver bracelet has a moon motif studded with zircon at the centre with two stars to its left and one star to its right.\r\n\r\n925 Silver\r\nPerfect for sensitive skin\r\nMotif Size: Height - 0.85 cm, Motif Width - 1.35 cm\r\nThe length of the bracelet is 15 cm with a 4 cm adjustable portion\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Bracelet\r\nNet Qty- 1 unit\r\nStyling Tip:\r\nStyle this bracelet with a pink patchwork cocktail dress.",
+              "price": 2999.5,
+              "regular_price": 5999,
+              "sale_price": 2999.5,
+              "base_price": 5999,
+              "discount_type": "percentage",
+              "discount_value": 50,
+              "discount_percentage": 50,
+              "is_on_sale": true,
+              "price_range": null,
+              "primary_image": "http://127.0.0.1:8123/storage/products/JZBDIxaCw2LrKudyhdATWUjMKIHiRtHPMNwoSypB.png",
+              "images": [
+                "http://127.0.0.1:8123/storage/products/JZBDIxaCw2LrKudyhdATWUjMKIHiRtHPMNwoSypB.png",
+                "http://127.0.0.1:8123/storage/products/nFr8k7kOaGrKgqbLlsD7OYXDicRj40PnimAgOtQT.webp",
+                "http://127.0.0.1:8123/storage/products/33ghQTfgYvweacmeZQ63l0nwrgkkGqnNRBixGfNS.webp"
+              ],
+              "manage_stock": true,
+              "stock": 497,
+              "in_stock": true,
+              "variations": []
+            }
+          ],
+          "products_count": 4
+        }
+      ],
+      "meta": {
+        "total": 1
+      }
+    }
+  },
+  "pages.index": {
+    "method": "GET",
+    "path": "/pages",
+    "query": null,
+    "auth": false,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "OK",
+      "data": [
+        {
+          "id": 1,
+          "title": "API Docs Page",
+          "slug": "api-docs-page",
+          "url": "http://127.0.0.1:8123/pages/api-docs-page"
+        }
+      ],
+      "meta": {}
+    }
+  },
+  "home": {
+    "method": "GET",
+    "path": "/home",
+    "query": null,
+    "auth": false,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "OK",
+      "data": {
+        "sliders": [
+          {
+            "id": 1,
+            "title": "Slider1",
+            "subheading": null,
+            "button_text": null,
+            "button_link": null,
+            "image": "http://127.0.0.1:8123/storage/sliders/Jx2UPzXcbaoSE95QSjP07deexgjAH7a0CcBihv5M.png",
+            "sort_order": 1
+          },
+          {
+            "id": 2,
+            "title": "Slider 2",
+            "subheading": null,
+            "button_text": null,
+            "button_link": null,
+            "image": "http://127.0.0.1:8123/storage/sliders/Eg7xszXcHD1SDXADnNlGl2h02R8gHsBTwZi8la0f.png",
+            "sort_order": 2
+          },
+          {
+            "id": 3,
+            "title": "slide 3",
+            "subheading": null,
+            "button_text": null,
+            "button_link": null,
+            "image": "http://127.0.0.1:8123/storage/sliders/m8pnfZf9nJXfpFXOy8pfb31esqsrPsJdYrGLz3PJ.png",
+            "sort_order": 3
+          }
+        ],
+        "categories": [
+          {
+            "id": 5,
+            "name": "Anklets",
+            "slug": "anklets",
+            "parent_id": null,
+            "is_root": true,
+            "position": 0,
+            "description": "Anklets",
+            "image": "http://127.0.0.1:8123/storage/categories/2STL6Liwt0Nqua8Ye4KFn6PCjHRYqied8cCHgW0q.jpg",
+            "breadcrumb": "Anklets",
+            "products_count": 0,
+            "url": "http://127.0.0.1:8123/category/anklets"
+          },
+          {
+            "id": 13,
+            "name": "Bangles",
+            "slug": "bangles",
+            "parent_id": null,
+            "is_root": true,
+            "position": 0,
+            "description": null,
+            "image": "http://127.0.0.1:8123/storage/categories/cw3tw1TIfn9yq4G762JJg9EwKNdPY5JoX6EqQyuh.jpg",
+            "breadcrumb": "Bangles",
+            "products_count": 0,
+            "url": "http://127.0.0.1:8123/category/bangles"
+          },
+          {
+            "id": 7,
+            "name": "Bracelets",
+            "slug": "bracelets",
+            "parent_id": null,
+            "is_root": true,
+            "position": 0,
+            "description": "Bracelets",
+            "image": "http://127.0.0.1:8123/storage/categories/zI3pukSqDOszpmONt48DinTED9GwhKNRe2XE20jj.jpg",
+            "breadcrumb": "Bracelets",
+            "products_count": 3,
+            "url": "http://127.0.0.1:8123/category/bracelets"
+          },
+          {
+            "id": 8,
+            "name": "Chains",
+            "slug": "chains",
+            "parent_id": null,
+            "is_root": true,
+            "position": 0,
+            "description": "Chains",
+            "image": "http://127.0.0.1:8123/storage/categories/SdputSypD8iiEi37dwoIwEOypOydi0JuNR1gNLdk.jpg",
+            "breadcrumb": "Chains",
+            "products_count": 0,
+            "url": "http://127.0.0.1:8123/category/chains"
+          },
+          {
+            "id": 4,
+            "name": "Earrings",
+            "slug": "earrings",
+            "parent_id": null,
+            "is_root": true,
+            "position": 0,
+            "description": "Earrings",
+            "image": "http://127.0.0.1:8123/storage/categories/203NWk2VUQioJWpfeyVcQt5Xa0lvFtqAVyfOMUOK.jpg",
+            "breadcrumb": "Earrings",
+            "products_count": 2,
+            "url": "http://127.0.0.1:8123/category/earrings"
+          },
+          {
+            "id": 12,
+            "name": "Men's Jewellery",
+            "slug": "mens-jewellery",
+            "parent_id": null,
+            "is_root": true,
+            "position": 0,
+            "description": null,
+            "image": "http://127.0.0.1:8123/storage/categories/rJNgx5yoL61P1tfwhHdB3S4LLjNPTCmQC8STDJJ0.jpg",
+            "breadcrumb": "Men's Jewellery",
+            "products_count": 0,
+            "url": "http://127.0.0.1:8123/category/mens-jewellery"
+          },
+          {
+            "id": 11,
+            "name": "Nose Pin",
+            "slug": "nose-pin",
+            "parent_id": null,
+            "is_root": true,
+            "position": 0,
+            "description": null,
+            "image": "http://127.0.0.1:8123/storage/categories/hveDuL6lrZ6toEOTptfYoA9lWPkaxIEMlttoGFEn.jpg",
+            "breadcrumb": "Nose Pin",
+            "products_count": 0,
+            "url": "http://127.0.0.1:8123/category/nose-pin"
+          },
+          {
+            "id": 6,
+            "name": "Pendants",
+            "slug": "pendants",
+            "parent_id": null,
+            "is_root": true,
+            "position": 0,
+            "description": "Pendants",
+            "image": "http://127.0.0.1:8123/storage/categories/vz0r3lDgqY23iqABC0008KeC3zYg9CnEKjOQ3hZw.jpg",
+            "breadcrumb": "Pendants",
+            "products_count": 0,
+            "url": "http://127.0.0.1:8123/category/pendants"
+          },
+          {
+            "id": 3,
+            "name": "Rings",
+            "slug": "rings",
+            "parent_id": null,
+            "is_root": true,
+            "position": 0,
+            "description": "Timeless Rings, Made to Celebrate Every Moment.\r\nElegant designs crafted to sparkle today and be cherished forever.",
+            "image": "http://127.0.0.1:8123/storage/categories/LRb2d62xnkA918FHqY6FSirXx1X4icYWWA4kmNye.jpg",
+            "breadcrumb": "Rings",
+            "products_count": 4,
+            "url": "http://127.0.0.1:8123/category/rings"
+          },
+          {
+            "id": 14,
+            "name": "Solitaires",
+            "slug": "solitaires",
+            "parent_id": null,
+            "is_root": true,
+            "position": 0,
+            "description": null,
+            "image": "http://127.0.0.1:8123/storage/categories/eh79bjmFeVOTzsNV9wUZ5XrINkysMUpYe6Q6m7xk.jpg",
+            "breadcrumb": "Solitaires",
+            "products_count": 0,
+            "url": "http://127.0.0.1:8123/category/solitaires"
+          }
+        ],
+        "new_arrivals": [
+          {
+            "id": 9,
+            "name": "Silver Elegant Butterflies Bracelet",
+            "slug": "silver-elegant-butterflies-bracelet",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/silver-elegant-butterflies-bracelet",
+            "audience": "women",
+            "material_type": "silver",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "The Silver Elegant Butterflies Bracelet is inspired by the moon showing up unexpectedly on a rainy night with a group of three twinkling stars.",
+            "description": "The Design:\r\nThis silver bracelet has a moon motif studded with zircon at the centre with two stars to its left and one star to its right.\r\n\r\n925 Silver\r\nPerfect for sensitive skin\r\nMotif Size: Height - 0.85 cm, Motif Width - 1.35 cm\r\nThe length of the bracelet is 15 cm with a 4 cm adjustable portion\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Bracelet\r\nNet Qty- 1 unit\r\nStyling Tip:\r\nStyle this bracelet with a pink patchwork cocktail dress.",
+            "price": 2999.5,
+            "regular_price": 5999,
+            "sale_price": 2999.5,
+            "base_price": 5999,
+            "discount_type": "percentage",
+            "discount_value": 50,
+            "discount_percentage": 50,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/JZBDIxaCw2LrKudyhdATWUjMKIHiRtHPMNwoSypB.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/JZBDIxaCw2LrKudyhdATWUjMKIHiRtHPMNwoSypB.png",
+              "http://127.0.0.1:8123/storage/products/nFr8k7kOaGrKgqbLlsD7OYXDicRj40PnimAgOtQT.webp",
+              "http://127.0.0.1:8123/storage/products/33ghQTfgYvweacmeZQ63l0nwrgkkGqnNRBixGfNS.webp"
+            ],
+            "manage_stock": true,
+            "stock": 497,
+            "in_stock": true,
+            "category": {
+              "id": 7,
+              "name": "Bracelets",
+              "slug": "bracelets",
+              "parent_id": null
+            },
+            "brand": null,
+            "variations": [],
+            "reviews_count": 1
+          },
+          {
+            "id": 8,
+            "name": "Rose Gold My Love Bracelet",
+            "slug": "rose-gold-my-love-bracelet",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/rose-gold-my-love-bracelet",
+            "audience": "women",
+            "material_type": "gold",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "Don't hesitate any longer, it's the season of love -the perfect time to convey your feelings to that special someone.",
+            "description": "The Design:\r\nThis rose gold open-type bracelet features a heart motif that rotates and studded with zircons on one end and other end has a zircon studded heart in a circle, that has an open heart mechanism where you can custom inscribe the message. Celebrate your moments of passion with GIVA’s Red Romance Collection.\r\n\r\n925 Silver with Rose Gold Plating\r\nPerfect for sensitive skin\r\nBracelet Diameter: 5.5 cm + Adjustable\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Bracelet\r\nNet Qty- 1 unit\r\nStyling Tip:\r\nThis bracelet would go well with a sheath dress.",
+            "price": 10895.39,
+            "regular_price": 19799,
+            "sale_price": 10895.39,
+            "base_price": 19799,
+            "discount_type": "percentage",
+            "discount_value": 44.97,
+            "discount_percentage": 44.97,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/9IOxM3tY8wYLuJ0Nbz8cVHTumtdTZWffq7aw8TKL.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/9IOxM3tY8wYLuJ0Nbz8cVHTumtdTZWffq7aw8TKL.png",
+              "http://127.0.0.1:8123/storage/products/IqCtkrj5wdrGVCaZj4WlQFYvgboxyw7lVTBjeI4o.webp",
+              "http://127.0.0.1:8123/storage/products/pXTsmDE8r4oOJ1N6BoVZ5i342vpztE1OWVDJQyLA.webp",
+              "http://127.0.0.1:8123/storage/products/Y58I2LtT5qBTKi9p6QPT5QTjn3PJBhjHJxS8R3gK.webp"
+            ],
+            "manage_stock": false,
+            "stock": 0,
+            "in_stock": false,
+            "category": {
+              "id": 7,
+              "name": "Bracelets",
+              "slug": "bracelets",
+              "parent_id": null
+            },
+            "brand": null,
+            "variations": [],
+            "reviews_count": 0
+          },
+          {
+            "id": 7,
+            "name": "Rose Gold For My Dear Bracelet",
+            "slug": "rose-gold-for-my-dear-bracelet",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/rose-gold-for-my-dear-bracelet",
+            "audience": "men",
+            "material_type": "gold",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "The Rose Gold For My Dear Bracelet is inspired by the special moments captured in the camera of our hearts that we keep encapsulated in a treasure box of memories.",
+            "description": "The Design:\r\n\r\nThe rose gold bracelet has a design of the antlers of a reindeer with a zircon on the head.\r\n\r\n925 silver with Rose Gold plating\r\nPerfect for sensitive skin\r\nAdjustable size\r\nLength of the bracelet - 16.5 cm+ 4 cm adjustable\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nNet Qty- 1 piece\r\nStyling Tip:\r\n\r\nStyle this with a beige ribbed top and blue jeans.",
+            "price": 4388.43,
+            "regular_price": 7699,
+            "sale_price": 4388.43,
+            "base_price": 7699,
+            "discount_type": "percentage",
+            "discount_value": 43,
+            "discount_percentage": 43,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/lmjp2W1sXyGGN8e54MUXgPmMGcEi7V7DfT4MVwmn.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/lmjp2W1sXyGGN8e54MUXgPmMGcEi7V7DfT4MVwmn.png",
+              "http://127.0.0.1:8123/storage/products/2d8xGFiDZgDbCm5BvIEAgodEsmtfkqtX5DPUnpe6.webp",
+              "http://127.0.0.1:8123/storage/products/mU9q8NWxS3eiDTigzzbFGphU18Dtb8MtALvHAo4b.webp"
+            ],
+            "manage_stock": false,
+            "stock": 0,
+            "in_stock": false,
+            "category": {
+              "id": 7,
+              "name": "Bracelets",
+              "slug": "bracelets",
+              "parent_id": null
+            },
+            "brand": null,
+            "variations": [],
+            "reviews_count": 1
+          },
+          {
+            "id": 6,
+            "name": "Silver Cupid Arrow Couple Bands",
+            "slug": "silver-cupid-arrow-couple-bands",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/silver-cupid-arrow-couple-bands",
+            "audience": "unisex",
+            "material_type": "silver",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "Show off how you and your partner make a perfect fit for each other just like the jigsaw puzzle pieces with these rings.",
+            "description": "The Design:\r\nThese silver rings feature a V-shaped cut-out design, with one ring set with zircons.\r\n\r\n925 Silver\r\nPerfect for sensitive skin\r\nAdjustable size to ensure no fitting issues\r\nFemale ring size: 1.62 cm\r\nMale ring size: 2 cm + adjustable\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Couple Bands\r\nNet Qty - 1 unit\r\nStyling Tip:\r\nMatch these rings with casual wear.",
+            "price": 4399.45,
+            "regular_price": 7999,
+            "sale_price": 4399.45,
+            "base_price": 7999,
+            "discount_type": "percentage",
+            "discount_value": 45,
+            "discount_percentage": 45,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/bVmcUjnGkuIIwcM2U2r0aIvUp80THAmVeGc3rDhr.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/bVmcUjnGkuIIwcM2U2r0aIvUp80THAmVeGc3rDhr.png",
+              "http://127.0.0.1:8123/storage/products/bHMrMJ2xbgslL4fVUfCbk7gOjSXpbt4i00w5CQ8k.webp",
+              "http://127.0.0.1:8123/storage/products/HPLHcEsI7QMJXI3KmzMWuKwtaY1kTFNaNaqtVYGh.webp",
+              "http://127.0.0.1:8123/storage/products/QnJPvFuh1vFDZJD66b5omgD7oZyw2lvhURORpYB9.webp"
+            ],
+            "manage_stock": false,
+            "stock": 0,
+            "in_stock": false,
+            "category": {
+              "id": 3,
+              "name": "Rings",
+              "slug": "rings",
+              "parent_id": null
+            },
+            "brand": null,
+            "variations": [],
+            "reviews_count": 0
+          },
+          {
+            "id": 5,
+            "name": "Silver Minimal Couple Rings",
+            "slug": "silver-minimal-couple-rings",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/silver-minimal-couple-rings",
+            "audience": "women",
+            "material_type": "silver",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "Make your love feel truly special with these. They are the perfect couple bands for you and your partner.",
+            "description": "The Design:\r\nThese silver couple rings have zircons in the centre.\r\n\r\n925 Silver\r\nPerfect for sensitive skin\r\nAdjustable size to ensure no fitting issues\r\nFemale ring size 1.66 cm +adjustable\r\nMale ring size 1.94 cm + adjustable\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Couple Rings\r\nNet Qty - 1 unit\r\nStyling Tip:\r\nSuit these with matching couple Tee-shirts.",
+            "price": 4639.42,
+            "regular_price": 7999,
+            "sale_price": 4639.42,
+            "base_price": 7999,
+            "discount_type": "percentage",
+            "discount_value": 42,
+            "discount_percentage": 42,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/D5WNVAgymWr5lZZpcmit3GnGI5r12I8eKBuIvxIb.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/D5WNVAgymWr5lZZpcmit3GnGI5r12I8eKBuIvxIb.png",
+              "http://127.0.0.1:8123/storage/products/OUEOVySsr6Ir43LDXKf4fIuJZx13n4xkP1pJ5tE5.webp",
+              "http://127.0.0.1:8123/storage/products/vpWqjg0H18hJMjlEendImgOiGOGKBqHTXth7MFk2.webp",
+              "http://127.0.0.1:8123/storage/products/TEPynOpvKFJ8x0w7IRhJVDnkeks9gQwTcbcgZEEC.webp"
+            ],
+            "manage_stock": false,
+            "stock": 0,
+            "in_stock": false,
+            "category": {
+              "id": 3,
+              "name": "Rings",
+              "slug": "rings",
+              "parent_id": null
+            },
+            "brand": null,
+            "variations": [],
+            "reviews_count": 0
+          },
+          {
+            "id": 4,
+            "name": "Golden Star Constellation Tiny Studs",
+            "slug": "golden-star-constellation-tiny-studs",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/golden-star-constellation-tiny-studs",
+            "audience": "women",
+            "material_type": "gold",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "The night sky devoid of any stars is unimaginable and incomplete. Likewise, your accessory collection, without these earrings, would be incomplete.",
+            "description": "The Design:\r\nThese golden earrings feature a star motif set with zircons.\r\n\r\n925 Silver with Gold Plating\r\nPerfect for sensitive skin\r\nEarring Size: Height - 0.5 cm, Width - 0.5 cm\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Earrings\r\nNet Qty- 1 pair\r\nStyling Tip:\r\nTeam these with a purple ruffle dress.",
+            "price": 999.75,
+            "regular_price": 3999,
+            "sale_price": 999.75,
+            "base_price": 3999,
+            "discount_type": "percentage",
+            "discount_value": 75,
+            "discount_percentage": 75,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/0sp8aUfrXeY9JNRAZYxe89EkgjeFpu70sQg6IHob.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/0sp8aUfrXeY9JNRAZYxe89EkgjeFpu70sQg6IHob.png",
+              "http://127.0.0.1:8123/storage/products/vTMnfpRpo8Mn0rLkWsOzmMoRQfy3PWw9NxmkjByF.webp",
+              "http://127.0.0.1:8123/storage/products/l53QZdhYsrJn8s4G13N1qYMyZv84np6YkprH2D0L.webp",
+              "http://127.0.0.1:8123/storage/products/tV62bwAPIlIq1GyEDmCGGQa1mzQWcwvufSQzS0D1.webp"
+            ],
+            "manage_stock": false,
+            "stock": 0,
+            "in_stock": false,
+            "category": {
+              "id": 4,
+              "name": "Earrings",
+              "slug": "earrings",
+              "parent_id": null
+            },
+            "brand": null,
+            "variations": [],
+            "reviews_count": 1
+          },
+          {
+            "id": 3,
+            "name": "Silver Zircon Bubble Stud Earrings",
+            "slug": "silver-zircon-bubble-stud-earrings",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/silver-zircon-bubble-stud-earrings",
+            "audience": "women",
+            "material_type": "silver",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "Are you in search of the perfect everyday earrings suitable for office wear? Look no further, because we've got just the pair for you!",
+            "description": "The Design:\r\nThese silver earrings have a hexagonal shape with a zircon placed on them.\r\n925 Silver\r\nPerfect for sensitive skin\r\nEarring Size: Height - 0.5 cm, Width - 0.5 cm\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Earrings\r\nNet Qty- 1 pair\r\nStyling Tip:\r\nWear a maroon straight sheath dress.",
+            "price": 990,
+            "regular_price": 3000,
+            "sale_price": 990,
+            "base_price": 3000,
+            "discount_type": "percentage",
+            "discount_value": 67,
+            "discount_percentage": 67,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/aDKzPcUL9Y3aBNrTlDVBwj33wfW4Y2EKoluEyZsA.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/aDKzPcUL9Y3aBNrTlDVBwj33wfW4Y2EKoluEyZsA.png",
+              "http://127.0.0.1:8123/storage/products/eabUVxJDrgefzhEGkW1j0pKgcqgtWJAaTgGL1D37.webp",
+              "http://127.0.0.1:8123/storage/products/jYLVJEiyHRCz9cUHYyqhjh5WDCEjJRBocyeYmif0.webp",
+              "http://127.0.0.1:8123/storage/products/771zwzKOgO06OyU3aiI0Q87ii6DdL9XIgXavRVJF.webp"
+            ],
+            "manage_stock": false,
+            "stock": 0,
+            "in_stock": false,
+            "category": {
+              "id": 4,
+              "name": "Earrings",
+              "slug": "earrings",
+              "parent_id": null
+            },
+            "brand": null,
+            "variations": [],
+            "reviews_count": 0
+          },
+          {
+            "id": 2,
+            "name": "Golden Square in Rectangle Ring",
+            "slug": "golden-square-in-rectangle-ring",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/golden-square-in-rectangle-ring",
+            "audience": "men",
+            "material_type": "gold",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "No compromises, no limits just like your ambitions. This ring is designed for the man who settles for nothing but the best.",
+            "description": "The Design:\r\nThis gold plated ring for men features a rectangular design on the front, with a zircon stud elegantly placed at one corner within a square line.\r\n\r\n925 Silver with Gold Plating\r\nPerfect for sensitive skin\r\nRing Size Indian 17- Diameter: 1.82 cm\r\nRing Size Indian 20- Diameter: 1.91 cm\r\nFixed Size\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Ring\r\nNet Qty- 1 unit\r\nStyling Tip:\r\nStyle this with your party outfit.",
+            "price": 3850,
+            "regular_price": 7000,
+            "sale_price": 3850,
+            "base_price": 7000,
+            "discount_type": "percentage",
+            "discount_value": 45,
+            "discount_percentage": 45,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/UywQ7vZQjGwkSj82biKOttXMszRuKXNhiYarAG4x.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/UywQ7vZQjGwkSj82biKOttXMszRuKXNhiYarAG4x.png",
+              "http://127.0.0.1:8123/storage/products/HwI6l3qPX7kQ3gXJX5ehrjTZDJNXkUJgBgzjQCOt.webp",
+              "http://127.0.0.1:8123/storage/products/lmfWBCBZhLm5cjSCJ96ClJsBcVA9N0fPxWGhgtlP.webp",
+              "http://127.0.0.1:8123/storage/products/UBvSekywDA05tmMaN2e2v18GEGuILqpDUzMP1sii.webp"
+            ],
+            "manage_stock": false,
+            "stock": 0,
+            "in_stock": false,
+            "category": {
+              "id": 3,
+              "name": "Rings",
+              "slug": "rings",
+              "parent_id": null
+            },
+            "brand": null,
+            "variations": [],
+            "reviews_count": 0
+          }
+        ],
+        "featured": [
+          {
+            "id": 9,
+            "name": "Silver Elegant Butterflies Bracelet",
+            "slug": "silver-elegant-butterflies-bracelet",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/silver-elegant-butterflies-bracelet",
+            "audience": "women",
+            "material_type": "silver",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "The Silver Elegant Butterflies Bracelet is inspired by the moon showing up unexpectedly on a rainy night with a group of three twinkling stars.",
+            "description": "The Design:\r\nThis silver bracelet has a moon motif studded with zircon at the centre with two stars to its left and one star to its right.\r\n\r\n925 Silver\r\nPerfect for sensitive skin\r\nMotif Size: Height - 0.85 cm, Motif Width - 1.35 cm\r\nThe length of the bracelet is 15 cm with a 4 cm adjustable portion\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Bracelet\r\nNet Qty- 1 unit\r\nStyling Tip:\r\nStyle this bracelet with a pink patchwork cocktail dress.",
+            "price": 2999.5,
+            "regular_price": 5999,
+            "sale_price": 2999.5,
+            "base_price": 5999,
+            "discount_type": "percentage",
+            "discount_value": 50,
+            "discount_percentage": 50,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/JZBDIxaCw2LrKudyhdATWUjMKIHiRtHPMNwoSypB.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/JZBDIxaCw2LrKudyhdATWUjMKIHiRtHPMNwoSypB.png",
+              "http://127.0.0.1:8123/storage/products/nFr8k7kOaGrKgqbLlsD7OYXDicRj40PnimAgOtQT.webp",
+              "http://127.0.0.1:8123/storage/products/33ghQTfgYvweacmeZQ63l0nwrgkkGqnNRBixGfNS.webp"
+            ],
+            "manage_stock": true,
+            "stock": 497,
+            "in_stock": true,
+            "category": {
+              "id": 7,
+              "name": "Bracelets",
+              "slug": "bracelets",
+              "parent_id": null
+            },
+            "brand": null,
+            "variations": [],
+            "reviews_count": 1
+          },
+          {
+            "id": 8,
+            "name": "Rose Gold My Love Bracelet",
+            "slug": "rose-gold-my-love-bracelet",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/rose-gold-my-love-bracelet",
+            "audience": "women",
+            "material_type": "gold",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "Don't hesitate any longer, it's the season of love -the perfect time to convey your feelings to that special someone.",
+            "description": "The Design:\r\nThis rose gold open-type bracelet features a heart motif that rotates and studded with zircons on one end and other end has a zircon studded heart in a circle, that has an open heart mechanism where you can custom inscribe the message. Celebrate your moments of passion with GIVA’s Red Romance Collection.\r\n\r\n925 Silver with Rose Gold Plating\r\nPerfect for sensitive skin\r\nBracelet Diameter: 5.5 cm + Adjustable\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Bracelet\r\nNet Qty- 1 unit\r\nStyling Tip:\r\nThis bracelet would go well with a sheath dress.",
+            "price": 10895.39,
+            "regular_price": 19799,
+            "sale_price": 10895.39,
+            "base_price": 19799,
+            "discount_type": "percentage",
+            "discount_value": 44.97,
+            "discount_percentage": 44.97,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/9IOxM3tY8wYLuJ0Nbz8cVHTumtdTZWffq7aw8TKL.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/9IOxM3tY8wYLuJ0Nbz8cVHTumtdTZWffq7aw8TKL.png",
+              "http://127.0.0.1:8123/storage/products/IqCtkrj5wdrGVCaZj4WlQFYvgboxyw7lVTBjeI4o.webp",
+              "http://127.0.0.1:8123/storage/products/pXTsmDE8r4oOJ1N6BoVZ5i342vpztE1OWVDJQyLA.webp",
+              "http://127.0.0.1:8123/storage/products/Y58I2LtT5qBTKi9p6QPT5QTjn3PJBhjHJxS8R3gK.webp"
+            ],
+            "manage_stock": false,
+            "stock": 0,
+            "in_stock": false,
+            "category": {
+              "id": 7,
+              "name": "Bracelets",
+              "slug": "bracelets",
+              "parent_id": null
+            },
+            "brand": null,
+            "variations": [],
+            "reviews_count": 0
+          },
+          {
+            "id": 7,
+            "name": "Rose Gold For My Dear Bracelet",
+            "slug": "rose-gold-for-my-dear-bracelet",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/rose-gold-for-my-dear-bracelet",
+            "audience": "men",
+            "material_type": "gold",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "The Rose Gold For My Dear Bracelet is inspired by the special moments captured in the camera of our hearts that we keep encapsulated in a treasure box of memories.",
+            "description": "The Design:\r\n\r\nThe rose gold bracelet has a design of the antlers of a reindeer with a zircon on the head.\r\n\r\n925 silver with Rose Gold plating\r\nPerfect for sensitive skin\r\nAdjustable size\r\nLength of the bracelet - 16.5 cm+ 4 cm adjustable\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nNet Qty- 1 piece\r\nStyling Tip:\r\n\r\nStyle this with a beige ribbed top and blue jeans.",
+            "price": 4388.43,
+            "regular_price": 7699,
+            "sale_price": 4388.43,
+            "base_price": 7699,
+            "discount_type": "percentage",
+            "discount_value": 43,
+            "discount_percentage": 43,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/lmjp2W1sXyGGN8e54MUXgPmMGcEi7V7DfT4MVwmn.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/lmjp2W1sXyGGN8e54MUXgPmMGcEi7V7DfT4MVwmn.png",
+              "http://127.0.0.1:8123/storage/products/2d8xGFiDZgDbCm5BvIEAgodEsmtfkqtX5DPUnpe6.webp",
+              "http://127.0.0.1:8123/storage/products/mU9q8NWxS3eiDTigzzbFGphU18Dtb8MtALvHAo4b.webp"
+            ],
+            "manage_stock": false,
+            "stock": 0,
+            "in_stock": false,
+            "category": {
+              "id": 7,
+              "name": "Bracelets",
+              "slug": "bracelets",
+              "parent_id": null
+            },
+            "brand": null,
+            "variations": [],
+            "reviews_count": 1
+          },
+          {
+            "id": 6,
+            "name": "Silver Cupid Arrow Couple Bands",
+            "slug": "silver-cupid-arrow-couple-bands",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/silver-cupid-arrow-couple-bands",
+            "audience": "unisex",
+            "material_type": "silver",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "Show off how you and your partner make a perfect fit for each other just like the jigsaw puzzle pieces with these rings.",
+            "description": "The Design:\r\nThese silver rings feature a V-shaped cut-out design, with one ring set with zircons.\r\n\r\n925 Silver\r\nPerfect for sensitive skin\r\nAdjustable size to ensure no fitting issues\r\nFemale ring size: 1.62 cm\r\nMale ring size: 2 cm + adjustable\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Couple Bands\r\nNet Qty - 1 unit\r\nStyling Tip:\r\nMatch these rings with casual wear.",
+            "price": 4399.45,
+            "regular_price": 7999,
+            "sale_price": 4399.45,
+            "base_price": 7999,
+            "discount_type": "percentage",
+            "discount_value": 45,
+            "discount_percentage": 45,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/bVmcUjnGkuIIwcM2U2r0aIvUp80THAmVeGc3rDhr.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/bVmcUjnGkuIIwcM2U2r0aIvUp80THAmVeGc3rDhr.png",
+              "http://127.0.0.1:8123/storage/products/bHMrMJ2xbgslL4fVUfCbk7gOjSXpbt4i00w5CQ8k.webp",
+              "http://127.0.0.1:8123/storage/products/HPLHcEsI7QMJXI3KmzMWuKwtaY1kTFNaNaqtVYGh.webp",
+              "http://127.0.0.1:8123/storage/products/QnJPvFuh1vFDZJD66b5omgD7oZyw2lvhURORpYB9.webp"
+            ],
+            "manage_stock": false,
+            "stock": 0,
+            "in_stock": false,
+            "category": {
+              "id": 3,
+              "name": "Rings",
+              "slug": "rings",
+              "parent_id": null
+            },
+            "brand": null,
+            "variations": [],
+            "reviews_count": 0
+          },
+          {
+            "id": 5,
+            "name": "Silver Minimal Couple Rings",
+            "slug": "silver-minimal-couple-rings",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/silver-minimal-couple-rings",
+            "audience": "women",
+            "material_type": "silver",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "Make your love feel truly special with these. They are the perfect couple bands for you and your partner.",
+            "description": "The Design:\r\nThese silver couple rings have zircons in the centre.\r\n\r\n925 Silver\r\nPerfect for sensitive skin\r\nAdjustable size to ensure no fitting issues\r\nFemale ring size 1.66 cm +adjustable\r\nMale ring size 1.94 cm + adjustable\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Couple Rings\r\nNet Qty - 1 unit\r\nStyling Tip:\r\nSuit these with matching couple Tee-shirts.",
+            "price": 4639.42,
+            "regular_price": 7999,
+            "sale_price": 4639.42,
+            "base_price": 7999,
+            "discount_type": "percentage",
+            "discount_value": 42,
+            "discount_percentage": 42,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/D5WNVAgymWr5lZZpcmit3GnGI5r12I8eKBuIvxIb.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/D5WNVAgymWr5lZZpcmit3GnGI5r12I8eKBuIvxIb.png",
+              "http://127.0.0.1:8123/storage/products/OUEOVySsr6Ir43LDXKf4fIuJZx13n4xkP1pJ5tE5.webp",
+              "http://127.0.0.1:8123/storage/products/vpWqjg0H18hJMjlEendImgOiGOGKBqHTXth7MFk2.webp",
+              "http://127.0.0.1:8123/storage/products/TEPynOpvKFJ8x0w7IRhJVDnkeks9gQwTcbcgZEEC.webp"
+            ],
+            "manage_stock": false,
+            "stock": 0,
+            "in_stock": false,
+            "category": {
+              "id": 3,
+              "name": "Rings",
+              "slug": "rings",
+              "parent_id": null
+            },
+            "brand": null,
+            "variations": [],
+            "reviews_count": 0
+          },
+          {
+            "id": 4,
+            "name": "Golden Star Constellation Tiny Studs",
+            "slug": "golden-star-constellation-tiny-studs",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/golden-star-constellation-tiny-studs",
+            "audience": "women",
+            "material_type": "gold",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "The night sky devoid of any stars is unimaginable and incomplete. Likewise, your accessory collection, without these earrings, would be incomplete.",
+            "description": "The Design:\r\nThese golden earrings feature a star motif set with zircons.\r\n\r\n925 Silver with Gold Plating\r\nPerfect for sensitive skin\r\nEarring Size: Height - 0.5 cm, Width - 0.5 cm\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Earrings\r\nNet Qty- 1 pair\r\nStyling Tip:\r\nTeam these with a purple ruffle dress.",
+            "price": 999.75,
+            "regular_price": 3999,
+            "sale_price": 999.75,
+            "base_price": 3999,
+            "discount_type": "percentage",
+            "discount_value": 75,
+            "discount_percentage": 75,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/0sp8aUfrXeY9JNRAZYxe89EkgjeFpu70sQg6IHob.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/0sp8aUfrXeY9JNRAZYxe89EkgjeFpu70sQg6IHob.png",
+              "http://127.0.0.1:8123/storage/products/vTMnfpRpo8Mn0rLkWsOzmMoRQfy3PWw9NxmkjByF.webp",
+              "http://127.0.0.1:8123/storage/products/l53QZdhYsrJn8s4G13N1qYMyZv84np6YkprH2D0L.webp",
+              "http://127.0.0.1:8123/storage/products/tV62bwAPIlIq1GyEDmCGGQa1mzQWcwvufSQzS0D1.webp"
+            ],
+            "manage_stock": false,
+            "stock": 0,
+            "in_stock": false,
+            "category": {
+              "id": 4,
+              "name": "Earrings",
+              "slug": "earrings",
+              "parent_id": null
+            },
+            "brand": null,
+            "variations": [],
+            "reviews_count": 1
+          },
+          {
+            "id": 3,
+            "name": "Silver Zircon Bubble Stud Earrings",
+            "slug": "silver-zircon-bubble-stud-earrings",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/silver-zircon-bubble-stud-earrings",
+            "audience": "women",
+            "material_type": "silver",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "Are you in search of the perfect everyday earrings suitable for office wear? Look no further, because we've got just the pair for you!",
+            "description": "The Design:\r\nThese silver earrings have a hexagonal shape with a zircon placed on them.\r\n925 Silver\r\nPerfect for sensitive skin\r\nEarring Size: Height - 0.5 cm, Width - 0.5 cm\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Earrings\r\nNet Qty- 1 pair\r\nStyling Tip:\r\nWear a maroon straight sheath dress.",
+            "price": 990,
+            "regular_price": 3000,
+            "sale_price": 990,
+            "base_price": 3000,
+            "discount_type": "percentage",
+            "discount_value": 67,
+            "discount_percentage": 67,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/aDKzPcUL9Y3aBNrTlDVBwj33wfW4Y2EKoluEyZsA.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/aDKzPcUL9Y3aBNrTlDVBwj33wfW4Y2EKoluEyZsA.png",
+              "http://127.0.0.1:8123/storage/products/eabUVxJDrgefzhEGkW1j0pKgcqgtWJAaTgGL1D37.webp",
+              "http://127.0.0.1:8123/storage/products/jYLVJEiyHRCz9cUHYyqhjh5WDCEjJRBocyeYmif0.webp",
+              "http://127.0.0.1:8123/storage/products/771zwzKOgO06OyU3aiI0Q87ii6DdL9XIgXavRVJF.webp"
+            ],
+            "manage_stock": false,
+            "stock": 0,
+            "in_stock": false,
+            "category": {
+              "id": 4,
+              "name": "Earrings",
+              "slug": "earrings",
+              "parent_id": null
+            },
+            "brand": null,
+            "variations": [],
+            "reviews_count": 0
+          },
+          {
+            "id": 2,
+            "name": "Golden Square in Rectangle Ring",
+            "slug": "golden-square-in-rectangle-ring",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/golden-square-in-rectangle-ring",
+            "audience": "men",
+            "material_type": "gold",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "No compromises, no limits just like your ambitions. This ring is designed for the man who settles for nothing but the best.",
+            "description": "The Design:\r\nThis gold plated ring for men features a rectangular design on the front, with a zircon stud elegantly placed at one corner within a square line.\r\n\r\n925 Silver with Gold Plating\r\nPerfect for sensitive skin\r\nRing Size Indian 17- Diameter: 1.82 cm\r\nRing Size Indian 20- Diameter: 1.91 cm\r\nFixed Size\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Ring\r\nNet Qty- 1 unit\r\nStyling Tip:\r\nStyle this with your party outfit.",
+            "price": 3850,
+            "regular_price": 7000,
+            "sale_price": 3850,
+            "base_price": 7000,
+            "discount_type": "percentage",
+            "discount_value": 45,
+            "discount_percentage": 45,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/UywQ7vZQjGwkSj82biKOttXMszRuKXNhiYarAG4x.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/UywQ7vZQjGwkSj82biKOttXMszRuKXNhiYarAG4x.png",
+              "http://127.0.0.1:8123/storage/products/HwI6l3qPX7kQ3gXJX5ehrjTZDJNXkUJgBgzjQCOt.webp",
+              "http://127.0.0.1:8123/storage/products/lmfWBCBZhLm5cjSCJ96ClJsBcVA9N0fPxWGhgtlP.webp",
+              "http://127.0.0.1:8123/storage/products/UBvSekywDA05tmMaN2e2v18GEGuILqpDUzMP1sii.webp"
+            ],
+            "manage_stock": false,
+            "stock": 0,
+            "in_stock": false,
+            "category": {
+              "id": 3,
+              "name": "Rings",
+              "slug": "rings",
+              "parent_id": null
+            },
+            "brand": null,
+            "variations": [],
+            "reviews_count": 0
+          }
+        ],
+        "on_sale": [
+          {
+            "id": 9,
+            "name": "Silver Elegant Butterflies Bracelet",
+            "slug": "silver-elegant-butterflies-bracelet",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/silver-elegant-butterflies-bracelet",
+            "audience": "women",
+            "material_type": "silver",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "The Silver Elegant Butterflies Bracelet is inspired by the moon showing up unexpectedly on a rainy night with a group of three twinkling stars.",
+            "description": "The Design:\r\nThis silver bracelet has a moon motif studded with zircon at the centre with two stars to its left and one star to its right.\r\n\r\n925 Silver\r\nPerfect for sensitive skin\r\nMotif Size: Height - 0.85 cm, Motif Width - 1.35 cm\r\nThe length of the bracelet is 15 cm with a 4 cm adjustable portion\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Bracelet\r\nNet Qty- 1 unit\r\nStyling Tip:\r\nStyle this bracelet with a pink patchwork cocktail dress.",
+            "price": 2999.5,
+            "regular_price": 5999,
+            "sale_price": 2999.5,
+            "base_price": 5999,
+            "discount_type": "percentage",
+            "discount_value": 50,
+            "discount_percentage": 50,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/JZBDIxaCw2LrKudyhdATWUjMKIHiRtHPMNwoSypB.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/JZBDIxaCw2LrKudyhdATWUjMKIHiRtHPMNwoSypB.png",
+              "http://127.0.0.1:8123/storage/products/nFr8k7kOaGrKgqbLlsD7OYXDicRj40PnimAgOtQT.webp",
+              "http://127.0.0.1:8123/storage/products/33ghQTfgYvweacmeZQ63l0nwrgkkGqnNRBixGfNS.webp"
+            ],
+            "manage_stock": true,
+            "stock": 497,
+            "in_stock": true,
+            "category": {
+              "id": 7,
+              "name": "Bracelets",
+              "slug": "bracelets",
+              "parent_id": null
+            },
+            "brand": null,
+            "variations": [],
+            "reviews_count": 1
+          },
+          {
+            "id": 8,
+            "name": "Rose Gold My Love Bracelet",
+            "slug": "rose-gold-my-love-bracelet",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/rose-gold-my-love-bracelet",
+            "audience": "women",
+            "material_type": "gold",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "Don't hesitate any longer, it's the season of love -the perfect time to convey your feelings to that special someone.",
+            "description": "The Design:\r\nThis rose gold open-type bracelet features a heart motif that rotates and studded with zircons on one end and other end has a zircon studded heart in a circle, that has an open heart mechanism where you can custom inscribe the message. Celebrate your moments of passion with GIVA’s Red Romance Collection.\r\n\r\n925 Silver with Rose Gold Plating\r\nPerfect for sensitive skin\r\nBracelet Diameter: 5.5 cm + Adjustable\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Bracelet\r\nNet Qty- 1 unit\r\nStyling Tip:\r\nThis bracelet would go well with a sheath dress.",
+            "price": 10895.39,
+            "regular_price": 19799,
+            "sale_price": 10895.39,
+            "base_price": 19799,
+            "discount_type": "percentage",
+            "discount_value": 44.97,
+            "discount_percentage": 44.97,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/9IOxM3tY8wYLuJ0Nbz8cVHTumtdTZWffq7aw8TKL.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/9IOxM3tY8wYLuJ0Nbz8cVHTumtdTZWffq7aw8TKL.png",
+              "http://127.0.0.1:8123/storage/products/IqCtkrj5wdrGVCaZj4WlQFYvgboxyw7lVTBjeI4o.webp",
+              "http://127.0.0.1:8123/storage/products/pXTsmDE8r4oOJ1N6BoVZ5i342vpztE1OWVDJQyLA.webp",
+              "http://127.0.0.1:8123/storage/products/Y58I2LtT5qBTKi9p6QPT5QTjn3PJBhjHJxS8R3gK.webp"
+            ],
+            "manage_stock": false,
+            "stock": 0,
+            "in_stock": false,
+            "category": {
+              "id": 7,
+              "name": "Bracelets",
+              "slug": "bracelets",
+              "parent_id": null
+            },
+            "brand": null,
+            "variations": [],
+            "reviews_count": 0
+          },
+          {
+            "id": 7,
+            "name": "Rose Gold For My Dear Bracelet",
+            "slug": "rose-gold-for-my-dear-bracelet",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/rose-gold-for-my-dear-bracelet",
+            "audience": "men",
+            "material_type": "gold",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "The Rose Gold For My Dear Bracelet is inspired by the special moments captured in the camera of our hearts that we keep encapsulated in a treasure box of memories.",
+            "description": "The Design:\r\n\r\nThe rose gold bracelet has a design of the antlers of a reindeer with a zircon on the head.\r\n\r\n925 silver with Rose Gold plating\r\nPerfect for sensitive skin\r\nAdjustable size\r\nLength of the bracelet - 16.5 cm+ 4 cm adjustable\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nNet Qty- 1 piece\r\nStyling Tip:\r\n\r\nStyle this with a beige ribbed top and blue jeans.",
+            "price": 4388.43,
+            "regular_price": 7699,
+            "sale_price": 4388.43,
+            "base_price": 7699,
+            "discount_type": "percentage",
+            "discount_value": 43,
+            "discount_percentage": 43,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/lmjp2W1sXyGGN8e54MUXgPmMGcEi7V7DfT4MVwmn.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/lmjp2W1sXyGGN8e54MUXgPmMGcEi7V7DfT4MVwmn.png",
+              "http://127.0.0.1:8123/storage/products/2d8xGFiDZgDbCm5BvIEAgodEsmtfkqtX5DPUnpe6.webp",
+              "http://127.0.0.1:8123/storage/products/mU9q8NWxS3eiDTigzzbFGphU18Dtb8MtALvHAo4b.webp"
+            ],
+            "manage_stock": false,
+            "stock": 0,
+            "in_stock": false,
+            "category": {
+              "id": 7,
+              "name": "Bracelets",
+              "slug": "bracelets",
+              "parent_id": null
+            },
+            "brand": null,
+            "variations": [],
+            "reviews_count": 1
+          },
+          {
+            "id": 6,
+            "name": "Silver Cupid Arrow Couple Bands",
+            "slug": "silver-cupid-arrow-couple-bands",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/silver-cupid-arrow-couple-bands",
+            "audience": "unisex",
+            "material_type": "silver",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "Show off how you and your partner make a perfect fit for each other just like the jigsaw puzzle pieces with these rings.",
+            "description": "The Design:\r\nThese silver rings feature a V-shaped cut-out design, with one ring set with zircons.\r\n\r\n925 Silver\r\nPerfect for sensitive skin\r\nAdjustable size to ensure no fitting issues\r\nFemale ring size: 1.62 cm\r\nMale ring size: 2 cm + adjustable\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Couple Bands\r\nNet Qty - 1 unit\r\nStyling Tip:\r\nMatch these rings with casual wear.",
+            "price": 4399.45,
+            "regular_price": 7999,
+            "sale_price": 4399.45,
+            "base_price": 7999,
+            "discount_type": "percentage",
+            "discount_value": 45,
+            "discount_percentage": 45,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/bVmcUjnGkuIIwcM2U2r0aIvUp80THAmVeGc3rDhr.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/bVmcUjnGkuIIwcM2U2r0aIvUp80THAmVeGc3rDhr.png",
+              "http://127.0.0.1:8123/storage/products/bHMrMJ2xbgslL4fVUfCbk7gOjSXpbt4i00w5CQ8k.webp",
+              "http://127.0.0.1:8123/storage/products/HPLHcEsI7QMJXI3KmzMWuKwtaY1kTFNaNaqtVYGh.webp",
+              "http://127.0.0.1:8123/storage/products/QnJPvFuh1vFDZJD66b5omgD7oZyw2lvhURORpYB9.webp"
+            ],
+            "manage_stock": false,
+            "stock": 0,
+            "in_stock": false,
+            "category": {
+              "id": 3,
+              "name": "Rings",
+              "slug": "rings",
+              "parent_id": null
+            },
+            "brand": null,
+            "variations": [],
+            "reviews_count": 0
+          },
+          {
+            "id": 5,
+            "name": "Silver Minimal Couple Rings",
+            "slug": "silver-minimal-couple-rings",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/silver-minimal-couple-rings",
+            "audience": "women",
+            "material_type": "silver",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "Make your love feel truly special with these. They are the perfect couple bands for you and your partner.",
+            "description": "The Design:\r\nThese silver couple rings have zircons in the centre.\r\n\r\n925 Silver\r\nPerfect for sensitive skin\r\nAdjustable size to ensure no fitting issues\r\nFemale ring size 1.66 cm +adjustable\r\nMale ring size 1.94 cm + adjustable\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Couple Rings\r\nNet Qty - 1 unit\r\nStyling Tip:\r\nSuit these with matching couple Tee-shirts.",
+            "price": 4639.42,
+            "regular_price": 7999,
+            "sale_price": 4639.42,
+            "base_price": 7999,
+            "discount_type": "percentage",
+            "discount_value": 42,
+            "discount_percentage": 42,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/D5WNVAgymWr5lZZpcmit3GnGI5r12I8eKBuIvxIb.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/D5WNVAgymWr5lZZpcmit3GnGI5r12I8eKBuIvxIb.png",
+              "http://127.0.0.1:8123/storage/products/OUEOVySsr6Ir43LDXKf4fIuJZx13n4xkP1pJ5tE5.webp",
+              "http://127.0.0.1:8123/storage/products/vpWqjg0H18hJMjlEendImgOiGOGKBqHTXth7MFk2.webp",
+              "http://127.0.0.1:8123/storage/products/TEPynOpvKFJ8x0w7IRhJVDnkeks9gQwTcbcgZEEC.webp"
+            ],
+            "manage_stock": false,
+            "stock": 0,
+            "in_stock": false,
+            "category": {
+              "id": 3,
+              "name": "Rings",
+              "slug": "rings",
+              "parent_id": null
+            },
+            "brand": null,
+            "variations": [],
+            "reviews_count": 0
+          },
+          {
+            "id": 4,
+            "name": "Golden Star Constellation Tiny Studs",
+            "slug": "golden-star-constellation-tiny-studs",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/golden-star-constellation-tiny-studs",
+            "audience": "women",
+            "material_type": "gold",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "The night sky devoid of any stars is unimaginable and incomplete. Likewise, your accessory collection, without these earrings, would be incomplete.",
+            "description": "The Design:\r\nThese golden earrings feature a star motif set with zircons.\r\n\r\n925 Silver with Gold Plating\r\nPerfect for sensitive skin\r\nEarring Size: Height - 0.5 cm, Width - 0.5 cm\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Earrings\r\nNet Qty- 1 pair\r\nStyling Tip:\r\nTeam these with a purple ruffle dress.",
+            "price": 999.75,
+            "regular_price": 3999,
+            "sale_price": 999.75,
+            "base_price": 3999,
+            "discount_type": "percentage",
+            "discount_value": 75,
+            "discount_percentage": 75,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/0sp8aUfrXeY9JNRAZYxe89EkgjeFpu70sQg6IHob.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/0sp8aUfrXeY9JNRAZYxe89EkgjeFpu70sQg6IHob.png",
+              "http://127.0.0.1:8123/storage/products/vTMnfpRpo8Mn0rLkWsOzmMoRQfy3PWw9NxmkjByF.webp",
+              "http://127.0.0.1:8123/storage/products/l53QZdhYsrJn8s4G13N1qYMyZv84np6YkprH2D0L.webp",
+              "http://127.0.0.1:8123/storage/products/tV62bwAPIlIq1GyEDmCGGQa1mzQWcwvufSQzS0D1.webp"
+            ],
+            "manage_stock": false,
+            "stock": 0,
+            "in_stock": false,
+            "category": {
+              "id": 4,
+              "name": "Earrings",
+              "slug": "earrings",
+              "parent_id": null
+            },
+            "brand": null,
+            "variations": [],
+            "reviews_count": 1
+          },
+          {
+            "id": 3,
+            "name": "Silver Zircon Bubble Stud Earrings",
+            "slug": "silver-zircon-bubble-stud-earrings",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/silver-zircon-bubble-stud-earrings",
+            "audience": "women",
+            "material_type": "silver",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "Are you in search of the perfect everyday earrings suitable for office wear? Look no further, because we've got just the pair for you!",
+            "description": "The Design:\r\nThese silver earrings have a hexagonal shape with a zircon placed on them.\r\n925 Silver\r\nPerfect for sensitive skin\r\nEarring Size: Height - 0.5 cm, Width - 0.5 cm\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Earrings\r\nNet Qty- 1 pair\r\nStyling Tip:\r\nWear a maroon straight sheath dress.",
+            "price": 990,
+            "regular_price": 3000,
+            "sale_price": 990,
+            "base_price": 3000,
+            "discount_type": "percentage",
+            "discount_value": 67,
+            "discount_percentage": 67,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/aDKzPcUL9Y3aBNrTlDVBwj33wfW4Y2EKoluEyZsA.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/aDKzPcUL9Y3aBNrTlDVBwj33wfW4Y2EKoluEyZsA.png",
+              "http://127.0.0.1:8123/storage/products/eabUVxJDrgefzhEGkW1j0pKgcqgtWJAaTgGL1D37.webp",
+              "http://127.0.0.1:8123/storage/products/jYLVJEiyHRCz9cUHYyqhjh5WDCEjJRBocyeYmif0.webp",
+              "http://127.0.0.1:8123/storage/products/771zwzKOgO06OyU3aiI0Q87ii6DdL9XIgXavRVJF.webp"
+            ],
+            "manage_stock": false,
+            "stock": 0,
+            "in_stock": false,
+            "category": {
+              "id": 4,
+              "name": "Earrings",
+              "slug": "earrings",
+              "parent_id": null
+            },
+            "brand": null,
+            "variations": [],
+            "reviews_count": 0
+          },
+          {
+            "id": 2,
+            "name": "Golden Square in Rectangle Ring",
+            "slug": "golden-square-in-rectangle-ring",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/golden-square-in-rectangle-ring",
+            "audience": "men",
+            "material_type": "gold",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "No compromises, no limits just like your ambitions. This ring is designed for the man who settles for nothing but the best.",
+            "description": "The Design:\r\nThis gold plated ring for men features a rectangular design on the front, with a zircon stud elegantly placed at one corner within a square line.\r\n\r\n925 Silver with Gold Plating\r\nPerfect for sensitive skin\r\nRing Size Indian 17- Diameter: 1.82 cm\r\nRing Size Indian 20- Diameter: 1.91 cm\r\nFixed Size\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Ring\r\nNet Qty- 1 unit\r\nStyling Tip:\r\nStyle this with your party outfit.",
+            "price": 3850,
+            "regular_price": 7000,
+            "sale_price": 3850,
+            "base_price": 7000,
+            "discount_type": "percentage",
+            "discount_value": 45,
+            "discount_percentage": 45,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/UywQ7vZQjGwkSj82biKOttXMszRuKXNhiYarAG4x.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/UywQ7vZQjGwkSj82biKOttXMszRuKXNhiYarAG4x.png",
+              "http://127.0.0.1:8123/storage/products/HwI6l3qPX7kQ3gXJX5ehrjTZDJNXkUJgBgzjQCOt.webp",
+              "http://127.0.0.1:8123/storage/products/lmfWBCBZhLm5cjSCJ96ClJsBcVA9N0fPxWGhgtlP.webp",
+              "http://127.0.0.1:8123/storage/products/UBvSekywDA05tmMaN2e2v18GEGuILqpDUzMP1sii.webp"
+            ],
+            "manage_stock": false,
+            "stock": 0,
+            "in_stock": false,
+            "category": {
+              "id": 3,
+              "name": "Rings",
+              "slug": "rings",
+              "parent_id": null
+            },
+            "brand": null,
+            "variations": [],
+            "reviews_count": 0
+          }
+        ],
+        "brands": [
+          {
+            "id": 1,
+            "name": "API Docs Brand",
+            "slug": "api-docs-brand",
+            "logo": "http://127.0.0.1:8123/storage/brands/api-docs-brand.png",
+            "description": "A temporary brand created only to capture its API response for the documentation.",
+            "products_count": 0,
+            "url": "http://127.0.0.1:8123/brand/api-docs-brand"
+          }
+        ],
+        "faqs": [],
+        "testimonials": []
+      },
+      "meta": {}
+    }
+  },
+  "categories.tree": {
+    "method": "GET",
+    "path": "/categories",
+    "query": {
+      "tree": "1"
+    },
+    "auth": false,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "OK",
+      "data": [
+        {
+          "id": 5,
+          "name": "Anklets",
+          "slug": "anklets",
+          "parent_id": null,
+          "is_root": true,
+          "position": 0,
+          "description": "Anklets",
+          "image": "http://127.0.0.1:8123/storage/categories/2STL6Liwt0Nqua8Ye4KFn6PCjHRYqied8cCHgW0q.jpg",
+          "breadcrumb": "Anklets",
+          "products_count": 0,
+          "url": "http://127.0.0.1:8123/category/anklets",
+          "children": []
+        },
+        {
+          "id": 13,
+          "name": "Bangles",
+          "slug": "bangles",
+          "parent_id": null,
+          "is_root": true,
+          "position": 0,
+          "description": null,
+          "image": "http://127.0.0.1:8123/storage/categories/cw3tw1TIfn9yq4G762JJg9EwKNdPY5JoX6EqQyuh.jpg",
+          "breadcrumb": "Bangles",
+          "products_count": 0,
+          "url": "http://127.0.0.1:8123/category/bangles",
+          "children": []
+        },
+        {
+          "id": 7,
+          "name": "Bracelets",
+          "slug": "bracelets",
+          "parent_id": null,
+          "is_root": true,
+          "position": 0,
+          "description": "Bracelets",
+          "image": "http://127.0.0.1:8123/storage/categories/zI3pukSqDOszpmONt48DinTED9GwhKNRe2XE20jj.jpg",
+          "breadcrumb": "Bracelets",
+          "products_count": 3,
+          "url": "http://127.0.0.1:8123/category/bracelets",
+          "children": []
+        },
+        {
+          "id": 8,
+          "name": "Chains",
+          "slug": "chains",
+          "parent_id": null,
+          "is_root": true,
+          "position": 0,
+          "description": "Chains",
+          "image": "http://127.0.0.1:8123/storage/categories/SdputSypD8iiEi37dwoIwEOypOydi0JuNR1gNLdk.jpg",
+          "breadcrumb": "Chains",
+          "products_count": 0,
+          "url": "http://127.0.0.1:8123/category/chains",
+          "children": []
+        },
+        {
+          "id": 4,
+          "name": "Earrings",
+          "slug": "earrings",
+          "parent_id": null,
+          "is_root": true,
+          "position": 0,
+          "description": "Earrings",
+          "image": "http://127.0.0.1:8123/storage/categories/203NWk2VUQioJWpfeyVcQt5Xa0lvFtqAVyfOMUOK.jpg",
+          "breadcrumb": "Earrings",
+          "products_count": 2,
+          "url": "http://127.0.0.1:8123/category/earrings",
+          "children": []
+        },
+        {
+          "id": 12,
+          "name": "Men's Jewellery",
+          "slug": "mens-jewellery",
+          "parent_id": null,
+          "is_root": true,
+          "position": 0,
+          "description": null,
+          "image": "http://127.0.0.1:8123/storage/categories/rJNgx5yoL61P1tfwhHdB3S4LLjNPTCmQC8STDJJ0.jpg",
+          "breadcrumb": "Men's Jewellery",
+          "products_count": 0,
+          "url": "http://127.0.0.1:8123/category/mens-jewellery",
+          "children": []
+        },
+        {
+          "id": 11,
+          "name": "Nose Pin",
+          "slug": "nose-pin",
+          "parent_id": null,
+          "is_root": true,
+          "position": 0,
+          "description": null,
+          "image": "http://127.0.0.1:8123/storage/categories/hveDuL6lrZ6toEOTptfYoA9lWPkaxIEMlttoGFEn.jpg",
+          "breadcrumb": "Nose Pin",
+          "products_count": 0,
+          "url": "http://127.0.0.1:8123/category/nose-pin",
+          "children": []
+        },
+        {
+          "id": 6,
+          "name": "Pendants",
+          "slug": "pendants",
+          "parent_id": null,
+          "is_root": true,
+          "position": 0,
+          "description": "Pendants",
+          "image": "http://127.0.0.1:8123/storage/categories/vz0r3lDgqY23iqABC0008KeC3zYg9CnEKjOQ3hZw.jpg",
+          "breadcrumb": "Pendants",
+          "products_count": 0,
+          "url": "http://127.0.0.1:8123/category/pendants",
+          "children": []
+        },
+        {
+          "id": 3,
+          "name": "Rings",
+          "slug": "rings",
+          "parent_id": null,
+          "is_root": true,
+          "position": 0,
+          "description": "Timeless Rings, Made to Celebrate Every Moment.\r\nElegant designs crafted to sparkle today and be cherished forever.",
+          "image": "http://127.0.0.1:8123/storage/categories/LRb2d62xnkA918FHqY6FSirXx1X4icYWWA4kmNye.jpg",
+          "breadcrumb": "Rings",
+          "products_count": 4,
+          "url": "http://127.0.0.1:8123/category/rings",
+          "children": []
+        },
+        {
+          "id": 14,
+          "name": "Solitaires",
+          "slug": "solitaires",
+          "parent_id": null,
+          "is_root": true,
+          "position": 0,
+          "description": null,
+          "image": "http://127.0.0.1:8123/storage/categories/eh79bjmFeVOTzsNV9wUZ5XrINkysMUpYe6Q6m7xk.jpg",
+          "breadcrumb": "Solitaires",
+          "products_count": 0,
+          "url": "http://127.0.0.1:8123/category/solitaires",
+          "children": []
+        }
+      ],
+      "meta": {
+        "total": 10
+      }
+    }
+  },
+  "categories.show": {
+    "method": "GET",
+    "path": "/categories/bracelets",
+    "query": null,
+    "auth": false,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "OK",
+      "data": {
+        "id": 7,
+        "name": "Bracelets",
+        "slug": "bracelets",
+        "parent_id": null,
+        "is_root": true,
+        "position": 0,
+        "description": "Bracelets",
+        "image": "http://127.0.0.1:8123/storage/categories/zI3pukSqDOszpmONt48DinTED9GwhKNRe2XE20jj.jpg",
+        "breadcrumb": "Bracelets",
+        "products_count": 3,
+        "url": "http://127.0.0.1:8123/category/bracelets",
+        "children": []
+      },
+      "meta": {}
+    }
+  },
+  "categories.products": {
+    "method": "GET",
+    "path": "/categories/bracelets/products",
+    "query": {
+      "per_page": "2"
+    },
+    "auth": false,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "data": [
+        {
+          "id": 9,
+          "name": "Silver Elegant Butterflies Bracelet",
+          "slug": "silver-elegant-butterflies-bracelet",
+          "sku": null,
+          "url": "http://127.0.0.1:8123/product/silver-elegant-butterflies-bracelet",
+          "audience": "women",
+          "material_type": "silver",
+          "product_type": "simple",
+          "is_simple": true,
+          "is_variable": false,
+          "short_description": "The Silver Elegant Butterflies Bracelet is inspired by the moon showing up unexpectedly on a rainy night with a group of three twinkling stars.",
+          "description": "The Design:\r\nThis silver bracelet has a moon motif studded with zircon at the centre with two stars to its left and one star to its right.\r\n\r\n925 Silver\r\nPerfect for sensitive skin\r\nMotif Size: Height - 0.85 cm, Motif Width - 1.35 cm\r\nThe length of the bracelet is 15 cm with a 4 cm adjustable portion\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Bracelet\r\nNet Qty- 1 unit\r\nStyling Tip:\r\nStyle this bracelet with a pink patchwork cocktail dress.",
+          "price": 2999.5,
+          "regular_price": 5999,
+          "sale_price": 2999.5,
+          "base_price": 5999,
+          "discount_type": "percentage",
+          "discount_value": 50,
+          "discount_percentage": 50,
+          "is_on_sale": true,
+          "price_range": null,
+          "primary_image": "http://127.0.0.1:8123/storage/products/JZBDIxaCw2LrKudyhdATWUjMKIHiRtHPMNwoSypB.png",
+          "images": [
+            "http://127.0.0.1:8123/storage/products/JZBDIxaCw2LrKudyhdATWUjMKIHiRtHPMNwoSypB.png",
+            "http://127.0.0.1:8123/storage/products/nFr8k7kOaGrKgqbLlsD7OYXDicRj40PnimAgOtQT.webp",
+            "http://127.0.0.1:8123/storage/products/33ghQTfgYvweacmeZQ63l0nwrgkkGqnNRBixGfNS.webp"
+          ],
+          "manage_stock": true,
+          "stock": 497,
+          "in_stock": true,
+          "category": {
+            "id": 7,
+            "name": "Bracelets",
+            "slug": "bracelets",
+            "parent_id": null
+          },
+          "brand": null,
+          "variations": [],
+          "reviews_count": 1
+        },
+        {
+          "id": 8,
+          "name": "Rose Gold My Love Bracelet",
+          "slug": "rose-gold-my-love-bracelet",
+          "sku": null,
+          "url": "http://127.0.0.1:8123/product/rose-gold-my-love-bracelet",
+          "audience": "women",
+          "material_type": "gold",
+          "product_type": "simple",
+          "is_simple": true,
+          "is_variable": false,
+          "short_description": "Don't hesitate any longer, it's the season of love -the perfect time to convey your feelings to that special someone.",
+          "description": "The Design:\r\nThis rose gold open-type bracelet features a heart motif that rotates and studded with zircons on one end and other end has a zircon studded heart in a circle, that has an open heart mechanism where you can custom inscribe the message. Celebrate your moments of passion with GIVA’s Red Romance Collection.\r\n\r\n925 Silver with Rose Gold Plating\r\nPerfect for sensitive skin\r\nBracelet Diameter: 5.5 cm + Adjustable\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Bracelet\r\nNet Qty- 1 unit\r\nStyling Tip:\r\nThis bracelet would go well with a sheath dress.",
+          "price": 10895.39,
+          "regular_price": 19799,
+          "sale_price": 10895.39,
+          "base_price": 19799,
+          "discount_type": "percentage",
+          "discount_value": 44.97,
+          "discount_percentage": 44.97,
+          "is_on_sale": true,
+          "price_range": null,
+          "primary_image": "http://127.0.0.1:8123/storage/products/9IOxM3tY8wYLuJ0Nbz8cVHTumtdTZWffq7aw8TKL.png",
+          "images": [
+            "http://127.0.0.1:8123/storage/products/9IOxM3tY8wYLuJ0Nbz8cVHTumtdTZWffq7aw8TKL.png",
+            "http://127.0.0.1:8123/storage/products/IqCtkrj5wdrGVCaZj4WlQFYvgboxyw7lVTBjeI4o.webp",
+            "http://127.0.0.1:8123/storage/products/pXTsmDE8r4oOJ1N6BoVZ5i342vpztE1OWVDJQyLA.webp",
+            "http://127.0.0.1:8123/storage/products/Y58I2LtT5qBTKi9p6QPT5QTjn3PJBhjHJxS8R3gK.webp"
+          ],
+          "manage_stock": false,
+          "stock": 0,
+          "in_stock": false,
+          "category": {
+            "id": 7,
+            "name": "Bracelets",
+            "slug": "bracelets",
+            "parent_id": null
+          },
+          "brand": null,
+          "variations": [],
+          "reviews_count": 0
+        }
+      ],
+      "category": {
+        "id": 7,
+        "name": "Bracelets",
+        "slug": "bracelets",
+        "parent_id": null,
+        "is_root": true,
+        "position": 0,
+        "description": "Bracelets",
+        "image": "http://127.0.0.1:8123/storage/categories/zI3pukSqDOszpmONt48DinTED9GwhKNRe2XE20jj.jpg",
+        "breadcrumb": "Bracelets",
+        "url": "http://127.0.0.1:8123/category/bracelets"
+      },
+      "meta": {
+        "current_page": 1,
+        "last_page": 2,
+        "per_page": 2,
+        "total": 3,
+        "from": 1,
+        "to": 2,
+        "included": [
+          7
+        ]
+      }
+    }
+  },
+  "products.show": {
+    "method": "GET",
+    "path": "/products/silver-elegant-butterflies-bracelet",
+    "query": null,
+    "auth": false,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "OK",
+      "data": {
+        "product": {
+          "id": 9,
+          "name": "Silver Elegant Butterflies Bracelet",
+          "slug": "silver-elegant-butterflies-bracelet",
+          "sku": null,
+          "url": "http://127.0.0.1:8123/product/silver-elegant-butterflies-bracelet",
+          "audience": "women",
+          "material_type": "silver",
+          "product_type": "simple",
+          "is_simple": true,
+          "is_variable": false,
+          "short_description": "The Silver Elegant Butterflies Bracelet is inspired by the moon showing up unexpectedly on a rainy night with a group of three twinkling stars.",
+          "description": "The Design:\r\nThis silver bracelet has a moon motif studded with zircon at the centre with two stars to its left and one star to its right.\r\n\r\n925 Silver\r\nPerfect for sensitive skin\r\nMotif Size: Height - 0.85 cm, Motif Width - 1.35 cm\r\nThe length of the bracelet is 15 cm with a 4 cm adjustable portion\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Bracelet\r\nNet Qty- 1 unit\r\nStyling Tip:\r\nStyle this bracelet with a pink patchwork cocktail dress.",
+          "price": 2999.5,
+          "regular_price": 5999,
+          "sale_price": 2999.5,
+          "base_price": 5999,
+          "discount_type": "percentage",
+          "discount_value": 50,
+          "discount_percentage": 50,
+          "is_on_sale": true,
+          "price_range": null,
+          "primary_image": "http://127.0.0.1:8123/storage/products/JZBDIxaCw2LrKudyhdATWUjMKIHiRtHPMNwoSypB.png",
+          "images": [
+            "http://127.0.0.1:8123/storage/products/JZBDIxaCw2LrKudyhdATWUjMKIHiRtHPMNwoSypB.png",
+            "http://127.0.0.1:8123/storage/products/nFr8k7kOaGrKgqbLlsD7OYXDicRj40PnimAgOtQT.webp",
+            "http://127.0.0.1:8123/storage/products/33ghQTfgYvweacmeZQ63l0nwrgkkGqnNRBixGfNS.webp"
+          ],
+          "manage_stock": true,
+          "stock": 497,
+          "in_stock": true,
+          "category": {
+            "id": 7,
+            "name": "Bracelets",
+            "slug": "bracelets",
+            "parent_id": null
+          },
+          "brand": null,
+          "variations": [],
+          "attributes": [],
+          "videos": [
+            {
+              "id": 2,
+              "is_primary": true,
+              "url": "http://127.0.0.1:8123/product-videos/2",
+              "download_url": "http://127.0.0.1:8123/storage/products/videos/h5nn69B114m3zdCyelKdrsmYZEd7DL09lBM3gqIU.mp4"
+            }
+          ],
+          "rating": 5,
+          "reviews_count": 1
+        },
+        "reviews": {
+          "summary": {
+            "average": 5,
+            "count": 1
+          },
+          "data": [
+            {
+              "id": 3,
+              "rating": 5,
+              "comment": "great Product",
+              "author": {
+                "name": "Admin",
+                "initials": "A"
+              },
+              "images": [],
+              "created_at": "2026-09-08T04:54:41+00:00"
+            }
+          ],
+          "current_page": 1,
+          "last_page": 1,
+          "total": 1
+        }
+      },
+      "meta": {}
+    }
+  },
+  "products.related": {
+    "method": "GET",
+    "path": "/products/silver-elegant-butterflies-bracelet/related",
+    "query": {
+      "per_page": "2"
+    },
+    "auth": false,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "OK",
+      "data": [
+        {
+          "id": 8,
+          "name": "Rose Gold My Love Bracelet",
+          "slug": "rose-gold-my-love-bracelet",
+          "sku": null,
+          "url": "http://127.0.0.1:8123/product/rose-gold-my-love-bracelet",
+          "audience": "women",
+          "material_type": "gold",
+          "product_type": "simple",
+          "is_simple": true,
+          "is_variable": false,
+          "short_description": "Don't hesitate any longer, it's the season of love -the perfect time to convey your feelings to that special someone.",
+          "description": "The Design:\r\nThis rose gold open-type bracelet features a heart motif that rotates and studded with zircons on one end and other end has a zircon studded heart in a circle, that has an open heart mechanism where you can custom inscribe the message. Celebrate your moments of passion with GIVA’s Red Romance Collection.\r\n\r\n925 Silver with Rose Gold Plating\r\nPerfect for sensitive skin\r\nBracelet Diameter: 5.5 cm + Adjustable\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Bracelet\r\nNet Qty- 1 unit\r\nStyling Tip:\r\nThis bracelet would go well with a sheath dress.",
+          "price": 10895.39,
+          "regular_price": 19799,
+          "sale_price": 10895.39,
+          "base_price": 19799,
+          "discount_type": "percentage",
+          "discount_value": 44.97,
+          "discount_percentage": 44.97,
+          "is_on_sale": true,
+          "price_range": null,
+          "primary_image": "http://127.0.0.1:8123/storage/products/9IOxM3tY8wYLuJ0Nbz8cVHTumtdTZWffq7aw8TKL.png",
+          "images": [
+            "http://127.0.0.1:8123/storage/products/9IOxM3tY8wYLuJ0Nbz8cVHTumtdTZWffq7aw8TKL.png",
+            "http://127.0.0.1:8123/storage/products/IqCtkrj5wdrGVCaZj4WlQFYvgboxyw7lVTBjeI4o.webp",
+            "http://127.0.0.1:8123/storage/products/pXTsmDE8r4oOJ1N6BoVZ5i342vpztE1OWVDJQyLA.webp",
+            "http://127.0.0.1:8123/storage/products/Y58I2LtT5qBTKi9p6QPT5QTjn3PJBhjHJxS8R3gK.webp"
+          ],
+          "manage_stock": false,
+          "stock": 0,
+          "in_stock": false,
+          "category": {
+            "id": 7,
+            "name": "Bracelets",
+            "slug": "bracelets",
+            "parent_id": null
+          },
+          "brand": null,
+          "variations": []
+        },
+        {
+          "id": 7,
+          "name": "Rose Gold For My Dear Bracelet",
+          "slug": "rose-gold-for-my-dear-bracelet",
+          "sku": null,
+          "url": "http://127.0.0.1:8123/product/rose-gold-for-my-dear-bracelet",
+          "audience": "men",
+          "material_type": "gold",
+          "product_type": "simple",
+          "is_simple": true,
+          "is_variable": false,
+          "short_description": "The Rose Gold For My Dear Bracelet is inspired by the special moments captured in the camera of our hearts that we keep encapsulated in a treasure box of memories.",
+          "description": "The Design:\r\n\r\nThe rose gold bracelet has a design of the antlers of a reindeer with a zircon on the head.\r\n\r\n925 silver with Rose Gold plating\r\nPerfect for sensitive skin\r\nAdjustable size\r\nLength of the bracelet - 16.5 cm+ 4 cm adjustable\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nNet Qty- 1 piece\r\nStyling Tip:\r\n\r\nStyle this with a beige ribbed top and blue jeans.",
+          "price": 4388.43,
+          "regular_price": 7699,
+          "sale_price": 4388.43,
+          "base_price": 7699,
+          "discount_type": "percentage",
+          "discount_value": 43,
+          "discount_percentage": 43,
+          "is_on_sale": true,
+          "price_range": null,
+          "primary_image": "http://127.0.0.1:8123/storage/products/lmjp2W1sXyGGN8e54MUXgPmMGcEi7V7DfT4MVwmn.png",
+          "images": [
+            "http://127.0.0.1:8123/storage/products/lmjp2W1sXyGGN8e54MUXgPmMGcEi7V7DfT4MVwmn.png",
+            "http://127.0.0.1:8123/storage/products/2d8xGFiDZgDbCm5BvIEAgodEsmtfkqtX5DPUnpe6.webp",
+            "http://127.0.0.1:8123/storage/products/mU9q8NWxS3eiDTigzzbFGphU18Dtb8MtALvHAo4b.webp"
+          ],
+          "manage_stock": false,
+          "stock": 0,
+          "in_stock": false,
+          "category": {
+            "id": 7,
+            "name": "Bracelets",
+            "slug": "bracelets",
+            "parent_id": null
+          },
+          "brand": null,
+          "variations": []
+        }
+      ],
+      "meta": {
+        "total": 2
+      }
+    }
+  },
+  "products.reviews": {
+    "method": "GET",
+    "path": "/products/silver-elegant-butterflies-bracelet/reviews",
+    "query": {
+      "per_page": "2"
+    },
+    "auth": false,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "data": [
+        {
+          "id": 3,
+          "rating": 5,
+          "comment": "great Product",
+          "author": {
+            "name": "Admin",
+            "initials": "A"
+          },
+          "images": [],
+          "created_at": "2026-09-08T04:54:41+00:00"
+        }
+      ],
+      "meta": {
+        "current_page": 1,
+        "last_page": 1,
+        "per_page": 2,
+        "total": 1,
+        "average": 5
+      }
+    }
+  },
+  "search": {
+    "method": "GET",
+    "path": "/search",
+    "query": {
+      "q": "bracelet"
+    },
+    "auth": false,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "data": [
+        {
+          "id": 9,
+          "name": "Silver Elegant Butterflies Bracelet",
+          "slug": "silver-elegant-butterflies-bracelet",
+          "sku": null,
+          "url": "http://127.0.0.1:8123/product/silver-elegant-butterflies-bracelet",
+          "audience": "women",
+          "material_type": "silver",
+          "product_type": "simple",
+          "is_simple": true,
+          "is_variable": false,
+          "short_description": "The Silver Elegant Butterflies Bracelet is inspired by the moon showing up unexpectedly on a rainy night with a group of three twinkling stars.",
+          "description": "The Design:\r\nThis silver bracelet has a moon motif studded with zircon at the centre with two stars to its left and one star to its right.\r\n\r\n925 Silver\r\nPerfect for sensitive skin\r\nMotif Size: Height - 0.85 cm, Motif Width - 1.35 cm\r\nThe length of the bracelet is 15 cm with a 4 cm adjustable portion\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Bracelet\r\nNet Qty- 1 unit\r\nStyling Tip:\r\nStyle this bracelet with a pink patchwork cocktail dress.",
+          "price": 2999.5,
+          "regular_price": 5999,
+          "sale_price": 2999.5,
+          "base_price": 5999,
+          "discount_type": "percentage",
+          "discount_value": 50,
+          "discount_percentage": 50,
+          "is_on_sale": true,
+          "price_range": null,
+          "primary_image": "http://127.0.0.1:8123/storage/products/JZBDIxaCw2LrKudyhdATWUjMKIHiRtHPMNwoSypB.png",
+          "images": [
+            "http://127.0.0.1:8123/storage/products/JZBDIxaCw2LrKudyhdATWUjMKIHiRtHPMNwoSypB.png",
+            "http://127.0.0.1:8123/storage/products/nFr8k7kOaGrKgqbLlsD7OYXDicRj40PnimAgOtQT.webp",
+            "http://127.0.0.1:8123/storage/products/33ghQTfgYvweacmeZQ63l0nwrgkkGqnNRBixGfNS.webp"
+          ],
+          "manage_stock": true,
+          "stock": 497,
+          "in_stock": true,
+          "category": {
+            "id": 7,
+            "name": "Bracelets",
+            "slug": "bracelets",
+            "parent_id": null
+          },
+          "brand": null,
+          "variations": [],
+          "reviews_count": 1
+        },
+        {
+          "id": 8,
+          "name": "Rose Gold My Love Bracelet",
+          "slug": "rose-gold-my-love-bracelet",
+          "sku": null,
+          "url": "http://127.0.0.1:8123/product/rose-gold-my-love-bracelet",
+          "audience": "women",
+          "material_type": "gold",
+          "product_type": "simple",
+          "is_simple": true,
+          "is_variable": false,
+          "short_description": "Don't hesitate any longer, it's the season of love -the perfect time to convey your feelings to that special someone.",
+          "description": "The Design:\r\nThis rose gold open-type bracelet features a heart motif that rotates and studded with zircons on one end and other end has a zircon studded heart in a circle, that has an open heart mechanism where you can custom inscribe the message. Celebrate your moments of passion with GIVA’s Red Romance Collection.\r\n\r\n925 Silver with Rose Gold Plating\r\nPerfect for sensitive skin\r\nBracelet Diameter: 5.5 cm + Adjustable\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Bracelet\r\nNet Qty- 1 unit\r\nStyling Tip:\r\nThis bracelet would go well with a sheath dress.",
+          "price": 10895.39,
+          "regular_price": 19799,
+          "sale_price": 10895.39,
+          "base_price": 19799,
+          "discount_type": "percentage",
+          "discount_value": 44.97,
+          "discount_percentage": 44.97,
+          "is_on_sale": true,
+          "price_range": null,
+          "primary_image": "http://127.0.0.1:8123/storage/products/9IOxM3tY8wYLuJ0Nbz8cVHTumtdTZWffq7aw8TKL.png",
+          "images": [
+            "http://127.0.0.1:8123/storage/products/9IOxM3tY8wYLuJ0Nbz8cVHTumtdTZWffq7aw8TKL.png",
+            "http://127.0.0.1:8123/storage/products/IqCtkrj5wdrGVCaZj4WlQFYvgboxyw7lVTBjeI4o.webp",
+            "http://127.0.0.1:8123/storage/products/pXTsmDE8r4oOJ1N6BoVZ5i342vpztE1OWVDJQyLA.webp",
+            "http://127.0.0.1:8123/storage/products/Y58I2LtT5qBTKi9p6QPT5QTjn3PJBhjHJxS8R3gK.webp"
+          ],
+          "manage_stock": false,
+          "stock": 0,
+          "in_stock": false,
+          "category": {
+            "id": 7,
+            "name": "Bracelets",
+            "slug": "bracelets",
+            "parent_id": null
+          },
+          "brand": null,
+          "variations": [],
+          "reviews_count": 0
+        },
+        {
+          "id": 7,
+          "name": "Rose Gold For My Dear Bracelet",
+          "slug": "rose-gold-for-my-dear-bracelet",
+          "sku": null,
+          "url": "http://127.0.0.1:8123/product/rose-gold-for-my-dear-bracelet",
+          "audience": "men",
+          "material_type": "gold",
+          "product_type": "simple",
+          "is_simple": true,
+          "is_variable": false,
+          "short_description": "The Rose Gold For My Dear Bracelet is inspired by the special moments captured in the camera of our hearts that we keep encapsulated in a treasure box of memories.",
+          "description": "The Design:\r\n\r\nThe rose gold bracelet has a design of the antlers of a reindeer with a zircon on the head.\r\n\r\n925 silver with Rose Gold plating\r\nPerfect for sensitive skin\r\nAdjustable size\r\nLength of the bracelet - 16.5 cm+ 4 cm adjustable\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nNet Qty- 1 piece\r\nStyling Tip:\r\n\r\nStyle this with a beige ribbed top and blue jeans.",
+          "price": 4388.43,
+          "regular_price": 7699,
+          "sale_price": 4388.43,
+          "base_price": 7699,
+          "discount_type": "percentage",
+          "discount_value": 43,
+          "discount_percentage": 43,
+          "is_on_sale": true,
+          "price_range": null,
+          "primary_image": "http://127.0.0.1:8123/storage/products/lmjp2W1sXyGGN8e54MUXgPmMGcEi7V7DfT4MVwmn.png",
+          "images": [
+            "http://127.0.0.1:8123/storage/products/lmjp2W1sXyGGN8e54MUXgPmMGcEi7V7DfT4MVwmn.png",
+            "http://127.0.0.1:8123/storage/products/2d8xGFiDZgDbCm5BvIEAgodEsmtfkqtX5DPUnpe6.webp",
+            "http://127.0.0.1:8123/storage/products/mU9q8NWxS3eiDTigzzbFGphU18Dtb8MtALvHAo4b.webp"
+          ],
+          "manage_stock": false,
+          "stock": 0,
+          "in_stock": false,
+          "category": {
+            "id": 7,
+            "name": "Bracelets",
+            "slug": "bracelets",
+            "parent_id": null
+          },
+          "brand": null,
+          "variations": [],
+          "reviews_count": 1
+        }
+      ],
+      "meta": {
+        "query": "bracelet",
+        "current_page": 1,
+        "last_page": 1,
+        "per_page": 12,
+        "total": 3,
+        "categories": [
+          {
+            "id": 7,
+            "name": "Bracelets",
+            "slug": "bracelets",
+            "parent_id": null,
+            "is_root": true,
+            "position": 0,
+            "description": "Bracelets",
+            "image": "http://127.0.0.1:8123/storage/categories/zI3pukSqDOszpmONt48DinTED9GwhKNRe2XE20jj.jpg",
+            "breadcrumb": "Bracelets",
+            "products_count": 3,
+            "url": "http://127.0.0.1:8123/category/bracelets"
+          }
+        ],
+        "recent": []
+      }
+    }
+  },
+  "products.filtered": {
+    "method": "GET",
+    "path": "/products",
+    "query": {
+      "on_sale": "1",
+      "sort": "price_asc",
+      "per_page": "2"
+    },
+    "auth": false,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "data": [
+        {
+          "id": 3,
+          "name": "Silver Zircon Bubble Stud Earrings",
+          "slug": "silver-zircon-bubble-stud-earrings",
+          "sku": null,
+          "url": "http://127.0.0.1:8123/product/silver-zircon-bubble-stud-earrings",
+          "audience": "women",
+          "material_type": "silver",
+          "product_type": "simple",
+          "is_simple": true,
+          "is_variable": false,
+          "short_description": "Are you in search of the perfect everyday earrings suitable for office wear? Look no further, because we've got just the pair for you!",
+          "description": "The Design:\r\nThese silver earrings have a hexagonal shape with a zircon placed on them.\r\n925 Silver\r\nPerfect for sensitive skin\r\nEarring Size: Height - 0.5 cm, Width - 0.5 cm\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Earrings\r\nNet Qty- 1 pair\r\nStyling Tip:\r\nWear a maroon straight sheath dress.",
+          "price": 990,
+          "regular_price": 3000,
+          "sale_price": 990,
+          "base_price": 3000,
+          "discount_type": "percentage",
+          "discount_value": 67,
+          "discount_percentage": 67,
+          "is_on_sale": true,
+          "price_range": null,
+          "primary_image": "http://127.0.0.1:8123/storage/products/aDKzPcUL9Y3aBNrTlDVBwj33wfW4Y2EKoluEyZsA.png",
+          "images": [
+            "http://127.0.0.1:8123/storage/products/aDKzPcUL9Y3aBNrTlDVBwj33wfW4Y2EKoluEyZsA.png",
+            "http://127.0.0.1:8123/storage/products/eabUVxJDrgefzhEGkW1j0pKgcqgtWJAaTgGL1D37.webp",
+            "http://127.0.0.1:8123/storage/products/jYLVJEiyHRCz9cUHYyqhjh5WDCEjJRBocyeYmif0.webp",
+            "http://127.0.0.1:8123/storage/products/771zwzKOgO06OyU3aiI0Q87ii6DdL9XIgXavRVJF.webp"
+          ],
+          "manage_stock": false,
+          "stock": 0,
+          "in_stock": false,
+          "category": {
+            "id": 4,
+            "name": "Earrings",
+            "slug": "earrings",
+            "parent_id": null
+          },
+          "brand": null,
+          "variations": [],
+          "reviews_count": 0
+        },
+        {
+          "id": 4,
+          "name": "Golden Star Constellation Tiny Studs",
+          "slug": "golden-star-constellation-tiny-studs",
+          "sku": null,
+          "url": "http://127.0.0.1:8123/product/golden-star-constellation-tiny-studs",
+          "audience": "women",
+          "material_type": "gold",
+          "product_type": "simple",
+          "is_simple": true,
+          "is_variable": false,
+          "short_description": "The night sky devoid of any stars is unimaginable and incomplete. Likewise, your accessory collection, without these earrings, would be incomplete.",
+          "description": "The Design:\r\nThese golden earrings feature a star motif set with zircons.\r\n\r\n925 Silver with Gold Plating\r\nPerfect for sensitive skin\r\nEarring Size: Height - 0.5 cm, Width - 0.5 cm\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Earrings\r\nNet Qty- 1 pair\r\nStyling Tip:\r\nTeam these with a purple ruffle dress.",
+          "price": 999.75,
+          "regular_price": 3999,
+          "sale_price": 999.75,
+          "base_price": 3999,
+          "discount_type": "percentage",
+          "discount_value": 75,
+          "discount_percentage": 75,
+          "is_on_sale": true,
+          "price_range": null,
+          "primary_image": "http://127.0.0.1:8123/storage/products/0sp8aUfrXeY9JNRAZYxe89EkgjeFpu70sQg6IHob.png",
+          "images": [
+            "http://127.0.0.1:8123/storage/products/0sp8aUfrXeY9JNRAZYxe89EkgjeFpu70sQg6IHob.png",
+            "http://127.0.0.1:8123/storage/products/vTMnfpRpo8Mn0rLkWsOzmMoRQfy3PWw9NxmkjByF.webp",
+            "http://127.0.0.1:8123/storage/products/l53QZdhYsrJn8s4G13N1qYMyZv84np6YkprH2D0L.webp",
+            "http://127.0.0.1:8123/storage/products/tV62bwAPIlIq1GyEDmCGGQa1mzQWcwvufSQzS0D1.webp"
+          ],
+          "manage_stock": false,
+          "stock": 0,
+          "in_stock": false,
+          "category": {
+            "id": 4,
+            "name": "Earrings",
+            "slug": "earrings",
+            "parent_id": null
+          },
+          "brand": null,
+          "variations": [],
+          "reviews_count": 1
+        }
+      ],
+      "meta": {
+        "current_page": 1,
+        "last_page": 5,
+        "per_page": 2,
+        "total": 9,
+        "from": 1,
+        "to": 2,
+        "sort": "price_asc",
+        "filters": {
+          "on_sale": "1"
+        }
+      }
+    }
+  },
+  "sliders": {
+    "method": "GET",
+    "path": "/sliders",
+    "query": null,
+    "auth": false,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "OK",
+      "data": [
+        {
+          "id": 1,
+          "title": "Slider1",
+          "subheading": null,
+          "button_text": null,
+          "button_link": null,
+          "image": "http://127.0.0.1:8123/storage/sliders/Jx2UPzXcbaoSE95QSjP07deexgjAH7a0CcBihv5M.png",
+          "sort_order": 1
+        },
+        {
+          "id": 2,
+          "title": "Slider 2",
+          "subheading": null,
+          "button_text": null,
+          "button_link": null,
+          "image": "http://127.0.0.1:8123/storage/sliders/Eg7xszXcHD1SDXADnNlGl2h02R8gHsBTwZi8la0f.png",
+          "sort_order": 2
+        },
+        {
+          "id": 3,
+          "title": "slide 3",
+          "subheading": null,
+          "button_text": null,
+          "button_link": null,
+          "image": "http://127.0.0.1:8123/storage/sliders/m8pnfZf9nJXfpFXOy8pfb31esqsrPsJdYrGLz3PJ.png",
+          "sort_order": 3
+        }
+      ],
+      "meta": {}
+    }
+  },
+  "faqs": {
+    "method": "GET",
+    "path": "/faqs",
+    "query": null,
+    "auth": false,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "OK",
+      "data": [],
+      "meta": {}
+    }
+  },
+  "testimonials": {
+    "method": "GET",
+    "path": "/testimonials",
+    "query": null,
+    "auth": false,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "OK",
+      "data": [],
+      "meta": {}
+    }
+  },
+  "settings": {
+    "method": "GET",
+    "path": "/settings",
+    "query": null,
+    "auth": false,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "OK",
+      "data": {
+        "site_name": "Gehna",
+        "description": null,
+        "email": null,
+        "phone": null,
+        "address": null,
+        "city": null,
+        "state": null,
+        "country": null,
+        "zip": null,
+        "logo": "http://127.0.0.1:8123/storage/settings/xOw95lBN92dOUWuwAM4G5Fx0ku1HenNB81K9JKvc.png",
+        "favicon": "http://127.0.0.1:8123/storage/settings/xRbIAtrZ7Y5TTXbAvj4S68DQl4dGQFihQqEDJv2Z.png",
+        "social": []
+      },
+      "meta": {}
+    }
+  },
+  "newsletter": {
+    "method": "POST",
+    "path": "/newsletter",
+    "query": null,
+    "auth": false,
+    "status": 200,
+    "request": {
+      "email": "doc-preview@example.com"
+    },
+    "response": {
+      "success": true,
+      "message": "This email is already subscribed to our newsletter.",
+      "data": {
+        "subscribed": true,
+        "already_subscribed": true
+      },
+      "meta": {}
+    }
+  },
+  "metal-prices": {
+    "method": "GET",
+    "path": "/metal-prices",
+    "query": null,
+    "auth": false,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": false,
+      "data": {
+        "available": false,
+        "stale": false,
+        "message": "Live rates are temporarily unavailable. Please check back shortly.",
+        "currency": "INR",
+        "currency_symbol": "₹",
+        "unit_grams": 10,
+        "unit_label": "per 10 gram (1 tola)",
+        "updated_at": null,
+        "updated_at_display": null,
+        "metals": []
+      },
+      "meta": {
+        "source": "goldapi.io",
+        "cache_ttl": 900,
+        "generated_at": "2026-09-26T11:06:46+00:00"
+      }
+    }
+  },
+  "brands.show": {
+    "method": "GET",
+    "path": "/brands/api-docs-brand",
+    "query": null,
+    "auth": false,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "OK",
+      "data": {
+        "id": 1,
+        "name": "API Docs Brand",
+        "slug": "api-docs-brand",
+        "logo": "http://127.0.0.1:8123/storage/brands/api-docs-brand.png",
+        "description": "A temporary brand created only to capture its API response for the documentation.",
+        "products_count": 0,
+        "url": "http://127.0.0.1:8123/brand/api-docs-brand"
+      },
+      "meta": {}
+    }
+  },
+  "brands.products": {
+    "method": "GET",
+    "path": "/brands/api-docs-brand/products",
+    "query": {
+      "per_page": "2"
+    },
+    "auth": false,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "data": [],
+      "brand": {
+        "id": 1,
+        "name": "API Docs Brand",
+        "slug": "api-docs-brand",
+        "logo": "http://127.0.0.1:8123/storage/brands/api-docs-brand.png",
+        "description": "A temporary brand created only to capture its API response for the documentation.",
+        "url": "http://127.0.0.1:8123/brand/api-docs-brand"
+      },
+      "meta": {
+        "current_page": 1,
+        "last_page": 1,
+        "per_page": 2,
+        "total": 0
+      }
+    }
+  },
+  "combos.show": {
+    "method": "GET",
+    "path": "/combos/try",
+    "query": null,
+    "auth": false,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "OK",
+      "data": {
+        "id": 1,
+        "name": "try",
+        "slug": "try",
+        "description": null,
+        "discount_type": "percent",
+        "discount_value": 5,
+        "products_total": 12787.13,
+        "discount_amount": 639.36,
+        "combo_price": 12147.77,
+        "savings_percent": 5,
+        "is_live": true,
+        "starts_at": null,
+        "expires_at": null,
+        "products": [
+          {
+            "id": 4,
+            "name": "Golden Star Constellation Tiny Studs",
+            "slug": "golden-star-constellation-tiny-studs",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/golden-star-constellation-tiny-studs",
+            "audience": "women",
+            "material_type": "gold",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "The night sky devoid of any stars is unimaginable and incomplete. Likewise, your accessory collection, without these earrings, would be incomplete.",
+            "description": "The Design:\r\nThese golden earrings feature a star motif set with zircons.\r\n\r\n925 Silver with Gold Plating\r\nPerfect for sensitive skin\r\nEarring Size: Height - 0.5 cm, Width - 0.5 cm\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Earrings\r\nNet Qty- 1 pair\r\nStyling Tip:\r\nTeam these with a purple ruffle dress.",
+            "price": 999.75,
+            "regular_price": 3999,
+            "sale_price": 999.75,
+            "base_price": 3999,
+            "discount_type": "percentage",
+            "discount_value": 75,
+            "discount_percentage": 75,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/0sp8aUfrXeY9JNRAZYxe89EkgjeFpu70sQg6IHob.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/0sp8aUfrXeY9JNRAZYxe89EkgjeFpu70sQg6IHob.png",
+              "http://127.0.0.1:8123/storage/products/vTMnfpRpo8Mn0rLkWsOzmMoRQfy3PWw9NxmkjByF.webp",
+              "http://127.0.0.1:8123/storage/products/l53QZdhYsrJn8s4G13N1qYMyZv84np6YkprH2D0L.webp",
+              "http://127.0.0.1:8123/storage/products/tV62bwAPIlIq1GyEDmCGGQa1mzQWcwvufSQzS0D1.webp"
+            ],
+            "manage_stock": false,
+            "stock": 0,
+            "in_stock": false,
+            "variations": []
+          },
+          {
+            "id": 7,
+            "name": "Rose Gold For My Dear Bracelet",
+            "slug": "rose-gold-for-my-dear-bracelet",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/rose-gold-for-my-dear-bracelet",
+            "audience": "men",
+            "material_type": "gold",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "The Rose Gold For My Dear Bracelet is inspired by the special moments captured in the camera of our hearts that we keep encapsulated in a treasure box of memories.",
+            "description": "The Design:\r\n\r\nThe rose gold bracelet has a design of the antlers of a reindeer with a zircon on the head.\r\n\r\n925 silver with Rose Gold plating\r\nPerfect for sensitive skin\r\nAdjustable size\r\nLength of the bracelet - 16.5 cm+ 4 cm adjustable\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nNet Qty- 1 piece\r\nStyling Tip:\r\n\r\nStyle this with a beige ribbed top and blue jeans.",
+            "price": 4388.43,
+            "regular_price": 7699,
+            "sale_price": 4388.43,
+            "base_price": 7699,
+            "discount_type": "percentage",
+            "discount_value": 43,
+            "discount_percentage": 43,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/lmjp2W1sXyGGN8e54MUXgPmMGcEi7V7DfT4MVwmn.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/lmjp2W1sXyGGN8e54MUXgPmMGcEi7V7DfT4MVwmn.png",
+              "http://127.0.0.1:8123/storage/products/2d8xGFiDZgDbCm5BvIEAgodEsmtfkqtX5DPUnpe6.webp",
+              "http://127.0.0.1:8123/storage/products/mU9q8NWxS3eiDTigzzbFGphU18Dtb8MtALvHAo4b.webp"
+            ],
+            "manage_stock": false,
+            "stock": 0,
+            "in_stock": false,
+            "variations": []
+          },
+          {
+            "id": 6,
+            "name": "Silver Cupid Arrow Couple Bands",
+            "slug": "silver-cupid-arrow-couple-bands",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/silver-cupid-arrow-couple-bands",
+            "audience": "unisex",
+            "material_type": "silver",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "Show off how you and your partner make a perfect fit for each other just like the jigsaw puzzle pieces with these rings.",
+            "description": "The Design:\r\nThese silver rings feature a V-shaped cut-out design, with one ring set with zircons.\r\n\r\n925 Silver\r\nPerfect for sensitive skin\r\nAdjustable size to ensure no fitting issues\r\nFemale ring size: 1.62 cm\r\nMale ring size: 2 cm + adjustable\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Couple Bands\r\nNet Qty - 1 unit\r\nStyling Tip:\r\nMatch these rings with casual wear.",
+            "price": 4399.45,
+            "regular_price": 7999,
+            "sale_price": 4399.45,
+            "base_price": 7999,
+            "discount_type": "percentage",
+            "discount_value": 45,
+            "discount_percentage": 45,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/bVmcUjnGkuIIwcM2U2r0aIvUp80THAmVeGc3rDhr.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/bVmcUjnGkuIIwcM2U2r0aIvUp80THAmVeGc3rDhr.png",
+              "http://127.0.0.1:8123/storage/products/bHMrMJ2xbgslL4fVUfCbk7gOjSXpbt4i00w5CQ8k.webp",
+              "http://127.0.0.1:8123/storage/products/HPLHcEsI7QMJXI3KmzMWuKwtaY1kTFNaNaqtVYGh.webp",
+              "http://127.0.0.1:8123/storage/products/QnJPvFuh1vFDZJD66b5omgD7oZyw2lvhURORpYB9.webp"
+            ],
+            "manage_stock": false,
+            "stock": 0,
+            "in_stock": false,
+            "variations": []
+          },
+          {
+            "id": 9,
+            "name": "Silver Elegant Butterflies Bracelet",
+            "slug": "silver-elegant-butterflies-bracelet",
+            "sku": null,
+            "url": "http://127.0.0.1:8123/product/silver-elegant-butterflies-bracelet",
+            "audience": "women",
+            "material_type": "silver",
+            "product_type": "simple",
+            "is_simple": true,
+            "is_variable": false,
+            "short_description": "The Silver Elegant Butterflies Bracelet is inspired by the moon showing up unexpectedly on a rainy night with a group of three twinkling stars.",
+            "description": "The Design:\r\nThis silver bracelet has a moon motif studded with zircon at the centre with two stars to its left and one star to its right.\r\n\r\n925 Silver\r\nPerfect for sensitive skin\r\nMotif Size: Height - 0.85 cm, Motif Width - 1.35 cm\r\nThe length of the bracelet is 15 cm with a 4 cm adjustable portion\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Bracelet\r\nNet Qty- 1 unit\r\nStyling Tip:\r\nStyle this bracelet with a pink patchwork cocktail dress.",
+            "price": 2999.5,
+            "regular_price": 5999,
+            "sale_price": 2999.5,
+            "base_price": 5999,
+            "discount_type": "percentage",
+            "discount_value": 50,
+            "discount_percentage": 50,
+            "is_on_sale": true,
+            "price_range": null,
+            "primary_image": "http://127.0.0.1:8123/storage/products/JZBDIxaCw2LrKudyhdATWUjMKIHiRtHPMNwoSypB.png",
+            "images": [
+              "http://127.0.0.1:8123/storage/products/JZBDIxaCw2LrKudyhdATWUjMKIHiRtHPMNwoSypB.png",
+              "http://127.0.0.1:8123/storage/products/nFr8k7kOaGrKgqbLlsD7OYXDicRj40PnimAgOtQT.webp",
+              "http://127.0.0.1:8123/storage/products/33ghQTfgYvweacmeZQ63l0nwrgkkGqnNRBixGfNS.webp"
+            ],
+            "manage_stock": true,
+            "stock": 497,
+            "in_stock": true,
+            "variations": []
+          }
+        ],
+        "products_count": 4
+      },
+      "meta": {}
+    }
+  },
+  "pages.show": {
+    "method": "GET",
+    "path": "/pages/api-docs-page",
+    "query": null,
+    "auth": false,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "OK",
+      "data": {
+        "id": 1,
+        "title": "API Docs Page",
+        "slug": "api-docs-page",
+        "content": "<h2>Temporary page</h2><p>Created only to capture its API response for the documentation.</p>",
+        "meta_title": "API Docs Page",
+        "meta_description": "Temporary page for API documentation capture.",
+        "meta_keywords": "api, docs, temporary",
+        "url": "http://127.0.0.1:8123/pages/api-docs-page",
+        "updated_at": "2026-09-26T10:47:59+00:00"
+      },
+      "meta": {}
+    }
+  },
+  "error.404": {
+    "method": "GET",
+    "path": "/products/this-product-does-not-exist",
+    "query": null,
+    "auth": false,
+    "status": 404,
+    "request": null,
+    "response": {
+      "success": false,
+      "message": "Product not found.",
+      "data": null,
+      "errors": {},
+      "meta": {}
+    }
+  },
+  "error.422": {
+    "method": "POST",
+    "path": "/auth/login",
+    "query": null,
+    "auth": false,
+    "status": 422,
+    "request": {
+      "email": "nope",
+      "password": ""
+    },
+    "response": {
+      "success": false,
+      "message": "The email field must be a valid email address. (and 1 more error)",
+      "data": null,
+      "errors": {
+        "email": [
+          "The email field must be a valid email address."
+        ],
+        "password": [
+          "The password field is required."
+        ]
+      },
+      "meta": {}
+    }
+  },
+  "error.401": {
+    "method": "GET",
+    "path": "/cart",
+    "query": null,
+    "auth": false,
+    "status": 401,
+    "request": null,
+    "response": {
+      "success": false,
+      "message": "Unauthenticated.",
+      "data": null,
+      "errors": {},
+      "meta": {}
+    }
+  },
+  "auth.register": {
+    "method": "POST",
+    "path": "/auth/register",
+    "query": null,
+    "auth": false,
+    "status": 201,
+    "request": {
+      "name": "Doc Preview",
+      "email": "api.doc.1790420810069@example.com",
+      "password": "Password123!",
+      "password_confirmation": "Password123!",
+      "phone": "9420810069"
+    },
+    "response": {
+      "success": true,
+      "message": "Registration successful",
+      "data": {
+        "token": "<token>",
+        "token_type": "Bearer",
+        "user": {
+          "id": 19,
+          "name": "Doc Preview",
+          "email": "api.doc.1790420810069@example.com",
+          "phone": "9420810069",
+          "gehna_coins": 0,
+          "roles": [],
+          "is_admin": false,
+          "email_verified_at": null,
+          "created_at": "2026-09-26T11:06:50+00:00"
+        }
+      },
+      "meta": {}
+    }
+  },
+  "auth.login": {
+    "method": "POST",
+    "path": "/auth/login",
+    "query": null,
+    "auth": false,
+    "status": 200,
+    "request": {
+      "email": "api.doc.1790420810069@example.com",
+      "password": "Password123!"
+    },
+    "response": {
+      "success": true,
+      "message": "Logged in successfully",
+      "data": {
+        "token": "<token>",
+        "token_type": "Bearer",
+        "user": {
+          "id": 19,
+          "name": "Doc Preview",
+          "email": "api.doc.1790420810069@example.com",
+          "phone": "9420810069",
+          "gehna_coins": 0,
+          "roles": [],
+          "is_admin": false,
+          "email_verified_at": null,
+          "created_at": "2026-09-26T11:06:50+00:00"
+        }
+      },
+      "meta": {}
+    }
+  },
+  "auth.me": {
+    "method": "GET",
+    "path": "/auth/me",
+    "query": null,
+    "auth": true,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "OK",
+      "data": {
+        "id": 19,
+        "name": "Doc Preview",
+        "email": "api.doc.1790420810069@example.com",
+        "phone": "9420810069",
+        "gehna_coins": 0,
+        "roles": [],
+        "is_admin": false,
+        "email_verified_at": null,
+        "created_at": "2026-09-26T11:06:50+00:00"
+      },
+      "meta": {}
+    }
+  },
+  "auth.profile": {
+    "method": "PUT",
+    "path": "/auth/profile",
+    "query": null,
+    "auth": true,
+    "status": 200,
+    "request": {
+      "name": "Doc Preview",
+      "phone": null
+    },
+    "response": {
+      "success": true,
+      "message": "Profile updated",
+      "data": {
+        "id": 19,
+        "name": "Doc Preview",
+        "email": "api.doc.1790420810069@example.com",
+        "phone": null,
+        "gehna_coins": 0,
+        "roles": [],
+        "is_admin": false,
+        "email_verified_at": null,
+        "created_at": "2026-09-26T11:06:50+00:00"
+      },
+      "meta": {}
+    }
+  },
+  "cart.empty": {
+    "method": "GET",
+    "path": "/cart",
+    "query": null,
+    "auth": true,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "OK",
+      "data": [],
+      "meta": {
+        "subtotal": 0,
+        "total": 0,
+        "count": 0
+      }
+    }
+  },
+  "cart.add": {
+    "method": "POST",
+    "path": "/cart",
+    "query": null,
+    "auth": true,
+    "status": 201,
+    "request": {
+      "product_id": 9,
+      "quantity": 2
+    },
+    "response": {
+      "success": true,
+      "message": "Added to cart",
+      "data": [
+        {
+          "id": 114,
+          "product_id": 9,
+          "product_variation_id": null,
+          "combo_id": null,
+          "name": "Silver Elegant Butterflies Bracelet",
+          "slug": "silver-elegant-butterflies-bracelet",
+          "sku": null,
+          "image": "http://127.0.0.1:8123/storage/products/JZBDIxaCw2LrKudyhdATWUjMKIHiRtHPMNwoSypB.png",
+          "options": [],
+          "price": 2999.5,
+          "quantity": 2,
+          "line_total": 5999,
+          "available_stock": 497,
+          "url": "http://127.0.0.1:8123/product/silver-elegant-butterflies-bracelet"
+        }
+      ],
+      "meta": {
+        "subtotal": 5999,
+        "total": 5999,
+        "count": 2
+      }
+    }
+  },
+  "cart.update": {
+    "method": "PATCH",
+    "path": "/cart/114",
+    "query": null,
+    "auth": true,
+    "status": 200,
+    "request": {
+      "quantity": 3
+    },
+    "response": {
+      "success": true,
+      "message": "Cart updated",
+      "data": [
+        {
+          "id": 114,
+          "product_id": 9,
+          "product_variation_id": null,
+          "combo_id": null,
+          "name": "Silver Elegant Butterflies Bracelet",
+          "slug": "silver-elegant-butterflies-bracelet",
+          "sku": null,
+          "image": "http://127.0.0.1:8123/storage/products/JZBDIxaCw2LrKudyhdATWUjMKIHiRtHPMNwoSypB.png",
+          "options": [],
+          "price": 2999.5,
+          "quantity": 3,
+          "line_total": 8998.5,
+          "available_stock": 497,
+          "url": "http://127.0.0.1:8123/product/silver-elegant-butterflies-bracelet"
+        }
+      ],
+      "meta": {
+        "subtotal": 8998.5,
+        "total": 8998.5,
+        "count": 3
+      }
+    }
+  },
+  "cart.get": {
+    "method": "GET",
+    "path": "/cart",
+    "query": null,
+    "auth": true,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "OK",
+      "data": [
+        {
+          "id": 114,
+          "product_id": 9,
+          "product_variation_id": null,
+          "combo_id": null,
+          "name": "Silver Elegant Butterflies Bracelet",
+          "slug": "silver-elegant-butterflies-bracelet",
+          "sku": null,
+          "image": "http://127.0.0.1:8123/storage/products/JZBDIxaCw2LrKudyhdATWUjMKIHiRtHPMNwoSypB.png",
+          "options": [],
+          "price": 2999.5,
+          "quantity": 3,
+          "line_total": 8998.5,
+          "available_stock": 497,
+          "url": "http://127.0.0.1:8123/product/silver-elegant-butterflies-bracelet"
+        }
+      ],
+      "meta": {
+        "subtotal": 8998.5,
+        "total": 8998.5,
+        "count": 3
+      }
+    }
+  },
+  "cart.remove": {
+    "method": "DELETE",
+    "path": "/cart/114",
+    "query": null,
+    "auth": true,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "Item removed",
+      "data": [],
+      "meta": {
+        "subtotal": 0,
+        "total": 0,
+        "count": 0
+      }
+    }
+  },
+  "cart.clear": {
+    "method": "DELETE",
+    "path": "/cart",
+    "query": null,
+    "auth": true,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "Cart cleared",
+      "data": [],
+      "meta": {
+        "subtotal": 0,
+        "total": 0,
+        "count": 0
+      }
+    }
+  },
+  "wishlist.toggle": {
+    "method": "POST",
+    "path": "/wishlist/toggle",
+    "query": null,
+    "auth": true,
+    "status": 201,
+    "request": {
+      "product_id": 9
+    },
+    "response": {
+      "success": true,
+      "message": "Added to wishlist",
+      "data": {
+        "product_id": 9,
+        "in_wishlist": true,
+        "count": 1
+      },
+      "meta": {}
+    }
+  },
+  "wishlist.get": {
+    "method": "GET",
+    "path": "/wishlist",
+    "query": null,
+    "auth": true,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "data": [
+        {
+          "id": 9,
+          "name": "Silver Elegant Butterflies Bracelet",
+          "slug": "silver-elegant-butterflies-bracelet",
+          "sku": null,
+          "url": "http://127.0.0.1:8123/product/silver-elegant-butterflies-bracelet",
+          "audience": "women",
+          "material_type": "silver",
+          "product_type": "simple",
+          "is_simple": true,
+          "is_variable": false,
+          "short_description": "The Silver Elegant Butterflies Bracelet is inspired by the moon showing up unexpectedly on a rainy night with a group of three twinkling stars.",
+          "description": "The Design:\r\nThis silver bracelet has a moon motif studded with zircon at the centre with two stars to its left and one star to its right.\r\n\r\n925 Silver\r\nPerfect for sensitive skin\r\nMotif Size: Height - 0.85 cm, Motif Width - 1.35 cm\r\nThe length of the bracelet is 15 cm with a 4 cm adjustable portion\r\nComes with the GIVA Jewellery kit and authenticity certificate\r\nContent: Bracelet\r\nNet Qty- 1 unit\r\nStyling Tip:\r\nStyle this bracelet with a pink patchwork cocktail dress.",
+          "price": 2999.5,
+          "regular_price": 5999,
+          "sale_price": 2999.5,
+          "base_price": 5999,
+          "discount_type": "percentage",
+          "discount_value": 50,
+          "discount_percentage": 50,
+          "is_on_sale": true,
+          "price_range": null,
+          "primary_image": "http://127.0.0.1:8123/storage/products/JZBDIxaCw2LrKudyhdATWUjMKIHiRtHPMNwoSypB.png",
+          "images": [
+            "http://127.0.0.1:8123/storage/products/JZBDIxaCw2LrKudyhdATWUjMKIHiRtHPMNwoSypB.png",
+            "http://127.0.0.1:8123/storage/products/nFr8k7kOaGrKgqbLlsD7OYXDicRj40PnimAgOtQT.webp",
+            "http://127.0.0.1:8123/storage/products/33ghQTfgYvweacmeZQ63l0nwrgkkGqnNRBixGfNS.webp"
+          ],
+          "manage_stock": true,
+          "stock": 497,
+          "in_stock": true,
+          "category": {
+            "id": 7,
+            "name": "Bracelets",
+            "slug": "bracelets",
+            "parent_id": null
+          },
+          "brand": null,
+          "variations": [],
+          "reviews_count": 1
+        }
+      ],
+      "meta": {
+        "current_page": 1,
+        "last_page": 1,
+        "total": 1,
+        "count": 1
+      }
+    }
+  },
+  "wishlist.remove": {
+    "method": "DELETE",
+    "path": "/wishlist/9",
+    "query": null,
+    "auth": true,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "Removed from wishlist",
+      "data": {
+        "product_id": 9,
+        "in_wishlist": false,
+        "count": 0
+      },
+      "meta": {}
+    }
+  },
+  "orders.list": {
+    "method": "GET",
+    "path": "/orders",
+    "query": null,
+    "auth": true,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "data": [],
+      "meta": {
+        "current_page": 1,
+        "last_page": 1,
+        "per_page": 10,
+        "total": 0
+      }
+    }
+  },
+  "auth.logout": {
+    "method": "POST",
+    "path": "/auth/logout",
+    "query": null,
+    "auth": true,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "Logged out successfully",
+      "data": null,
+      "meta": {}
+    }
+  },
+  "auth.logout-all": {
+    "method": "POST",
+    "path": "/auth/logout-all",
+    "query": null,
+    "auth": true,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "Signed out of all devices",
+      "data": null,
+      "meta": {}
+    }
+  }
+}
