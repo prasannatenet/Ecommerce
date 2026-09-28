@@ -115,6 +115,10 @@ Route::prefix('v1')->name('api.')->group(function () {
 
         Route::get('cart', [CartController::class, 'index'])->name('cart.index');
         Route::post('cart', [CartController::class, 'store'])->name('cart.store');
+        // Bundle offers. Kept as its own action because a combo is added as one
+        // line per product, priced at the allocated share of the bundle price -
+        // sending the products one by one would charge full price for each.
+        Route::post('cart/combo', [CartController::class, 'storeCombo'])->name('cart.combo.store');
         Route::patch('cart/{cart}', [CartController::class, 'update'])->name('cart.update');
         Route::delete('cart/{cart}', [CartController::class, 'destroy'])->name('cart.destroy');
         Route::delete('cart', [CartController::class, 'clear'])->name('cart.clear');

@@ -11,18 +11,18 @@
     $notifyEvents = old('notify_events', optional($partner)->notifyEventList() ?? \App\Models\DeliveryPartner::DEFAULT_NOTIFY_EVENTS);
     $notifyEvents = is_array($notifyEvents) ? $notifyEvents : [];
 
-    // Pre-flight warnings. Booking silently fails when Delhivery One is enabled
-    // without an Express token, so say so up front instead of letting an admin
-    // discover it as a missing AWB days later.
+    // Pre-flight warnings. Booking silently fails when no Express token is
+    // saved, so say so up front instead of letting an admin discover it as a
+    // missing AWB days later.
     $warnings = [];
-    $useB2c = (bool) old('use_b2c_one', optional($partner)->use_b2c_one ?? false);
     $hasToken = $partner
         ? $partner->hasStoredApiKey()
         : trim((string) old('api_key', '')) !== '';
 
     if ($integrated && $driver === 'delhivery' && ! $hasToken) {
         $warnings[] = 'No Delhivery Express API token is saved, so no AWB (tracking number) can be generated. '
-            . 'Add the token below — Delhivery One credentials alone can only track, never book.';
+            . 'Add the token from Delhivery One > Settings > API Setup below. '
+            . 'It is the only credential that can book a shipment.';
     }
 
     if ($integrated && trim((string) old('pickup_name', optional($partner)->configValue('pickup_name'))) === '') {
@@ -184,20 +184,11 @@
                     <p class="df-form-hint">Stored encrypted. Falls back to DELHIVERY_B2C_CLIENT_SECRET when blank.</p>
                 @endif
             </div>
-            <div class="col-md-6 d-flex align-items-end">
-                <label class="d-flex align-items-center gap-2" style="cursor:pointer;">
-                    <input type="hidden" name="use_b2c_one" value="0">
-                    <input type="checkbox" name="use_b2c_one" value="1"
-                           {{ old('use_b2c_one', optional($partner)->use_b2c_one ?? false) ? 'checked' : '' }}
-                           style="width:18px; height:18px; accent-color:var(--df-primary);">
-                    <span class="df-form-label mb-0">Use Delhivery One (B2C / OAuth2)</span>
-                </label>
-            </div>
             <div class="col-12">
                 <p class="df-form-hint mb-0">
-                    <i class="bi bi-exclamation-triangle"></i>
-                    Order creation still requires the Express API token; Delhivery One credentials power tracking
-                    and serviceability for this account.
+                    <i class="bi bi-info-circle"></i>
+                    The Express API token is the only Delhivery credential that can create a shipment,
+                    allocate an AWB and request a pickup.
                 </p>
             </div>
         </div>

@@ -1029,6 +1029,64 @@ Sending the same product twice tops up the existing line. `product_variation_id`
 }
 ```
 
+### `POST /cart/combo` &nbsp;`Bearer token required`
+
+**Add a bundle offer**  
+Adds every product of a live combo as its own cart line, priced at its allocated share of the bundle price, so the lines add up to exactly `combo_price`.
+
+**Always send the combo to this endpoint.** Adding the same products through `POST /cart` one at a time charges full price for each and the offer is not applied as a single bundle.
+
+**No price is taken from the request body** — the bundle price is recomputed from the products' current prices. A `price` or `combo_price` field in the body is ignored.
+
+**Request body**
+
+```json
+{
+    "combo_id": 1,
+    "quantity": 1
+}
+```
+
+**Response `201`**
+
+Each line carries the pre-combo price so a client can strike it through, and the `meta` block reconciles:
+
+```json
+{
+    "success": true,
+    "message": "Combo added to cart",
+    "data": [
+        {
+            "id": 120,
+            "product_id": 4,
+            "product_variation_id": null,
+            "combo_id": 1,
+            "name": "Golden Star Constellation Tiny Studs",
+            "price": 899.78,
+            "quantity": 1,
+            "is_combo": true,
+            "combo": { "id": 1, "name": "try", "slug": "try", "combo_price": 12147.77 },
+            "combo_units": 0,
+            "combo_names": [],
+            "regular_unit_price": 999.75,
+            "line_total": 899.78,
+            "available_stock": 0,
+            "url": "https://astroemerging.com/gehna/product/golden-star-constellation-tiny-studs"
+        }
+    ],
+    "meta": {
+        "subtotal": 12147.77,
+        "combo_discount": 0.0,
+        "total": 12147.77,
+        "count": 4
+    }
+}
+```
+
+`meta.subtotal` is already the discounted total, so `combo_discount` is `0` for a combo added this way. It becomes non-zero only for a bundle that `ComboService` detected from ordinary product lines already in the cart — see `GET /cart`.
+
+Rejects `422` with `combo_id` when the combo is switched off, outside its date window, or no longer has at least two sellable products.
+
 ### `PATCH /cart/{id}` &nbsp;`Bearer token required`
 
 **Set quantity**  

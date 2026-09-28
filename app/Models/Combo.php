@@ -65,6 +65,26 @@ class Combo extends Model
                     ->withTimestamps();
     }
 
+    /**
+     * The products that can actually be sold inside this combo.
+     *
+     * products() deliberately keeps deactivated rows visible so the admin can
+     * see and remove them from a bundle. Pricing must not use it: a product
+     * switched off after the bundle was built cannot be bought, so counting it
+     * would inflate products_total and quote a combo_price the customer can
+     * never be charged.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Product>
+     */
+    public function sellableProducts()
+    {
+        return $this->belongsToMany(Product::class, 'combo_product')
+                    ->where('products.is_active', true)
+                    ->withPivot('sort_order')
+                    ->orderByPivot('sort_order')
+                    ->withTimestamps();
+    }
+
     /* ───── Scopes ───── */
 
     /** Combos that are enabled and inside their schedule window. */
@@ -95,10 +115,20 @@ class Combo extends Model
         return true;
     }
 
-    /** Combined price of every product in the combo. */
+    /**
+     * Combined price of every product in the combo.
+     *
+     * Uses the sellable set, not products(): a product deactivated after the
+     * bundle was built cannot be bought, so including it would quote a total
+     * the customer can never be charged and make every saving look wrong.
+     */
     public function productsTotal(): float
     {
-        return round((float) $this->products->sum(fn ($product) => (float) $product->display_price), 2);
+        $products = $this->relationLoaded('sellableProducts')
+            ? $this->sellableProducts
+            : $this->sellableProducts()->get();
+
+        return round((float) $products->sum(fn ($product) => (float) $product->display_price), 2);
     }
 
     /** Discount amount for the whole combo (never more than the total). */

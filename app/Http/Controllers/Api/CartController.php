@@ -4,18 +4,23 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Resources\CartResource;
 use App\Models\Cart;
+use App\Models\Combo;
 use App\Models\Product;
 use App\Models\ProductVariation;
+use App\Services\ComboService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
  * The signed-in customer's cart.
  *
- *   GET    /gehna/api/v1/cart
+ *   GET    /gehna/api/v1/cart                 list lines and totals
  *   POST   /gehna/api/v1/cart                 add a product or variation
+ *   POST   /gehna/api/v1/cart/combo            add a bundle offer
  *   PATCH  /gehna/api/v1/cart/{id}            change quantity
  *   DELETE /gehna/api/v1/cart/{id}            remove one line
  *   DELETE /gehna/api/v1/cart                 empty the cart
@@ -25,17 +30,22 @@ use Symfony\Component\HttpFoundation\Response;
  * endpoint trusts a price from the client: the unit price is resolved from
  * the product and variation rows, so a tampered request cannot set its own
  * price.
+ *
+ * Bundle pricing is delegated to ComboService, the same service the Blade cart
+ * and checkout use. It used not to be consulted here at all, which meant a
+ * combo added through this API was charged at full product price while the
+ * website discounted it - the customer-facing symptom was a cart whose
+ * subtotal ignored the offer entirely.
  */
 class CartController extends ApiController
 {
+    public function __construct(private readonly ComboService $comboService)
+    {
+    }
+
     public function index(Request $request): JsonResponse
     {
-        $cart = $this->query($request)->get();
-
-        return $this->ok(
-            CartResource::collection($cart),
-            $this->totals($cart),
-        );
+        return $this->respond($request);
     }
 
     /**
@@ -82,14 +92,74 @@ class CartController extends ApiController
         $line->price = $price;
         $line->save();
 
-        $cart = $this->query($request)->get();
+        return $this->respond($request, 'Added to cart', Response::HTTP_CREATED);
+    }
 
-        return $this->ok(
-            CartResource::collection($cart),
-            $this->totals($cart),
-            'Added to cart',
-            Response::HTTP_CREATED,
-        );
+    /**
+     * Add a bundle offer.
+     *
+     * Each product in the combo becomes its own cart line linked by combo_id and
+     * priced at its allocated share of the bundle price, so the lines add up to
+     * exactly the discounted total. Sending the same products through the plain
+     * cart endpoint one by one would charge full price for every one of them,
+     * which is what this action exists to prevent.
+     *
+     * No price is taken from the request body: the bundle price is recomputed
+     * from the products' own current prices, so a client cannot post a stale or
+     * tampered figure and neither can an admin who edited a product after the
+     * bundle was created.
+     */
+    public function storeCombo(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'combo_id' => ['required', 'integer', 'exists:combos,id'],
+            'quantity' => ['nullable', 'integer', 'min:1', 'max:99'],
+        ]);
+
+        $combo = Combo::where('id', $data['combo_id'])->with('sellableProducts')->first();
+
+        // isLive() covers a switched-off combo and one whose schedule window has
+        // closed, so an expired bundle can never be added at its old price.
+        if (! $combo || ! $combo->isLive()) {
+            throw ValidationException::withMessages([
+                'combo_id' => 'This combo is no longer available.',
+            ]);
+        }
+
+        $products = $combo->sellableProducts;
+
+        // A product deactivated after the bundle was built must not keep being
+        // sold inside it, and a combo that drops below two sellable products is
+        // no longer a bundle at all.
+        if ($products->count() < 2) {
+            throw ValidationException::withMessages([
+                'combo_id' => 'This combo no longer has enough available products to be offered.',
+            ]);
+        }
+
+        $quantity = (int) ($data['quantity'] ?? 1);
+        $allocated = $this->comboService->allocateComboUnitPrices($combo, $products);
+
+        DB::transaction(function () use ($request, $combo, $products, $allocated, $quantity) {
+            foreach ($products as $product) {
+                $line = Cart::firstOrNew([
+                    'user_id' => $request->user()->id,
+                    'product_id' => $product->id,
+                    'product_variation_id' => null,
+                    'combo_id' => $combo->id,
+                ]);
+
+                $line->quantity = (int) $line->quantity + $quantity;
+                // Re-applied on every add, not just on create: this line may
+                // still be holding a restored regular price after the customer
+                // removed a sibling product, and bumping the quantity alone
+                // would leave the discount permanently switched off.
+                $line->price = $allocated[$product->id] ?? (float) $product->effectivePrice();
+                $line->save();
+            }
+        });
+
+        return $this->respond($request, 'Combo added to cart', Response::HTTP_CREATED);
     }
 
     /** Set (not increment) the quantity of one line. */
@@ -107,23 +177,44 @@ class CartController extends ApiController
         if ($quantity === 0) {
             $line->delete();
 
-            $cartItems = $this->query($request)->get();
-
-            return $this->ok(CartResource::collection($cartItems), $this->totals($cartItems), 'Item removed');
+            return $this->respond($request, 'Item removed');
         }
 
         $line->quantity = $quantity;
         $line->save();
 
-        $cartItems = $this->query($request)->get();
-
-        return $this->ok(
-            CartResource::collection($cartItems),
-            $this->totals($cartItems),
-            'Cart updated',
-        );
+        return $this->respond($request, 'Cart updated');
     }
 
+
+    /**
+     * Build the standard cart response.
+     *
+     * Every cart action funnels through here so they cannot drift apart on
+     * pricing. Two steps matter:
+     *
+     * 1. applyExplicitComboPrices() puts the regular price back on bundle lines
+     *    whose bundle is no longer complete. A customer who removes one product
+     *    from a bundle must stop keeping the discount on what is left, otherwise
+     *    they can strip a bundle down to a single product and still pay the
+     *    bundle price. It only rewrites the in-memory model, so a GET never
+     *    writes to the carts table.
+     *
+     * 2. summarize() then works out any bundle discount that is earned by the
+     *    ordinary product lines sitting in the cart.
+     */
+    private function respond(Request $request, string $message = 'OK', int $status = Response::HTTP_OK): JsonResponse
+    {
+        $cart = $this->comboService->applyExplicitComboPrices($this->query($request)->get());
+        $summary = $this->comboService->summarize($cart);
+
+        return $this->ok(
+            CartResource::collection($this->annotate($cart, $summary)),
+            $this->totals($cart, $summary),
+            $message,
+            $status,
+        );
+    }
 
     /**
      * The customer's lines, with everything a cart row needs to render.
@@ -134,7 +225,11 @@ class CartController extends ApiController
     {
         return Cart::query()
             ->where('user_id', $request->user()->id)
-            ->with(['product.images', 'product.brand', 'variation'])
+            // variations and combo are needed by ComboService::regularUnitPrice()
+            // and by the resource. Without them a variable product's pre-combo
+            // price would fall back to the product's cheapest variation and quote
+            // the wrong "was" figure.
+            ->with(['product.images', 'product.brand', 'product.variations', 'variation', 'combo'])
             ->orderByDesc('id');
     }
 
@@ -149,20 +244,58 @@ class CartController extends ApiController
     }
 
     /**
-     * Cart-level totals. Only the line sum is exposed here — shipping, tax and
-     * coupon discounts are quote options that the checkout endpoint decides,
-     * so showing a "total" here that later changes would be misleading.
+     * Attach the derived per-line figures the resource renders.
+     *
+     * These are set as model attributes rather than passed to the resource so
+     * the resource stays a plain map of one cart line. They are synced straight
+     * back to "original" so a later save() can never try to write them to a
+     * column that does not exist - the same guard ComboService uses when it
+     * rewrites a broken combo line's price in memory.
      *
      * @param  \Illuminate\Support\Collection<int, Cart>  $cart
-     * @return array{subtotal: float, total: float, count: int}
+     * @param  array<string, mixed>  $summary
+     * @return \Illuminate\Support\Collection<int, Cart>
      */
-    private function totals($cart): array
+    private function annotate(Collection $cart, array $summary): Collection
     {
-        $subtotal = round((float) $cart->sum(fn (Cart $line) => $line->subtotal), 2);
+        foreach ($cart as $line) {
+            $allocation = $summary['line_allocations'][(string) $line->id] ?? null;
+
+            $line->setAttribute('regular_unit_price', round($this->comboService->regularUnitPrice($line), 2));
+            $line->setAttribute('charged_line_total', $this->comboService->chargedLineTotal($line, $summary));
+            $line->setAttribute('combo_units', (int) ($allocation['combo_units'] ?? 0));
+            $line->setAttribute('combo_names', $allocation['combo_names'] ?? []);
+
+            $line->syncOriginalAttribute('regular_unit_price');
+            $line->syncOriginalAttribute('charged_line_total');
+            $line->syncOriginalAttribute('combo_units');
+            $line->syncOriginalAttribute('combo_names');
+        }
+
+        return $cart;
+    }
+
+    /**
+     * Cart-level totals.
+     *
+     * `subtotal` is the sum of the line prices and `combo_discount` is what the
+     * bundle offers took off, so a client can show the saving and reconcile the
+     * arithmetic. Shipping and tax are still left to checkout: quoting them here
+     * as a "total" that later changed would be misleading.
+     *
+     * @param  \Illuminate\Support\Collection<int, Cart>  $cart
+     * @param  array<string, mixed>  $summary
+     * @return array{subtotal: float, combo_discount: float, total: float, count: int}
+     */
+    private function totals(Collection $cart, array $summary): array
+    {
+        $subtotal = round((float) $cart->sum(fn (Cart $line) => (float) $line->subtotal), 2);
+        $comboDiscount = round((float) ($summary['discount'] ?? 0), 2);
 
         return [
             'subtotal' => $subtotal,
-            'total' => $subtotal,
+            'combo_discount' => $comboDiscount,
+            'total' => round(max(0, $subtotal - $comboDiscount), 2),
             'count' => (int) $cart->sum(fn (Cart $line) => (int) $line->quantity),
         ];
     }
@@ -191,9 +324,7 @@ class CartController extends ApiController
     {
         $this->ownedLine($request, $cart)->delete();
 
-        $cartItems = $this->query($request)->get();
-
-        return $this->ok(CartResource::collection($cartItems), $this->totals($cartItems), 'Item removed');
+        return $this->respond($request, 'Item removed');
     }
 
     /** Empty the cart. */
@@ -201,6 +332,10 @@ class CartController extends ApiController
     {
         Cart::where('user_id', $request->user()->id)->delete();
 
-        return $this->ok([], ['subtotal' => 0.0, 'total' => 0.0, 'count' => 0], 'Cart cleared');
+        return $this->ok(
+            [],
+            ['subtotal' => 0.0, 'combo_discount' => 0.0, 'total' => 0.0, 'count' => 0],
+            'Cart cleared'
+        );
     }
 }

@@ -241,37 +241,20 @@ class FrontendCartController extends Controller
     }
 
     /**
-     * Split the combo price across its products in proportion to the price the
-     * customer sees, so the allocated unit prices add up to exactly comboPrice().
+     * Split the combo price across its products.
+     *
+     * Delegates to ComboService so the Blade cart and the JSON API allocate a
+     * bundle in exactly the same way. It used to carry its own copy of this
+     * maths, which put the rounding fix-up on the *first* product rather than
+     * spreading it - so the website and the API could quote the same combo a
+     * paisa apart.
      *
      * @param  \Illuminate\Support\Collection<int, \App\Models\Product>  $products
      * @return array<int, float>  product id => allocated unit price
      */
     private function comboUnitPrices(Combo $combo, $products): array
     {
-        $totalOriginal = (float) $products->sum(fn ($p) => (float) $p->display_price);
-        $comboTotalPrice = $combo->comboPrice();
-        $allocatedPrices = [];
-
-        foreach ($products as $product) {
-            $origPrice = (float) $product->display_price;
-            if ($totalOriginal > 0) {
-                $allocatedPrices[$product->id] = round(($origPrice / $totalOriginal) * $comboTotalPrice, 2);
-            } else {
-                $allocatedPrices[$product->id] = 0.0;
-            }
-        }
-
-        // Adjust for rounding so the sum equals comboTotalPrice
-        $allocatedSum = round(array_sum($allocatedPrices), 2);
-        $diff = round($comboTotalPrice - $allocatedSum, 2);
-
-        if (abs($diff) > 0.001 && $products->isNotEmpty()) {
-            $firstProductId = $products->first()->id;
-            $allocatedPrices[$firstProductId] = round($allocatedPrices[$firstProductId] + $diff, 2);
-        }
-
-        return $allocatedPrices;
+        return $this->comboService->allocateComboUnitPrices($combo, $products);
     }
 
     /**

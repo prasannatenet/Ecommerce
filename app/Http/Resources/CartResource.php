@@ -42,7 +42,32 @@ class CartResource extends JsonResource
 
             'price' => (float) $this->price,
             'quantity' => (int) $this->quantity,
-            'line_total' => (float) $this->subtotal,
+
+            // ── Bundle pricing ───────────────────────────────────────────
+            // `line_total` is what the customer is actually charged, which for a
+            // discounted line is lower than quantity x price.
+            // `regular_unit_price` is the undiscounted figure to strike through,
+            // so a combo line can read "1,000 -> 950" rather than only showing
+            // the discounted number. The controller sets all three on the model
+            // via syncOriginalAttribute, so a later save() cannot persist them.
+            'is_combo' => (bool) $this->combo_id,
+            'combo' => $this->relationLoaded('combo') && $this->combo
+                ? [
+                    'id' => $this->combo->id,
+                    'name' => $this->combo->name,
+                    'slug' => $this->combo->slug,
+                    'combo_price' => $this->combo->comboPrice(),
+                ]
+                : null,
+            'combo_units' => (int) ($this->combo_units ?? 0),
+            'combo_names' => array_values((array) ($this->combo_names ?? [])),
+            'regular_unit_price' => $this->regular_unit_price !== null
+                ? (float) $this->regular_unit_price
+                : (float) $this->price,
+            'line_total' => $this->charged_line_total !== null
+                ? (float) $this->charged_line_total
+                : (float) $this->subtotal,
+
             'available_stock' => $variation
                 ? (int) $variation->stock
                 : (int) ($product?->getTotalStockAttribute() ?? 0),

@@ -134,7 +134,15 @@ class BackendDeliveryPartnerController extends Controller
         $data['is_sandbox'] = $request->boolean('is_sandbox');
         $data['is_default'] = $request->boolean('is_default');
         $data['auto_update_order_status'] = $request->boolean('auto_update_order_status');
-        $data['use_b2c_one'] = $request->boolean('use_b2c_one');
+        // `use_b2c_one` is deliberately not operator-editable any more.
+        //
+        // It selected Delhivery's MCP transport, which their own docs describe as
+        // a read-only integration for AI coding assistants driven by a local
+        // `uvx` process. It cannot be called server-to-server and it cannot create
+        // a shipment, so a partner left on it books nothing and silently loses
+        // its AWB. It is forced off here so a stale row cannot keep selecting it;
+        // the column and B2CDelhiveryDriver are kept so this stays reversible.
+        $data['use_b2c_one'] = false;
         $data['require_webhook_signature'] = $request->boolean('require_webhook_signature');
 
         // Safety rules. These default to on, so an unchecked box only turns the
@@ -247,7 +255,6 @@ class BackendDeliveryPartnerController extends Controller
             'auto_notify_customer' => 'nullable|boolean',
             'notify_events' => 'nullable|array',
             'notify_events.*' => 'nullable|string|in:booked,shipped,in_transit,out_for_delivery,delivered,undelivered,rto,cancelled',
-            'use_b2c_one' => 'nullable|boolean',
             'tracking_url_template' => 'nullable|string|max:500',
             'config_pickup_name' => 'nullable|string|max:255',
             'config_pickup_pin' => 'nullable|string|max:20',

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Combo;
+use App\Models\Product;
 use Illuminate\Support\Collection;
 
 /**
@@ -63,17 +64,20 @@ class ComboService
 
         $productIds = $lines->pluck('product_id')->unique()->values()->all();
 
+        // sellableProducts throughout, so "which products make up this bundle"
+        // and "what the bundle costs" can never disagree about a product that
+        // was switched off after the bundle was built.
         $combos = Combo::query()
-            ->whereHas('products', fn ($query) => $query->whereIn('products.id', $productIds))
+            ->whereHas('sellableProducts', fn ($query) => $query->whereIn('products.id', $productIds))
             ->active()
-            ->with('products:id,name')
+            ->with('sellableProducts:id,name')
             ->get();
 
         // Cart line id => how many units are already taken by an earlier combo.
         $claimedUnits = [];
 
         foreach ($combos as $combo) {
-            $comboProductIds = $combo->products
+            $comboProductIds = $combo->sellableProducts
                 ->pluck('id')
                 ->map(fn ($id) => (int) $id)
                 ->unique()
@@ -152,6 +156,45 @@ class ComboService
         return $summary;
     }
 
+    /**
+     * Split a combo's price across its products in proportion to what the
+     * customer actually pays for each one.
+     *
+     * This is the one allocation implementation in the project. The Blade
+     * "Add combo" action and POST /api/v1/cart/combo both call it, so a bundle
+     * can never be quoted one price on the website and a different one through
+     * the API.
+     *
+     * It reuses allocate() for the rounding fix-up, so the parts sum to
+     * comboPrice() to the last paisa rather than drifting by a few paise.
+     *
+     * @param  \Illuminate\Support\Collection<int, \App\Models\Product>  $products
+     * @return array<int, float>  product id => allocated unit price
+     */
+    public function allocateComboUnitPrices(Combo $combo, Collection $products): array
+    {
+        if ($products->isEmpty()) {
+            return [];
+        }
+
+        $products = $products->values();
+
+        // One unit per product, priced at the customer's real price for it, so
+        // the bundle is weighted by what is actually being discounted rather
+        // than by list price.
+        $units = $products
+            ->map(fn (Product $product) => [
+                'line_id' => (string) $product->id,
+                'product_id' => (int) $product->id,
+                'unit_price' => (float) $product->effectivePrice(),
+            ])
+            ->all();
+
+        return collect($this->allocate($units, $combo->comboPrice()))
+            ->mapWithKeys(fn (float $price, int $index) => [(int) $products[$index]->id => $price])
+            ->all();
+    }
+
     /** Total combo saving for a cart. */
     public function discount($cartItems): float
     {
@@ -218,7 +261,11 @@ class ComboService
 
         $combos = Combo::query()
             ->whereIn('id', $comboIds)
-            ->with('products:id')
+            // sellableProducts, not products: the cart can only ever hold lines
+            // for products that are still active, so requiring the deactivated
+            // ones here would make a perfectly complete bundle look broken and
+            // throw its discount away on the next cart read.
+            ->with('sellableProducts:id')
             ->get()
             ->keyBy(fn (Combo $combo) => (int) $combo->id);
 
@@ -229,7 +276,7 @@ class ComboService
                 $combo = $combos->get($comboId);
 
                 $required = $combo
-                    ? $combo->products->pluck('id')->map(fn ($id) => (int) $id)->unique()->values()
+                    ? $combo->sellableProducts->pluck('id')->map(fn ($id) => (int) $id)->unique()->values()
                     : collect();
 
                 $present = $lines

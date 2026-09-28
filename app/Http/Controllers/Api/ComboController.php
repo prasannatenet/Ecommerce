@@ -19,12 +19,32 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class ComboController extends ApiController
 {
+    /**
+     * Relations every combo query needs.
+     *
+     * `products.variations` is not optional. Combo::productsTotal() prices a
+     * variable product from its cheapest variation, so the bundle price was
+     * already derived from variation data - but only `products.images` was
+     * eager loaded, which meant ProductResource emitted an empty `variations`
+     * array and a null `price_range` for every variable product, and
+     * getTotalStockAttribute() fired an extra SUM query per product. The API
+     * quoted a bundle price built from a number it never showed the client.
+     */
+    private const COMBO_RELATIONS = ['products.images', 'products.variations'];
+
+    /**
+     * Count the products that can actually be sold, so products_count agrees
+     * with the products_total and combo_price quoted beside it. Counting the
+     * raw pivot rows would advertise a product the customer cannot buy.
+     */
+    private const COMBO_COUNT = ['sellableProducts as products_count'];
+
     public function index(): JsonResponse
     {
         $combos = Combo::query()
             ->active()
-            ->with('products.images')
-            ->withCount('products')
+            ->with(self::COMBO_RELATIONS)
+            ->withCount(self::COMBO_COUNT)
             ->orderByDesc('id')
             ->get();
 
@@ -35,8 +55,8 @@ class ComboController extends ApiController
     {
         $combo = Combo::query()
             ->where('slug', $slug)
-            ->with('products.images')
-            ->withCount('products')
+            ->with(self::COMBO_RELATIONS)
+            ->withCount(self::COMBO_COUNT)
             ->first();
 
         if (! $combo) {
