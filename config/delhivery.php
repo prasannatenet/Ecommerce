@@ -9,11 +9,36 @@ return [
     | Traditional Delhivery Express APIs at staging-express.delhivery.com
     | and track.delhivery.com. Uses a simple "Token <api_key>" header.
     |
+    | Only the base URLs live in code. Every endpoint PATH is a config value
+    | (see the `endpoints` block below) so a Delhivery path change is an .env
+    | edit, never a code edit. Each path can also be overridden per partner
+    | through its `config` JSON column, which wins over the config value.
+    |
     */
     'old_api' => [
         'sandbox_base_url' => env('DELHIVERY_SANDBOX_URL', 'https://staging-express.delhivery.com'),
         'production_base_url' => env('DELHIVERY_PRODUCTION_URL', 'https://track.delhivery.com'),
         'default_api_key' => env('DELHIVERY_API_KEY', ''),
+
+        /*
+        | Endpoint paths. Never hardcode these into a driver - read them with
+        | DelhiveryEndpoints::url('waybill', $partner) so they stay overridable.
+        |
+        | `waybill` allocates the AWB. Note that create.json does NOT return a
+        | waybill: the shipment must be created against one already allocated.
+        */
+        'endpoints' => [
+            'waybill' => env('DELHIVERY_EP_WAYBILL', '/waybill/api/bulk/json/'),
+            'create' => env('DELHIVERY_EP_CREATE', '/api/cmu/create.json'),
+            'serviceability' => env('DELHIVERY_EP_SERVICEABILITY', '/c/api/pin-codes/json/'),
+            'tracking' => env('DELHIVERY_EP_TRACKING', '/api/v1/packages/json/'),
+            'label' => env('DELHIVERY_EP_LABEL', '/api/p/packing_slip'),
+            'cancel' => env('DELHIVERY_EP_CANCEL', '/api/p/edit'),
+            'pickup_request' => env('DELHIVERY_EP_PICKUP_REQUEST', '/fm/request/new/'),
+        ],
+
+        // Delhivery caps a single bulk waybill request.
+        'max_waybills_per_request' => (int) env('DELHIVERY_MAX_AWB', 100),
     ],
 
     /*
