@@ -14,6 +14,7 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         \App\Console\Commands\SyncDeliveryTracking::class,
+        \App\Console\Commands\RepairShipmentConsistency::class,
     ];
 
     /**

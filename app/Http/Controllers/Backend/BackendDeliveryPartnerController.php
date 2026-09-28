@@ -135,6 +135,11 @@ class BackendDeliveryPartnerController extends Controller
         $data['is_default'] = $request->boolean('is_default');
         $data['auto_update_order_status'] = $request->boolean('auto_update_order_status');
         $data['use_b2c_one'] = $request->boolean('use_b2c_one');
+        $data['require_webhook_signature'] = $request->boolean('require_webhook_signature');
+
+        // Safety rules. These default to on, so an unchecked box only turns the
+        // behaviour off when the operator deliberately unchecks it.
+        $data['auto_cancel_with_order'] = $request->boolean('auto_cancel_with_order');
 
         // Automatic shipping rules.
         $data['auto_sync_tracking'] = $request->boolean('auto_sync_tracking');
@@ -230,11 +235,13 @@ class BackendDeliveryPartnerController extends Controller
             'client_id' => 'nullable|string|max:255',
             'client_secret' => 'nullable|string|max:2000',
             'webhook_secret' => 'nullable|string|max:2000',
+            'require_webhook_signature' => 'nullable|boolean',
             'base_url' => 'nullable|url|max:500',
             'is_sandbox' => 'nullable|boolean',
             'is_default' => 'nullable|boolean',
             'auto_book_on' => 'nullable|string|in:manual,processing,shipped,both',
             'auto_book_enabled' => 'nullable|boolean',
+            'auto_cancel_with_order' => 'nullable|boolean',
             'auto_update_order_status' => 'nullable|boolean',
             'auto_sync_tracking' => 'nullable|boolean',
             'auto_notify_customer' => 'nullable|boolean',

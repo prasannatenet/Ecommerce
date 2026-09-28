@@ -10,7 +10,34 @@
     }
     $notifyEvents = old('notify_events', optional($partner)->notifyEventList() ?? \App\Models\DeliveryPartner::DEFAULT_NOTIFY_EVENTS);
     $notifyEvents = is_array($notifyEvents) ? $notifyEvents : [];
+
+    // Pre-flight warnings. Booking silently fails when Delhivery One is enabled
+    // without an Express token, so say so up front instead of letting an admin
+    // discover it as a missing AWB days later.
+    $warnings = [];
+    $useB2c = (bool) old('use_b2c_one', optional($partner)->use_b2c_one ?? false);
+    $hasToken = $partner
+        ? $partner->hasStoredApiKey()
+        : trim((string) old('api_key', '')) !== '';
+
+    if ($integrated && $driver === 'delhivery' && ! $hasToken) {
+        $warnings[] = 'No Delhivery Express API token is saved, so no AWB (tracking number) can be generated. '
+            . 'Add the token below — Delhivery One credentials alone can only track, never book.';
+    }
+
+    if ($integrated && trim((string) old('pickup_name', optional($partner)->configValue('pickup_name'))) === '') {
+        $warnings[] = 'No pickup warehouse name is set. Every booking will fail until it exactly matches a warehouse registered in Delhivery.';
+    }
 @endphp
+
+@if($warnings)
+    <div class="df-alert df-alert-danger mb-4">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <div style="white-space:pre-line;">
+            @foreach($warnings as $warning)<div>{{ $warning }}</div>@endforeach
+        </div>
+    </div>
+@endif
 
 {{-- ============================ DELIVERY PARTNER ============================ --}}
 <div class="df-card mb-4">
@@ -212,6 +239,20 @@
                         </select>
                         <p class="df-form-hint">Configurable trigger - nothing is hardcoded.</p>
                     </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <div>
+                            <label class="d-flex align-items-center gap-2" style="cursor:pointer;">
+                                <input type="hidden" name="auto_cancel_with_order" value="0">
+                                <input type="checkbox" name="auto_cancel_with_order" value="1"
+                                       {{ old('auto_cancel_with_order', optional($partner)->auto_cancel_with_order ?? true) ? 'checked' : '' }}
+                                       style="width:18px; height:18px; accent-color:var(--df-primary);">
+                                <span class="df-form-label mb-0">Cancel with the courier when an order is cancelled</span>
+                            </label>
+                            <p class="df-form-hint">
+                                Tells the courier to stand down so the parcel is not picked up and billed.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="col-12">
@@ -268,22 +309,35 @@
             <div class="col-md-6">
                 <label class="df-form-label">Webhook URL (configure in the Delhivery dashboard)</label>
                 <input type="text" class="df-form-control" readonly
-                       value="{{ url('/webhooks/delivery/' . (old('code', optional($partner)->code) ?? 'CODE')) }}">
+                       value="{{ route('webhooks.delivery', old('code', optional($partner)->code) ?? 'CODE') }}">
                 <p class="df-form-hint">Delhivery pushes shipment status events here; the app updates the shipment instantly.</p>
             </div>
             <div class="col-md-6">
                 <label class="df-form-label">Webhook Secret</label>
                 <input type="text" name="webhook_secret" class="df-form-control" value="{{ old('webhook_secret') }}"
                        autocomplete="new-password"
-                       placeholder="{{ $partner && $partner->webhook_secret ? 'Leave blank to keep the stored secret' : 'HMAC secret (optional)' }}">
+                       placeholder="{{ $partner && $partner->webhook_secret ? 'Leave blank to keep the stored secret' : 'HMAC secret (strongly recommended)' }}">
                 <p class="df-form-hint">Verifies the X-Delhivery-Signature header on incoming events. Leave blank to keep it.</p>
+            </div>
+            <div class="col-md-6 d-flex align-items-end">
+                <label class="d-flex align-items-center gap-2" style="cursor:pointer;">
+                    <input type="hidden" name="require_webhook_signature" value="0">
+                    <input type="checkbox" name="require_webhook_signature" value="1"
+                           {{ old('require_webhook_signature', optional($partner)->require_webhook_signature ?? true) ? 'checked' : '' }}
+                           style="width:18px; height:18px; accent-color:var(--df-primary);">
+                    <span class="df-form-label mb-0">Require a signed webhook</span>
+                </label>
+                <p class="df-form-hint mt-1 w-100">
+                    Rejects all callbacks unless the courier signs them. Turn this off only if your
+                    courier cannot send a signature.
+                </p>
             </div>
             <div class="col-md-6">
                 <label class="df-form-label">Tracking URL Template</label>
                 <input type="text" name="tracking_url_template" class="df-form-control"
                        value="{{ old('tracking_url_template', optional($partner)->tracking_url_template) }}"
-                       placeholder="https://www.delhivery.com/track/package/{awb}">
-                <p class="df-form-hint">Use {awb} or {tracking_number} as the placeholder.</p>
+                       placeholder="{{ \App\Models\DeliveryPartner::DEFAULT_TRACKING_URL }}">
+                <p class="df-form-hint">Use {awb} or {tracking_number} as the placeholder. Leave blank to use the Delhivery default.</p>
             </div>
             <div class="col-md-6 d-flex align-items-end">
                 <label class="d-flex align-items-center gap-2" style="cursor:pointer;">

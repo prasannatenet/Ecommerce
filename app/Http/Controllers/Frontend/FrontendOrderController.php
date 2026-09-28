@@ -5,12 +5,14 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\ReturnRequest;
+use App\Services\Delivery\DeliveryManager;
 use App\Services\OrderInventoryService;
 use App\Services\ProductRecommendationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 use App\Mail\ReturnRequestMail;
@@ -42,7 +44,7 @@ class FrontendOrderController extends Controller
         return view('frontend.order.show', compact('order'));
     }
 
-    public function cancel(Request $request, Order $order): RedirectResponse
+    public function cancel(Request $request, Order $order, DeliveryManager $deliveryManager): RedirectResponse
     {
         abort_if($order->user_id !== Auth::id(), 403);
 
@@ -54,6 +56,11 @@ class FrontendOrderController extends Controller
             return redirect()->route('orders.show', $order)
                 ->with('error', 'This order can no longer be cancelled.');
         }
+
+        // Tell the courier to stand down. A courier outage must not stop the
+        // customer cancelling, so a failure is logged and flagged to the admin
+        // rather than surfaced as a blocking error.
+        $courierNote = $deliveryManager->cancelForOrder($order);
 
         $order->update([
             'status' => 'cancelled',
@@ -75,6 +82,13 @@ class FrontendOrderController extends Controller
 
         $this->inventoryService->restockForOrder($order);
         $this->recommendations->forgetForOrder($order->fresh());
+
+        // The customer gets a clean confirmation; the courier follow-up is an
+        // operations matter and is surfaced on the admin order screen instead.
+        Log::warning('Courier cancellation incomplete on customer cancel', [
+            'order_id' => $order->id,
+            'note' => $courierNote,
+        ]);
 
         return redirect()->route('orders.show', $order)
             ->with('success', 'Order cancelled successfully. If payment was prepaid, refund will be initiated by admin.');

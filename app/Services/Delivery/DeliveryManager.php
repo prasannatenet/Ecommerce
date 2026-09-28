@@ -34,6 +34,26 @@ class DeliveryManager
         return $driver ? $driver->baseUrl($partner) : '';
     }
 
+    /**
+     * The driver that should actually place the order.
+     *
+     * Delhivery One (B2C) credentials are read/search scoped and cannot create
+     * orders. If a partner has both B2C enabled *and* a stored Express API key,
+     * book through the Express driver so the order still goes out; B2C keeps
+     * handling tracking. Without this fallback such a partner could never book
+     * anything and the failure only showed up in last_sync_error.
+     */
+    public function bookingDriverFor(DeliveryPartner $partner): ?DeliveryDriver
+    {
+        $driver = $this->driverFor($partner);
+
+        if ($driver instanceof B2CDelhiveryDriver && ! empty($partner->api_key)) {
+            return new DelhiveryDriver();
+        }
+
+        return $driver;
+    }
+
     public function testConnection(DeliveryPartner $partner): array
     {
         $driver = $this->driverFor($partner);
@@ -109,9 +129,24 @@ class DeliveryManager
 
         $reason = method_exists($driver, 'lastError') ? trim((string) $driver->lastError()) : '';
 
+        // Drivers that return a structured result (Delhivery Express) carry the
+        // detail an operator needs: COD/prepaid availability, weight cap and
+        // the courier's own remark.
+        if ($serviceable instanceof ServiceabilityResult) {
+            return [
+                'ok' => $serviceable->error === null,
+                'serviceable' => $serviceable->serviceable,
+                'message' => $serviceable->error ?? $serviceable->summary(),
+                'cod_available' => $serviceable->codAvailable,
+                'prepaid_available' => $serviceable->prepaidAvailable,
+                'max_weight_kg' => $serviceable->maxWeightKg,
+                'warnings' => $serviceable->warnings(),
+            ];
+        }
+
         return [
             'ok' => true,
-            'serviceable' => $serviceable,
+            'serviceable' => (bool) $serviceable,
             'message' => $serviceable
                 ? 'Pincode ' . $pincode . ' is serviceable for ' . $partner->name . '.'
                 : ('Pincode ' . $pincode . ' is not serviceable for ' . $partner->name . '.' . ($reason !== '' ? ' ' . $reason : '')),
@@ -147,12 +182,20 @@ class DeliveryManager
             return;
         }
 
-        if (! $serviceable) {
+        // A ServiceabilityResult object is always truthy, so comparing it
+        // directly would silently report every pincode as serviceable.
+        $isServiceable = $serviceable instanceof ServiceabilityResult
+            ? $serviceable->serviceable
+            : (bool) $serviceable;
+
+        if (! $isServiceable) {
             Log::warning('Pincode reported as not serviceable', [
                 'shipment' => $shipment->id,
                 'partner' => $partner->id,
                 'pincode' => $pincode,
-                'reason' => method_exists($driver, 'lastError') ? (string) $driver->lastError() : '',
+                'reason' => $serviceable instanceof ServiceabilityResult
+                    ? ($serviceable->error ?? $serviceable->summary())
+                    : (method_exists($driver, 'lastError') ? (string) $driver->lastError() : ''),
             ]);
         }
     }
@@ -236,13 +279,15 @@ class DeliveryManager
         $receiverPhone = $shipping['phone'] ?? $order->user?->phone;
         $isCod = strtolower((string) ($order->payment_method ?? '')) === 'cod';
 
-                return new DeliveryDraft(
+        return new DeliveryDraft(
             $order,
             $partner,
             $shipping,
             $receiverName,
             $receiverPhone,
-            $isCod ? 'COD' : 'Pre-paid',
+            // Delhivery expects exactly "Prepaid" (no hyphen) or "COD". Sending
+            // "Pre-paid" gets prepaid orders rejected by the booking API.
+            $isCod ? 'COD' : 'Prepaid',
             $isCod ? (float) $order->total : 0.0,
             max(1.0, (float) $order->total),
             (int) ($partner->configValue('default_weight', 500)),
@@ -269,13 +314,28 @@ class DeliveryManager
             ]);
         }
 
-        $driver = $this->driverFor($partner);
+        $driver = $this->bookingDriverFor($partner);
         if (! $driver) {
             return DeliveryBookingResult::failed('Selected partner is manual. Enter the AWB manually.');
         }
 
-        if (! ($driver instanceof B2CDelhiveryDriver) && empty($partner->api_key)) {
-            return DeliveryBookingResult::failed('Partner API key is missing.');
+        // B2C One cannot allocate waybills, and nothing else here can either, so
+        // say the one actionable thing instead of a generic failure.
+        if (empty($partner->api_key)) {
+            return DeliveryBookingResult::failed(
+                'This partner has no Delhivery Express API token, so no AWB can be generated. '
+                . 'Add the token in Delivery Settings > API & Environment; Delhivery One alone only tracks.'
+            );
+        }
+
+        // A pickup warehouse that is blank or not registered in Delhivery makes
+        // the booking fail at the courier. Stopping here avoids a pointless
+        // serviceability round trip and never burns an AWB on a dead request.
+        if ($partner->isIntegrated() && trim((string) $partner->configValue('pickup_name', '')) === '') {
+            return DeliveryBookingResult::failed(
+                'No pickup warehouse is configured for this partner. Set the warehouse name to '
+                . 'exactly match a warehouse registered in Delhivery, otherwise every booking is rejected.'
+            );
         }
 
         $this->logPincodeServiceability($shipment, $partner, $driver);
@@ -313,6 +373,114 @@ class DeliveryManager
         }
 
         return $result;
+    }
+
+    /**
+     * Cancel a shipment with the courier.
+     *
+     * The Delhivery driver has always supported cancellation, but nothing ever
+     * called it: cancelling an order locally left the courier free to pick the
+     * parcel up, which is billed and then returned at our cost.
+     *
+     * A courier outage must never trap a customer behind a support queue, so a
+     * failure here is recorded on the shipment and logged, never thrown. The
+     * caller can surface it for follow-up.
+     */
+    public function cancel(Shipment $shipment): bool
+    {
+        $shipment->loadMissing(['order', 'deliveryPartner']);
+        $partner = $shipment->deliveryPartner;
+
+        // Nothing was ever booked, so there is nothing to cancel with the courier.
+        if (! $partner || empty($shipment->tracking_number)) {
+            $shipment->forceFill([
+                'status' => DeliveryStatus::CANCELLED,
+                'last_sync_error' => null,
+            ])->save();
+
+            return true;
+        }
+
+        // Already in a terminal state: do not re-cancel with the courier.
+        if (in_array($shipment->status, [DeliveryStatus::CANCELLED, DeliveryStatus::DELIVERED, DeliveryStatus::RTO], true)) {
+            return $shipment->status === DeliveryStatus::CANCELLED;
+        }
+
+        $driver = $this->driverFor($partner);
+        if (! $driver) {
+            $shipment->forceFill([
+                'status' => DeliveryStatus::CANCELLED,
+                'last_sync_error' => null,
+            ])->save();
+
+            return true;
+        }
+
+        try {
+            $ok = $driver->cancel($shipment);
+        } catch (\Throwable $e) {
+            Log::error('Delivery cancellation failed', [
+                'shipment' => $shipment->id,
+                'tracking_number' => $shipment->tracking_number,
+                'error' => $e->getMessage(),
+            ]);
+
+            $shipment->forceFill([
+                'last_sync_error' => 'Courier cancellation failed: ' . $e->getMessage(),
+            ])->save();
+
+            return false;
+        }
+
+        $shipment->forceFill([
+            'status' => $ok ? DeliveryStatus::CANCELLED : $shipment->status,
+            'last_sync_error' => $ok ? null : 'Courier did not accept the cancellation. Contact the courier to stop this shipment.',
+        ])->save();
+
+        return $ok;
+    }
+
+    /**
+     * Cancel every bookable shipment on an order. Used when an order is
+     * cancelled from the admin panel or by the customer.
+     *
+     * Returns a short human readable note about what happened so the caller can
+     * show it ("Courier cancellation failed, call Delhivery to stop WB123").
+     */
+    public function cancelForOrder(Order $order): ?string
+    {
+        // Include shipments that were never booked: they still need to leave the
+        // "pending" state so the dashboard does not keep counting them as live.
+        $shipments = $order->shipments()->get();
+
+        if ($shipments->isEmpty()) {
+            return null;
+        }
+
+        $failed = [];
+
+        foreach ($shipments as $shipment) {
+            $partner = $shipment->relationLoaded('deliveryPartner')
+                ? $shipment->deliveryPartner
+                : $shipment->deliveryPartner()->first();
+
+            // Per-partner opt-out, so a manual or self-pickup partner is never
+            // sent an API cancellation it does not understand.
+            if ($partner && ! $partner->auto_cancel_with_order) {
+                continue;
+            }
+
+            if (! $this->cancel($shipment)) {
+                $failed[] = $shipment->tracking_number;
+            }
+        }
+
+        if ($failed === []) {
+            return null;
+        }
+
+        return 'Courier cancellation failed for ' . implode(', ', $failed)
+            . '. Contact the courier to stop these pickups before they are billed.';
     }
 
     public function mapStatus(DeliveryPartner $partner, string $providerCode): string
@@ -432,6 +600,40 @@ class DeliveryManager
         }
     }
 
+    /**
+     * Repair a shipment that has a waybill but no customer tracking link.
+     *
+     * tracking_url used to be written only during booking, so any shipment
+     * booked before a tracking template existed kept a null URL forever and the
+     * customer saw no "Track Delivery" link even though the AWB was fine.
+     * Running this on every sync repairs those rows automatically.
+     */
+    private function backfillTrackingUrl(Shipment $shipment, DeliveryPartner $partner): void
+    {
+        if (! empty($shipment->tracking_url) || empty($shipment->tracking_number)) {
+            return;
+        }
+
+        $url = $partner->trackingUrlFor((string) $shipment->tracking_number, $this->defaultTrackingTemplate($partner));
+
+        if ($url) {
+            $shipment->forceFill(['tracking_url' => $url])->save();
+        }
+    }
+
+    /**
+     * The courier's public tracking page for this partner. Drivers own this
+     * knowledge, so B2C only (which never books) still produces a usable link.
+     */
+    private function defaultTrackingTemplate(DeliveryPartner $partner): ?string
+    {
+        if ($partner->driver === 'delhivery') {
+            return DeliveryPartner::DEFAULT_TRACKING_URL;
+        }
+
+        return null;
+    }
+
     public function sync(Shipment $shipment): bool
     {
         $shipment->loadMissing(['deliveryPartner']);
@@ -440,6 +642,8 @@ class DeliveryManager
         if (! $driver) {
             return false;
         }
+
+        $this->backfillTrackingUrl($shipment, $shipment->deliveryPartner);
 
         try {
             $events = $driver->track($shipment);
@@ -491,7 +695,11 @@ class DeliveryManager
         $secret = (string) ($partner->webhook_secret ?? '');
 
         if ($secret === '') {
-            return true;
+            // No secret configured: only accept if the partner is not in strict
+            // mode. Previously this returned true unconditionally, which meant an
+            // unsigned POST from anybody could mark shipments as delivered and
+            // trigger "your order is delivered" emails to customers.
+            return ! $partner->require_webhook_signature;
         }
 
         $signature = $request->header('X-Delhivery-Signature')
@@ -503,9 +711,13 @@ class DeliveryManager
             return false;
         }
 
-        $expected = 'sha256=' . hash_hmac('sha256', $request->getContent(), $secret);
+        // Accept both the `sha256=` prefixed and the bare hex digest so the
+        // courier's header format does not have to match exactly.
+        $signature = trim((string) $signature);
+        $bare = str_starts_with(strtolower($signature), 'sha256=') ? substr($signature, 7) : $signature;
+        $expected = hash_hmac('sha256', $request->getContent(), $secret);
 
-        return hash_equals($expected, $signature);
+        return hash_equals($expected, $bare) || hash_equals('sha256=' . $expected, $signature);
     }
 
     public function handleWebhook(DeliveryPartner $partner, array $payload): int

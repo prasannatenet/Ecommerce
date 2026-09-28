@@ -31,7 +31,13 @@ function makeIntegratedPartner(): DeliveryPartner
         'api_key' => 'test-api-key',
         'auto_book_on' => 'both',
         'auto_update_order_status' => false,
-        'config' => ['pickup_pin' => '122001'],
+        'config' => [
+            'pickup_pin' => '122001',
+            'pickup_name' => 'Test Warehouse',
+            // These tests are about waybill idempotency, not serviceability.
+            // Turning the probe off keeps the request counts deterministic.
+            'serviceability_check' => false,
+        ],
     ]);
 }
 
@@ -105,7 +111,7 @@ it('retries auto booking on the existing shipment and completes it without dupli
     $waybillAttempts = 0;
 
     Http::fake(function (\Illuminate\Http\Client\Request $request) use (&$waybillAttempts) {
-        if (str_contains($request->url(), '/api/waybill/')) {
+        if (str_contains($request->url(), '/waybill/api/bulk/')) {
             $waybillAttempts++;
 
             if ($waybillAttempts === 1) {
@@ -146,7 +152,7 @@ it('never books a shipment twice once the tracking number exists', function () {
     $order = makeAutoBookOrder($buyer);
 
     Http::fake([
-        '*/api/waybill/*' => Http::response(['awb' => ['WB00000001']], 200),
+        '*/waybill/api/bulk/*' => Http::response(['awb' => ['WB00000001']], 200),
         '*/api/cmu/create.json' => Http::response(['packages' => [['waybill' => 'WB00000001']]], 200),
     ]);
 

@@ -18,10 +18,12 @@ class DeliveryPartner extends Model
         'client_id',
         'client_secret',
         'webhook_secret',
+        'require_webhook_signature',
         'base_url',
         'is_sandbox',
         'is_default',
         'auto_book_on',
+        'auto_cancel_with_order',
         'auto_update_order_status',
         'auto_sync_tracking',
         'auto_notify_customer',
@@ -40,8 +42,10 @@ class DeliveryPartner extends Model
         'api_key' => 'encrypted',
         'client_secret' => 'encrypted',
         'webhook_secret' => 'encrypted',
+        'require_webhook_signature' => 'boolean',
         'is_sandbox' => 'boolean',
         'is_default' => 'boolean',
+        'auto_cancel_with_order' => 'boolean',
         'auto_update_order_status' => 'boolean',
         'auto_sync_tracking' => 'boolean',
         'auto_notify_customer' => 'boolean',
@@ -95,6 +99,17 @@ class DeliveryPartner extends Model
         };
     }
 
+    /**
+     * Delhivery's public customer tracking page.
+     *
+     * This is the one place the format lives. The driver, the admin form
+     * placeholder and the sync backfill all read it from here, so the URL shape
+     * cannot drift between them. (It used to be hardcoded as
+     * `/track/package/{awb}` in two separate places, which is not a valid
+     * Delhivery customer URL and sent buyers to a dead link.)
+     */
+    public const DEFAULT_TRACKING_URL = 'https://www.delhivery.com/track/awb/{awb}';
+
     public function configValue(string $key, mixed $default = null): mixed
     {
         $config = $this->config ?? [];
@@ -102,15 +117,31 @@ class DeliveryPartner extends Model
         return $config[$key] ?? $default;
     }
 
-    public function trackingUrlFor(string $waybill): ?string
+    /**
+     * Build the customer facing tracking URL for a waybill.
+     *
+     * Uses the partner's own template when one is configured, otherwise falls
+     * back to $fallback (the driver supplies the courier's public page). Returns
+     * null only when neither is available, so callers can hide the link rather
+     * than render a broken one.
+     */
+    public function trackingUrlFor(string $waybill, ?string $fallback = null): ?string
     {
         $template = trim((string) ($this->tracking_url_template ?? ''));
+
+        if ($template === '') {
+            $template = trim((string) $fallback);
+        }
 
         if ($template === '') {
             return null;
         }
 
-        return str_replace(['{awb}', '{tracking_number}', '{waybill}'], $waybill, $template);
+        return str_replace(
+            ['{awb}', '{tracking_number}', '{waybill}'],
+            $waybill,
+            $template
+        );
     }
 
     /**

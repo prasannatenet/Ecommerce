@@ -222,6 +222,22 @@
                                     @endif
                                 @else
                                     <span style="color:var(--df-text-secondary);">AWB pending</span>
+                                    @if($shipment->last_sync_error)
+                                        {{-- Surface the courier's own words. Booking failures used to be
+                                             invisible here, so an admin only found out days later. --}}
+                                        <div class="mt-1" style="font-size:0.72rem; color:#b42318;"
+                                             title="{{ $shipment->last_sync_error }}">
+                                            <i class="bi bi-exclamation-triangle-fill"></i>
+                                            {{ \Illuminate\Support\Str::limit($shipment->last_sync_error, 90) }}
+                                        </div>
+                                    @endif
+                                @endif
+                                @if($shipment->tracking_number && $shipment->last_sync_error)
+                                    <div class="mt-1" style="font-size:0.72rem; color:#b42318;"
+                                         title="{{ $shipment->last_sync_error }}">
+                                        <i class="bi bi-exclamation-triangle-fill"></i>
+                                        {{ \Illuminate\Support\Str::limit($shipment->last_sync_error, 90) }}
+                                    </div>
                                 @endif
                             </td>
 <td>

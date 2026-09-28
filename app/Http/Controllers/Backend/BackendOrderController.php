@@ -134,6 +134,15 @@ class BackendOrderController extends Controller
 
 		if ($order->status === 'cancelled' && $previousStatus !== 'cancelled') {
 			$this->inventoryService->restockForOrder($order);
+
+			// Cancelling through the status dropdown must also stand the courier
+			// down, otherwise the parcel is still collected and billed.
+			$courierNote = $deliveryManager->cancelForOrder($order);
+
+			if ($courierNote) {
+				return redirect()->route('admin.orders.show', $order)
+					->with('delivery_error', $courierNote);
+			}
 		}
 
 		if (
@@ -152,7 +161,7 @@ class BackendOrderController extends Controller
 		return redirect()->route('admin.orders.show', $order)->with('success', 'Order status updated.');
 	}
 
-	public function cancel(Request $request, Order $order)
+	public function cancel(Request $request, Order $order, DeliveryManager $deliveryManager)
 	{
 		$request->validate([
 			'reason' => 'nullable|string|max:500',
@@ -162,6 +171,10 @@ class BackendOrderController extends Controller
 			return redirect()->route('admin.orders.show', $order)->with('error', 'Order cannot be cancelled in its current state.');
 		}
 
+		// Stop the courier from picking the parcel up before we drop the order.
+		// A failure here is reported but never blocks the cancellation.
+		$courierNote = $deliveryManager->cancelForOrder($order);
+
 		$order->update([
 			'status' => 'cancelled',
 			'cancel_reason' => $request->input('reason', 'Cancelled by admin'),
@@ -170,6 +183,11 @@ class BackendOrderController extends Controller
 
 		$this->inventoryService->restockForOrder($order);
 		$this->recommendations->forgetForOrder($order->fresh());
+
+		if ($courierNote) {
+			return redirect()->route('admin.orders.show', $order)
+				->with('delivery_error', $courierNote);
+		}
 
 		return redirect()->route('admin.orders.show', $order)->with('success', 'Order cancelled successfully.');
 	}

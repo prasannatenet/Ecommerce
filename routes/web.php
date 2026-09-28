@@ -114,6 +114,17 @@ Route::post('/webhooks/razorpay', [FrontendCheckoutController::class, 'razorpayW
     ->name('webhooks.razorpay')
     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
+    // Courier callbacks. The courier posts here server-to-server, so there is no
+    // session and no CSRF token: `auth`/`admin` never applied, CSRF is exempted,
+    // and authenticity is proven by the partner's HMAC webhook secret instead.
+    Route::post('/webhooks/delivery/{partnerCode}', [\App\Http\Controllers\Backend\BackendDeliveryWebhookController::class, '__invoke'])
+        ->name('webhooks.delivery')
+        ->withoutMiddleware([
+            'auth',
+            'admin',
+            \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
+        ]);
+
 // Auth
 // Auth::routes();
 
@@ -194,9 +205,6 @@ Route::prefix('admin')->middleware(['auth','admin'])->name('admin.')->group(func
     Route::post('shipments/{shipment}/book', [BackendShipmentController::class, 'book'])->name('shipments.book');
     Route::post('shipments/{shipment}/sync', [BackendShipmentController::class, 'sync'])->name('shipments.sync');
     Route::get('shipments/{shipment}/label', [BackendShipmentController::class, 'label'])->name('shipments.label');
-    Route::post('webhooks/delivery/{partnerCode}', [App\Http\Controllers\Backend\BackendDeliveryWebhookController::class, '__invoke'])
-        ->name('webhooks.delivery')
-        ->withoutMiddleware(['auth', 'admin']);
     Route::resource('orders', BackendOrderController::class)->only(['index', 'show', 'update']);
     Route::get('orders-export', [BackendOrderController::class, 'exportCsv'])->name('orders.export');
     Route::post('orders/{order}/cancel', [BackendOrderController::class, 'cancel'])->name('orders.cancel');

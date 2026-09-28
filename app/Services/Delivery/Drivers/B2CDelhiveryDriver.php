@@ -147,8 +147,27 @@ class B2CDelhiveryDriver implements DeliveryDriver
         $base = rtrim((string) $this->credential('auth_url', ''), '/');
         $tokenUrl = (string) $this->credential('token_url', '');
 
+        // An empty realm produces a "Realm does not exist" response from the
+        // auth server, which looks like a credential problem but is really a
+        // missing configuration value. Catch it before the round trip.
+        if ($realm === '' && $tokenUrl === '') {
+            throw new \RuntimeException(
+                'Delhivery One realm is not configured. Set DELHIVERY_B2C_REALM in .env '
+                . '(or the partner\'s B2C Realm field), then run: php artisan config:clear'
+            );
+        }
+
         if ($tokenUrl === '') {
             $tokenUrl = $base . '/realms/' . $realm . '/protocol/openid-connect/token';
+        }
+
+        if (trim((string) $this->credential('client_id', '')) === ''
+            || trim((string) $this->credential('client_secret', '')) === '') {
+            throw new \RuntimeException(
+                'Delhivery One client ID or client secret is missing. '
+                . 'Add them in Delivery Settings > API & Environment. '
+                . 'Note these credentials can only track - booking needs an Express API token.'
+            );
         }
 
         $response = Http::asForm()
@@ -168,7 +187,7 @@ class B2CDelhiveryDriver implements DeliveryDriver
                 ?? $response->json('error')
                 ?? ('HTTP ' . $response->status());
 
-            throw new \RuntimeException('Delhivery One authentication failed: ' . mb_substr((string) $error, 0, 300));
+            throw new \RuntimeException($this->explainAuthFailure((string) $error, (string) $response->json('error')));
         }
 
         $expiresIn = (int) ($response->json('expires_in') ?: config('delhivery.b2c_one.token_cache_ttl', 600));
@@ -179,6 +198,32 @@ class B2CDelhiveryDriver implements DeliveryDriver
         ];
 
         return $token;
+    }
+
+    /**
+     * Turn a failed OAuth exchange into something an operator can act on.
+     *
+     * "Realm does not exist" means the realm string is wrong for this account.
+     * "Invalid client" means the realm is fine but the secret is not - the two
+     * are easy to confuse and lead to chasing the wrong credential.
+     */
+    private function explainAuthFailure(string $description, string $code): string
+    {
+        $detail = mb_substr(trim($description), 0, 200);
+
+        if (stripos($detail, 'realm') !== false) {
+            return 'Delhivery One realm does not exist: ' . $detail
+                . ' Copy the exact realm from your Delhivery One developer portal, '
+                . 'then run: php artisan config:clear';
+        }
+
+        if (stripos($detail, 'invalid client') !== false || $code === 'unauthorized_client') {
+            return 'Delhivery One rejected the client credentials: ' . $detail
+                . ' The realm is correct but the client secret is not - re-copy it from the portal. '
+                . 'Remember: B2C credentials can only track; booking needs an Express API token.';
+        }
+
+        return 'Delhivery One authentication failed: ' . ($detail !== '' ? $detail : ('HTTP ' . $code));
     }
 
     private function mcpHeaders(): array
@@ -353,7 +398,7 @@ class B2CDelhiveryDriver implements DeliveryDriver
                 'shipping_mode' => (string) ($partner->configValue('shipping_mode', 'Surface') ?? 'Surface'),
                 'weight' => 0.5,
                 'weight_unit' => 'KG',
-                'payment_mode' => 'Pre-paid',
+                'payment_mode' => 'Prepaid',
             ]);
         } catch (\Throwable $e) {
             $this->lastError = $e->getMessage();
