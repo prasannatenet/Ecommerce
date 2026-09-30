@@ -108,7 +108,41 @@ class DeliveryPartner extends Model
      * `/track/package/{awb}` in two separate places, which is not a valid
      * Delhivery customer URL and sent buyers to a dead link.)
      */
-    public const DEFAULT_TRACKING_URL = 'https://www.delhivery.com/track/package/{awb}';
+    public const DEFAULT_TRACKING_URL = 'https://www.delhivery.com/track/awb/{awb}';
+
+    /**
+     * Hosts that serve Delhivery's machine API rather than its customer pages.
+     *
+     * A tracking link is opened in the buyer's browser with no Authorization
+     * header, so anything served from one of these hosts answers
+     * "Login or API Key Required".
+     *
+     * These are regexes, not exact hosts, because the API is published under
+     * tenant subdomains (ucp-*.delhivery.com) that vary per account. The
+     * customer-facing www.delhivery.com is deliberately excluded so the public
+     * page is never treated as an API endpoint.
+     */
+    private const API_HOST_PATTERNS = [
+        '/(^|\.)track\.delhivery\.com$/',
+        '/(^|\.)staging-express\.delhivery\.com$/',
+        '/(^|\.)api\.delhivery\.com$/',
+        '/(^|\.)ucp-[a-z0-9-]+\.delhivery\.com$/',
+    ];
+
+    /**
+     * Path/query fragments that only ever appear on an API endpoint.
+     *
+     * The public customer page is /track/awb/{awb}; every one of these belongs
+     * to the JSON API surface used by DelhiveryDriver::track().
+     */
+    private const API_URL_MARKERS = [
+        '/api/',
+        '/waybill/api/',
+        '/cmu/',
+        '?waybill=',
+        '&waybill=',
+        '.json',
+    ];
 
     public function configValue(string $key, mixed $default = null): mixed
     {
@@ -129,7 +163,11 @@ class DeliveryPartner extends Model
     {
         $template = trim((string) ($this->tracking_url_template ?? ''));
 
-        if ($template === '') {
+        if ($template === '' || self::isTrackingApiEndpoint($template)) {
+            // An API endpoint pasted into the template is the single most
+            // common way this breaks: the buyer's browser has no API key, so the
+            // page answers "Login or API Key Required". Degrade to the public
+            // page rather than shipping a dead link to the customer.
             $template = trim((string) $fallback);
         }
 
@@ -142,6 +180,44 @@ class DeliveryPartner extends Model
             $waybill,
             $template
         );
+    }
+
+    /**
+     * Does this URL point at a courier API rather than a customer-facing page?
+     *
+     * Public because the admin form and the repair command both need the same
+     * judgement, so the rule that rejects a bad template is the rule that
+     * repairs a bad stored value.
+     */
+    public static function isTrackingApiEndpoint(?string $url): bool
+    {
+        $url = trim((string) $url);
+
+        if ($url === '') {
+            return false;
+        }
+
+        $host = parse_url($url, PHP_URL_HOST);
+
+        if (is_string($host) && $host !== '') {
+            $host = strtolower($host);
+
+            foreach (self::API_HOST_PATTERNS as $pattern) {
+                if (preg_match($pattern, $host) === 1) {
+                    return true;
+                }
+            }
+        }
+
+        $haystack = strtolower($url);
+
+        foreach (self::API_URL_MARKERS as $marker) {
+            if (str_contains($haystack, $marker)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

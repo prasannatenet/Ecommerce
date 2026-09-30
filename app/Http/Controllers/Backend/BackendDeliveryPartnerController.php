@@ -255,7 +255,26 @@ class BackendDeliveryPartnerController extends Controller
             'auto_notify_customer' => 'nullable|boolean',
             'notify_events' => 'nullable|array',
             'notify_events.*' => 'nullable|string|in:booked,shipped,in_transit,out_for_delivery,delivered,undelivered,rto,cancelled',
-            'tracking_url_template' => 'nullable|string|max:500',
+            'tracking_url_template' => [
+                'nullable',
+                'string',
+                'max:500',
+                // This field is rendered straight into the customer's "Track
+                // Delivery" link. A courier API endpoint pasted here answers
+                // "Login or API Key Required" in the buyer's browser, so reject
+                // it here rather than shipping a dead link to every order.
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if (! is_string($value) || trim($value) === '') {
+                        return;
+                    }
+
+                    if (\App\Models\DeliveryPartner::isTrackingApiEndpoint($value)) {
+                        $fail('This must be the public customer tracking page, not the courier API. '
+                            . 'For Delhivery use ' . \App\Models\DeliveryPartner::DEFAULT_TRACKING_URL
+                            . ', or leave it blank to use that default.');
+                    }
+                },
+            ],
             'config_pickup_name' => 'nullable|string|max:255',
             'config_pickup_pin' => 'nullable|string|max:20',
             'config_pickup_phone' => 'nullable|string|max:50',

@@ -644,4 +644,177 @@ test('missing Delhivery One client credentials name the setting to use', functio
     expect($result['ok'])->toBeFalse()
         ->and($result['message'])->toContain('client ID or client secret is missing');
 });
+test('a Delhivery API endpoint pasted as the template falls back to the public page', function () {
+    // This is the live bug: the backend tracking endpoint was saved into the
+    // template, so the buyer's browser hit an authenticated API URL and saw
+    // "Login or API Key Required".
+    $partner = delhiveryPartner([
+        'tracking_url_template' => 'https://track.delhivery.com/api/v1/packages/{awb}',
+    ]);
+
+    expect($partner->trackingUrlFor('86358810000372', DeliveryPartner::DEFAULT_TRACKING_URL))
+        ->toBe('https://www.delhivery.com/track/awb/86358810000372');
+});
+
+test('every Delhivery API host and path shape is recognised', function () {
+    $apiUrls = [
+        'https://track.delhivery.com/api/v1/packages/{awb}',
+        'https://staging-express.delhivery.com/api/v1/packages/{awb}',
+        'https://ucp-service-cli.delhivery.com/api/packages/{awb}',
+        'https://ucp-abc123.delhivery.com/v1/packages/{awb}',
+        'https://api.delhivery.com/v1/packages/{awb}',
+        'https://example.com/api/packages/{awb}',
+        'https://example.com/waybill/api/bulk/json/{awb}',
+        'https://example.com/track?waybill={awb}',
+        'https://example.com/api/cmu/create.json',
+    ];
+
+    foreach ($apiUrls as $url) {
+        expect(DeliveryPartner::isTrackingApiEndpoint($url))->toBeTrue("expected {$url} to be treated as an API endpoint");
+    }
+});
+
+test('a public customer tracking page is not mistaken for an API endpoint', function () {
+    // www.delhivery.com contains "delhivery.com" but is the customer page, and
+    // an operator may legitimately use another courier's public tracker.
+    $publicUrls = [
+        'https://www.delhivery.com/track/awb/{awb}',
+        'https://track.example.com/{awb}',
+        'https://www.shiprocket.in/shipment-tracking/{awb}',
+        'https://example.com/track/myawb/{awb}',
+    ];
+
+    foreach ($publicUrls as $url) {
+        expect(DeliveryPartner::isTrackingApiEndpoint($url))->toBeFalse("expected {$url} to be treated as a customer page");
+    }
+});
+
+test('saving a courier API URL as the template is rejected with an actionable message', function () {
+    $admin = trackingAdmin();
+    $partner = delhiveryPartner();
+
+    $response = actingAs($admin)->put(route('admin.delivery-partners.update', $partner), [
+        'name' => $partner->name,
+        'code' => $partner->code,
+        'driver' => 'delhivery',
+        'tracking_url_template' => 'https://track.delhivery.com/api/v1/packages/{awb}',
+    ]);
+
+    $response->assertSessionHasErrors('tracking_url_template');
+
+    expect(session('errors')->first('tracking_url_template'))
+        ->toContain('not the courier API')
+        ->toContain('https://www.delhivery.com/track/awb/{awb}');
+
+    expect($partner->fresh()->tracking_url_template)->toBeNull();
+});
+
+test('saving a public tracking page as the template is accepted', function () {
+    $admin = trackingAdmin();
+    $partner = delhiveryPartner();
+
+    $response = actingAs($admin)->put(route('admin.delivery-partners.update', $partner), [
+        'name' => $partner->name,
+        'code' => $partner->code,
+        'driver' => 'delhivery',
+        'tracking_url_template' => 'https://www.delhivery.com/track/awb/{awb}',
+    ]);
+
+    $response->assertSessionHasNoErrors();
+
+    expect($partner->fresh()->tracking_url_template)
+        ->toBe('https://www.delhivery.com/track/awb/{awb}');
+});
+test('the repair command rewrites a stored API URL from the waybill', function () {
+    $partner = delhiveryPartner();
+    $shipment = trackingShipment(
+        $partner,
+        'WB5551234',
+        'https://track.delhivery.com/api/v1/packages/WB5551234'
+    );
+
+    $this->artisan('delivery:repair-tracking-urls', ['--dry-run' => true])
+        ->assertSuccessful();
+
+    // Dry run must not write.
+    expect($shipment->fresh()->tracking_url)
+        ->toBe('https://track.delhivery.com/api/v1/packages/WB5551234');
+
+    $this->artisan('delivery:repair-tracking-urls')->assertSuccessful();
+
+    expect($shipment->fresh()->tracking_url)
+        ->toBe('https://www.delhivery.com/track/awb/WB5551234');
+});
+
+test('the repair command leaves a valid custom tracking URL untouched', function () {
+    $partner = delhiveryPartner();
+    $shipment = trackingShipment($partner, 'WB6661234', 'https://track.example.com/WB6661234');
+
+    $this->artisan('delivery:repair-tracking-urls')->assertSuccessful();
+
+    expect($shipment->fresh()->tracking_url)->toBe('https://track.example.com/WB6661234');
+});
+
+test('the repair command is idempotent', function () {
+    $partner = delhiveryPartner();
+    $shipment = trackingShipment(
+        $partner,
+        'WB7779999',
+        'https://track.delhivery.com/api/v1/packages/WB7779999'
+    );
+
+    $this->artisan('delivery:repair-tracking-urls')->assertSuccessful();
+    $first = $shipment->fresh()->tracking_url;
+
+    $this->artisan('delivery:repair-tracking-urls')->assertSuccessful();
+
+    expect($first)->toBe('https://www.delhivery.com/track/awb/WB7779999')
+        ->and($shipment->fresh()->tracking_url)->toBe($first);
+});
+
+test('the repair command fixes a bad row even while the partner template is still wrong', function () {
+    // The partner row is the root cause, but a deploy should not have to fix the
+    // template before the customer-facing links start working.
+    $partner = delhiveryPartner([
+        'tracking_url_template' => 'https://track.delhivery.com/api/v1/packages/{awb}',
+    ]);
+    $shipment = trackingShipment(
+        $partner,
+        'WB8887777',
+        'https://track.delhivery.com/api/v1/packages/WB8887777'
+    );
+
+    $this->artisan('delivery:repair-tracking-urls')->assertSuccessful();
+
+    expect($shipment->fresh()->tracking_url)
+        ->toBe('https://www.delhivery.com/track/awb/WB8887777');
+});
+
+test('the repair command flags a partner template that points at the API', function () {
+    $partner = delhiveryPartner([
+        'tracking_url_template' => 'https://track.delhivery.com/api/v1/packages/{awb}',
+    ]);
+
+    $this->artisan('delivery:repair-tracking-urls')
+        ->expectsOutputToContain('point at the courier API')
+        ->assertSuccessful();
+});
+
+test('the admin form warns that the template must not be the courier API', function () {
+    $admin = trackingAdmin();
+    $partner = delhiveryPartner();
+
+    $response = actingAs($admin)->get(route('admin.delivery-partners.edit', $partner));
+
+    $response->assertOk();
+    $response->assertSee('not the courier API', false);
+});
+test('a valid custom template still wins over the fallback', function () {
+    // Guards the hardening from over-reaching: a legitimate partner URL that
+    // merely contains "track" must keep working.
+    $partner = delhiveryPartner(['tracking_url_template' => 'https://track.example.com/{awb}']);
+
+    expect($partner->trackingUrlFor('WB123', DeliveryPartner::DEFAULT_TRACKING_URL))
+        ->toBe('https://track.example.com/WB123');
+});
 

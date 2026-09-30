@@ -329,6 +329,12 @@
                        value="{{ old('tracking_url_template', optional($partner)->tracking_url_template) }}"
                        placeholder="{{ \App\Models\DeliveryPartner::DEFAULT_TRACKING_URL }}">
                 <p class="df-form-hint">Use {awb} or {tracking_number} as the placeholder. Leave blank to use the Delhivery default.</p>
+                <p class="df-form-hint text-danger mb-0">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Enter the public tracking page the customer opens in a browser &mdash; not the courier API.
+                    An API URL shows the buyer a &ldquo;Login or API Key Required&rdquo; page.
+                    Delhivery: <code>{{ \App\Models\DeliveryPartner::DEFAULT_TRACKING_URL }}</code>
+                </p>
             </div>
             <div class="col-md-6 d-flex align-items-end">
                 <label class="d-flex align-items-center gap-2" style="cursor:pointer;">
