@@ -100,6 +100,93 @@ class FrontendCartController extends Controller
             return view('frontend.cart.index', compact('cartItems', 'subtotal', 'discount', 'shippingCharge', 'grandTotal', 'appliedCoupon', 'availableCoupons', 'freeItems', 'comboSuggestions', 'comboSummary', 'comboDiscount', 'hasAppliedCombo', 'lineOriginalPrices'));
     }
 
+    /**
+     * Apply a coupon code to the current cart.
+     *
+     * Lives on the cart rather than on checkout because the cart is the page a
+     * guest can actually reach. It validates against the very same service the
+     * checkout uses, and stores the code in the same `checkout_coupon` session
+     * key, so a code applied here survives the login that checkout requires and
+     * is re-validated against the account there.
+     */
+    public function applyCoupon(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'coupon_code' => 'required|string|max:50',
+        ]);
+
+        $cartItems = $this->currentCartItems();
+        if ($cartItems->isEmpty()) {
+            return redirect()->route('products.index')->with('error', 'Your cart is empty.');
+        }
+
+        $subtotal = (float) $cartItems->sum(fn ($item) => (int) $item->quantity * (float) $item->price);
+        $hasAppliedCombo = $this->comboService->hasAppliedCombo($cartItems);
+
+        if ($hasAppliedCombo) {
+            session()->forget('checkout_coupon');
+        }
+
+        $normalizedCode = strtoupper(trim($data['coupon_code']));
+        $coupon = Coupon::whereRaw('UPPER(TRIM(code)) = ?', [$normalizedCode])->first();
+
+        if (! $coupon) {
+            return back()->with('error', 'Coupon code not found.')->withInput();
+        }
+
+        $ineligibilityReason = $this->getCouponIneligibilityReason($coupon, $subtotal, $hasAppliedCombo);
+        if ($ineligibilityReason !== null) {
+            return back()->with('error', $ineligibilityReason)->withInput();
+        }
+
+        session([
+            'checkout_coupon' => [
+                'code' => $coupon->code,
+            ],
+        ]);
+
+        // Spell the saving out in the flash message. A guest has no order to
+        // look at yet, so this is the one place they are told what the code is
+        // worth before they ever reach checkout.
+        $discount = $this->calculateCouponDiscount($coupon, $cartItems);
+
+        return back()->with('success', $this->couponAppliedMessage($coupon, $discount));
+    }
+
+    public function removeCoupon(): RedirectResponse
+    {
+        session()->forget('checkout_coupon');
+
+        return back()->with('success', 'Coupon removed.');
+    }
+
+    /**
+     * The confirmation shown once a coupon is accepted.
+     *
+     * Buy X Get Y coupons are worth zero rupees as a line item — their value is
+     * the free units — so they are described by what they give away rather than
+     * by a discount figure that would read as "you saved nothing".
+     */
+    private function couponAppliedMessage(Coupon $coupon, float $discount): string
+    {
+        if ($coupon->type === 'buy_get') {
+            $freeQuantity = (int) $this->couponService
+                ->freeItemsBreakdown($coupon, $this->currentCartItems())
+                ->sum('free_quantity');
+
+            if ($freeQuantity > 0) {
+                return 'Coupon '.$coupon->code.' applied. You get '.$freeQuantity
+                    .' free '.($freeQuantity === 1 ? 'item' : 'items').'!';
+            }
+        }
+
+        if ($discount > 0) {
+            return 'Coupon '.$coupon->code.' applied. You saved Rs '.number_format($discount, 2).'.';
+        }
+
+        return 'Coupon '.$coupon->code.' applied successfully.';
+    }
+
     public function add(Request $request)
     {
         try {

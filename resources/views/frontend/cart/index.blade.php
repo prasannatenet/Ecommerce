@@ -317,7 +317,7 @@
 
                         {{-- Coupon --}}
                         <div id="cart-coupon-panel" class="mb-4">
-                            <form id="cart-coupon-form" action="{{ route('checkout.coupon.apply') }}" method="POST" style="display:flex; gap:8px;">
+                            <form id="cart-coupon-form" action="{{ route('cart.coupon.apply') }}" method="POST" style="display:flex; gap:8px;">
                                 @csrf
                                 <input id="cart-coupon-code" type="text" name="coupon_code" value="{{ old('coupon_code', $appliedCoupon['code'] ?? '') }}"
                                        placeholder="Coupon code"
@@ -343,7 +343,7 @@
                                     <span style="color:#198754; font-size:0.82rem; font-weight:600; text-transform:uppercase;">
                                         <i class="bi bi-tag-fill me-1"></i> {{ $appliedCoupon['code'] }} applied
                                     </span>
-                                    <form action="{{ route('checkout.coupon.remove') }}" method="POST" style="margin:0;">
+                                    <form action="{{ route('cart.coupon.remove') }}" method="POST" style="margin:0;">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" style="background:none; border:none; color:#dc3545; font-size:0.82rem; font-weight:600; cursor:pointer; padding:0;">Remove</button>
@@ -396,7 +396,7 @@
                                                             @endif
                                                         </div>
 
-                                                        <form action="{{ route('checkout.coupon.apply') }}" method="POST" style="margin:0;">
+                                                        <form action="{{ route('cart.coupon.apply') }}" method="POST" style="margin:0;">
                                                             @csrf
                                                             <input type="hidden" name="coupon_code" value="{{ $couponItem['code'] }}">
                                                             <button type="submit"

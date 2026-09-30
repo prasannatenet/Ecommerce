@@ -101,6 +101,11 @@ Route::post('/cart/restore-combo', [FrontendCartController::class, 'restoreCombo
 Route::get('/cart/quantities', [FrontendCartController::class, 'quantities'])->name('cart.quantities');
 Route::post('/cart/set-quantity', [FrontendCartController::class, 'setQuantityByProduct'])->name('cart.set-quantity');
 Route::get('/cart', [FrontendCartController::class, 'index'])->name('cart.index');
+// Applying a coupon happens on the cart page, which guests reach without an
+// account, so these cannot live behind the auth-protected checkout routes.
+// Declared before the /cart/{cart} wildcards so "coupon" is never read as an id.
+Route::post('/cart/coupon', [FrontendCartController::class, 'applyCoupon'])->name('cart.coupon.apply');
+Route::delete('/cart/coupon', [FrontendCartController::class, 'removeCoupon'])->name('cart.coupon.remove');
 Route::patch('/cart/{cart}', [FrontendCartController::class, 'update'])->name('cart.update');
 Route::delete('/cart/{cart}', [FrontendCartController::class, 'destroy'])->name('cart.destroy');
 Route::post('/cart/{cart}/move-to-wishlist', [FrontendCartController::class, 'moveToWishlist'])->name('cart.move-to-wishlist');
