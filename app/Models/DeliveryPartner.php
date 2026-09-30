@@ -108,7 +108,7 @@ class DeliveryPartner extends Model
      * `/track/package/{awb}` in two separate places, which is not a valid
      * Delhivery customer URL and sent buyers to a dead link.)
      */
-    public const DEFAULT_TRACKING_URL = 'https://www.delhivery.com/track/awb/{awb}';
+    public const DEFAULT_TRACKING_URL = 'https://www.delhivery.com/track/package/{awb}';
 
     public function configValue(string $key, mixed $default = null): mixed
     {

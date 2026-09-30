@@ -659,6 +659,28 @@
         if (driverSelect) { driverSelect.addEventListener('change', syncDriver); }
         if (autoBookToggle) { autoBookToggle.addEventListener('change', syncAutoBook); }
 
+        var envRadios = document.querySelectorAll('.env-radio');
+        envRadios.forEach(function (radio) {
+            radio.addEventListener('change', function () {
+                var isSandbox = this.value === "1";
+                
+                var prodLabel = document.querySelector('input.env-radio[value="0"]').parentElement;
+                var sandboxLabel = document.querySelector('input.env-radio[value="1"]').parentElement;
+                
+                if (isSandbox) {
+                    prodLabel.classList.remove('df-btn-primary');
+                    prodLabel.classList.add('df-btn-outline');
+                    sandboxLabel.classList.remove('df-btn-outline');
+                    sandboxLabel.classList.add('df-btn-primary');
+                } else {
+                    sandboxLabel.classList.remove('df-btn-primary');
+                    sandboxLabel.classList.add('df-btn-outline');
+                    prodLabel.classList.remove('df-btn-outline');
+                    prodLabel.classList.add('df-btn-primary');
+                }
+            });
+        });
+
         syncDriver();
     })();
 </script>

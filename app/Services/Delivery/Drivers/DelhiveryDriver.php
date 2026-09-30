@@ -161,7 +161,13 @@ class DelhiveryDriver implements DeliveryDriver
             return false;
         }
 
-        return $this->checkPincode($partner, $pin)->serviceable;
+        $result = $this->checkPincode($partner, $pin);
+
+        if (! $result->serviceable && $result->error) {
+            $this->lastError = $result->error;
+        }
+
+        return $result->serviceable;
     }
 
     /**
@@ -182,7 +188,7 @@ class DelhiveryDriver implements DeliveryDriver
         try {
             $response = Http::withHeaders($this->headers($partner))
                 ->timeout(20)
-                ->post(DelhiveryEndpoints::url('serviceability', $partner), [
+                ->get(DelhiveryEndpoints::url('serviceability', $partner), [
                     'filter_codes' => $pin,
                 ]);
         } catch (\Throwable $e) {
@@ -278,13 +284,20 @@ class DelhiveryDriver implements DeliveryDriver
             return null;
         }
 
-        $json = (array) ($response->json() ?? []);
-
         if (! $response->successful()) {
             $this->lastError = $this->explainWaybillFailure($response->status(), $response->body());
 
             return null;
         }
+
+        // Production endpoint returns a plain JSON string e.g. "65878310000206"
+        // (not a JSON object), so check the raw decoded value first.
+        $decoded = $response->json();
+        if (is_string($decoded) && trim($decoded) !== '') {
+            return trim($decoded);
+        }
+
+        $json = is_array($decoded) ? $decoded : [];
 
         // The bulk endpoint has returned more than one envelope over time, so
         // every documented shape is accepted rather than guessing one.
