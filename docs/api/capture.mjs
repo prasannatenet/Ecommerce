@@ -1,6 +1,7 @@
 // Captures real responses from the running API so API.md documents the exact
 // JSON the server returns, not hand-written guesses.
 import fs from 'node:fs';
+import { randomUUID } from 'node:crypto';
 
 // Where the browser-facing API lives locally. Point this at a staging host to
 // capture against that instead.
@@ -131,6 +132,88 @@ await capture('wishlist.get', 'GET', '/wishlist', { auth: true, token });
 await capture('wishlist.remove', 'DELETE', `/wishlist/${products.data[0].id}`, { auth: true, token });
 
 await capture('orders.list', 'GET', '/orders', { auth: true, token });
+
+/* ── Checkout, order placement and payment ──────────────────────────── */
+
+// cart.clear above emptied the cart, so refill it: checkout needs a real line
+// to price, discount and charge.
+await capture('checkout.cart.refill', 'POST', '/cart', {
+    auth: true, token, body: { product_id: products.data[0].id, quantity: 2 },
+});
+
+await capture('checkout.summary', 'GET', '/checkout/summary', { auth: true, token });
+
+// Apply whichever coupon the summary itself says is applicable, so the capture
+// cannot break when the seeded coupons change.
+const applicableCoupon = (out['checkout.summary'].response?.data?.available_coupons ?? [])
+    .find((c) => c.is_applicable);
+if (applicableCoupon) {
+    await capture('checkout.applyCoupon', 'POST', '/checkout/apply-coupon', {
+        auth: true, token, body: { coupon_code: applicableCoupon.code },
+    });
+}
+await capture('checkout.removeCoupon', 'POST', '/checkout/remove-coupon', { auth: true, token });
+
+// A freshly registered account holds no Gehna Coins, so this records the real
+// zero-balance rejection. The success shape lives in summary.data.applied_coins.
+await capture('checkout.applyCoins', 'POST', '/checkout/apply-coins', {
+    auth: true, token, body: { coins: 5 },
+});
+await capture('checkout.removeCoins', 'POST', '/checkout/remove-coins', { auth: true, token });
+
+const billing = {
+    billing_name: 'Doc Preview',
+    billing_email: email,
+    billing_phone: '9812345678',
+    billing_line1: '12 Museum Road',
+    billing_city: 'Bengaluru',
+    billing_state: 'Karnataka',
+    billing_zip: '560001',
+    billing_country: 'India',
+    shipping_same_as_billing: true,
+};
+
+// Cash on Delivery completes without touching a payment gateway.
+const cod = await capture('checkout.placeOrder.cod', 'POST', '/checkout/place-order', {
+    auth: true, token,
+    body: { payment_method: 'cod', checkout_token: randomUUID(), ...billing },
+});
+const codOrderId = cod?.data?.order?.id;
+if (codOrderId) {
+    await capture('checkout.paymentStatus.cod', 'GET', `/checkout/payment-status/${codOrderId}`, { auth: true, token });
+    await capture('orders.show', 'GET', `/orders/${codOrderId}`, { auth: true, token });
+}
+
+// Razorpay: the COD order emptied the cart again, so refill, then place a real
+// test-mode gateway order. No money moves - charging needs the popup.
+await capture('checkout.cart.refill', 'POST', '/cart', {
+    auth: true, token, body: { product_id: products.data[0].id, quantity: 1 },
+});
+const razorpay = await capture('checkout.placeOrder.razorpay', 'POST', '/checkout/place-order', {
+    auth: true, token,
+    body: { payment_method: 'razorpay', checkout_token: randomUUID(), ...billing },
+});
+const rzpOrderId = razorpay?.data?.order?.id;
+
+if (rzpOrderId) {
+    // Payment state between opening the popup and the signature arriving.
+    await capture('checkout.paymentStatus.processing', 'GET', `/checkout/payment-status/${rzpOrderId}`, { auth: true, token });
+
+    // A forged signature must be rejected. The success path needs a real payment
+    // inside the Razorpay popup, which cannot be scripted for a document.
+    await capture('checkout.verifyRazorpay.bad', 'POST', '/checkout/verify-razorpay', {
+        auth: true, token,
+        body: {
+            order_id: rzpOrderId,
+            razorpay_order_id: razorpay.data.razorpay?.order_id ?? 'order_documentation',
+            razorpay_payment_id: 'pay_documentation',
+            razorpay_signature: 'forged-signature',
+        },
+    });
+
+    await capture('checkout.paymentStatus.failed', 'GET', `/checkout/payment-status/${rzpOrderId}`, { auth: true, token });
+}
+
 await capture('auth.logout', 'POST', '/auth/logout', { auth: true, token });
 
 // The token above was just revoked, so mint a fresh one for the last call.

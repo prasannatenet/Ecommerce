@@ -169,7 +169,7 @@ $endpoints = [
 
     '## 2. Products' => [
         ['products.list', 'GET /products', 'Product list',
-            'The main grid. Accepts every filter in section 8. Inactive products are never returned.'],
+            'The main grid. Accepts every filter in section 9. Inactive products are never returned.'],
         ['products.filtered', 'GET /products?on_sale=1&sort=price_asc&per_page=2', 'Filtered list',
             'The same endpoint with `on_sale`, `sort` and `per_page` applied.'],
         ['products.show', 'GET /products/{slug}', 'Product detail',
@@ -218,9 +218,45 @@ $endpoints += [
         ['wishlist.remove', 'DELETE /wishlist/{productId}', 'Remove from wishlist', ''],
         ['orders.list', 'GET /orders', 'Order history',
             'Read-only. `?status=` and `?payment_status=` filter the list.'],
+        ['orders.show', 'GET /orders/{id}', 'Order detail',
+            'The one call that returns an order with its `items` and `items_count` filled in - use it for the order confirmation and history detail views.'],
     ],
 
-    '## 6. Search and site content' => [
+    '## 6. Checkout and payments' => [
+        ['checkout.summary', 'GET /checkout/summary', 'Checkout summary',
+            "Prices the cart on the server: combo and coupon discounts, Gehna Coins, shipping (free when the subtotal is ₹5,000 or more, otherwise ₹199) and the grand total. Also returns which payment providers are active, every eligible coupon, and a `checkout_token`.\n\n"
+            .'**Send that `checkout_token` back with `place-order`.** It makes retries idempotent: a double-tapped button or a network retry returns the order that already exists instead of creating a second one.'],
+        ['checkout.applyCoupon', 'POST /checkout/apply-coupon', 'Apply a coupon',
+            'The discount is recomputed server-side from the coupon rules - never trust a discount sent by the client. Coupons cannot be combined with an active combo offer.'],
+        ['checkout.removeCoupon', 'POST /checkout/remove-coupon', 'Remove the coupon', ''],
+        ['checkout.applyCoins', 'POST /checkout/apply-coins', 'Redeem Gehna Coins',
+            "Success returns `{ coins_used, discount, balance, balance_after }`, clamped to the balance and the order total. The capture shows the zero-balance rejection a freshly registered account gets; the applied figure always also appears in `summary.data.applied_coins`."],
+        ['checkout.removeCoins', 'POST /checkout/remove-coins', 'Remove redeemed coins', ''],
+        ['checkout.placeOrder.cod', 'POST /checkout/place-order', 'Place order - Cash on Delivery',
+            "Creates the order, moves stock and clears the cart in one transaction. `is_paid` is `false`: payment is collected on delivery.\n\n"
+            .'All `billing_*` fields are required. The `shipping_*` fields fall back to their `billing_*` counterparts, so `shipping_same_as_billing: true` alone is enough.'],
+        ['checkout.paymentStatus.cod', 'GET /checkout/payment-status/{order}', 'Payment status - COD confirmed',
+            'For an order paid on delivery `state` is `cod_confirmed`. The other values you will see are `paid`, `failed` and `processing`.'],
+        ['checkout.placeOrder.razorpay', 'POST /checkout/place-order', 'Place order - Razorpay (online payment)',
+            "The same request with `payment_method: \"razorpay\"`. The response carries a `razorpay` object - hand it straight to the Razorpay popup:\n\n"
+            ."```js\n"
+            ."const rzp = new Razorpay({\n"
+            ."    ...data.razorpay,\n"
+            ."    handler: (res) => api.verifyRazorpay({ order_id: data.order.id, ...res }),\n"
+            ."});\n"
+            ."rzp.open();\n"
+            ."```\n\n"
+            .'`amount` is in paise (₹ × 100). The order is created locally first, so if the customer abandons the popup the order simply stays `processing`.'],
+        ['checkout.paymentStatus.processing', 'GET /checkout/payment-status/{order}', 'Payment status - awaiting payment',
+            'Poll this while the popup outcome is unknown. `state: "processing"` means neither a success nor a failure has been recorded yet.'],
+        ['checkout.verifyRazorpay.bad', 'POST /checkout/verify-razorpay', 'Verify the Razorpay signature (forged)',
+            "The popup's `handler` gives you `razorpay_order_id`, `razorpay_payment_id` and `razorpay_signature`; send them with the local `order_id`. The server recomputes `HMAC_SHA256(order_id|payment_id, secret)` - here the forged signature is rejected and the order flips to `failed`.\n\n"
+            .'On success the response is `200 { order, payment_status: "paid" }`, the cart is cleared and the invoice mail is queued. Verifying an already-paid order is safe: it returns success again instead of an error.'],
+        ['checkout.paymentStatus.failed', 'GET /checkout/payment-status/{order}', 'Payment status - failed',
+            'The customer can safely retry `place-order` **with the same `checkout_token`**: an unpaid order is reused rather than duplicated.'],
+    ],
+
+    '## 7. Search and site content' => [
         ['search', 'GET /search?q=bracelet', 'Search',
             'Returns products plus the categories that matched and the customer recent searches.'],
         ['home', 'GET /home', 'Home page',
@@ -237,7 +273,7 @@ $endpoints += [
         ['metal-prices', 'GET /metal-prices', 'Metal spot rates', 'Live gold and silver prices, cached server-side.'],
     ],
 
-    '## 7. Errors you must handle' => [
+    '## 8. Errors you must handle' => [
         ['error.401', 'GET /cart (no token)', '401 Unauthenticated',
             'The token is missing, expired or revoked. The client clears the stored token so the UI re-renders as signed out.'],
         ['error.404', 'GET /products/{unknown slug}', '404 Not found',

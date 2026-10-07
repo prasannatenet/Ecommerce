@@ -12,9 +12,9 @@ $dir = __DIR__;
 
 $parts = [
     "$dir/prose/01.md",   // title, base url, auth, envelope, status codes
-    "$dir/endpoints.md",  // sections 1-7, rendered from captured.json
-    "$dir/prose/03.md",   // section 8 filters, section 9 object reference
-    "$dir/prose/04.md",   // sections 10-12 integration notes and config
+    "$dir/endpoints.md",  // sections 1-8, rendered from captured.json
+    "$dir/prose/03.md",   // section 9 filters, section 10 object reference
+    "$dir/prose/04.md",   // sections 11-13 integration notes and config
 ];
 
 // A blank line between the parts: markdown needs one before a heading, and a

@@ -268,13 +268,24 @@ class FrontendCheckoutController extends Controller
         }
         session(['checkout_token' => $checkoutToken]);
 
-        if ($existingOrder) {
-            return $this->checkoutOrderResponse($existingOrder);
-        }
-
         $provider = PaymentProvider::where('slug', $data['payment_method'])
             ->where('is_active', true)
             ->first();
+
+        if ($existingOrder) {
+            if ($existingOrder->payment_status !== 'paid' && $existingOrder->payment_method !== $data['payment_method']) {
+                $existingOrder->update([
+                    'payment_method' => $data['payment_method'],
+                    'payment_status' => $data['payment_method'] === 'cod' ? 'pending' : 'initiated',
+                    'payment_provider_id' => $provider ? $provider->id : $existingOrder->payment_provider_id,
+                ]);
+                $existingOrder->paymentTransactions()->where('type', 'payment')->latest('id')->first()?->update([
+                    'status' => $data['payment_method'] === 'cod' ? 'pending' : 'initiated',
+                    'notes' => ['method' => $data['payment_method']],
+                ]);
+            }
+            return $this->checkoutOrderResponse($existingOrder);
+        }
 
         if (! $provider) {
             throw ValidationException::withMessages([
@@ -303,7 +314,7 @@ class FrontendCheckoutController extends Controller
         // order, shown on the page and sent to the gateway, so the customer is
         // never quoted a fraction they are not charged.
         $orderTotal = Order::roundAmount((float) $orderTotal - $coinsDiscount);
-        $shippingSame = $request->boolean('shipping_same_as_billing', true);
+        $shippingSame = $request->boolean('shipping_same_as_billing', false);
 
         if ($data['payment_method'] === 'razorpay' && $orderTotal < 1) {
             throw ValidationException::withMessages([

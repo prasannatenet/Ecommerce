@@ -40,7 +40,7 @@
             "http://127.0.0.1:8123/storage/products/33ghQTfgYvweacmeZQ63l0nwrgkkGqnNRBixGfNS.webp"
           ],
           "manage_stock": true,
-          "stock": 497,
+          "stock": 494,
           "in_stock": true,
           "category": {
             "id": 7,
@@ -305,19 +305,9 @@
     "response": {
       "success": true,
       "message": "OK",
-      "data": [
-        {
-          "id": 1,
-          "name": "API Docs Brand",
-          "slug": "api-docs-brand",
-          "logo": "http://127.0.0.1:8123/storage/brands/api-docs-brand.png",
-          "description": "A temporary brand created only to capture its API response for the documentation.",
-          "products_count": 0,
-          "url": "http://127.0.0.1:8123/brand/api-docs-brand"
-        }
-      ],
+      "data": [],
       "meta": {
-        "total": 1
+        "total": 0
       }
     }
   },
@@ -477,7 +467,7 @@
                 "http://127.0.0.1:8123/storage/products/33ghQTfgYvweacmeZQ63l0nwrgkkGqnNRBixGfNS.webp"
               ],
               "manage_stock": true,
-              "stock": 497,
+              "stock": 494,
               "in_stock": true,
               "variations": []
             }
@@ -500,14 +490,7 @@
     "response": {
       "success": true,
       "message": "OK",
-      "data": [
-        {
-          "id": 1,
-          "title": "API Docs Page",
-          "slug": "api-docs-page",
-          "url": "http://127.0.0.1:8123/pages/api-docs-page"
-        }
-      ],
+      "data": [],
       "meta": {}
     }
   },
@@ -713,7 +696,7 @@
               "http://127.0.0.1:8123/storage/products/33ghQTfgYvweacmeZQ63l0nwrgkkGqnNRBixGfNS.webp"
             ],
             "manage_stock": true,
-            "stock": 497,
+            "stock": 494,
             "in_stock": true,
             "category": {
               "id": 7,
@@ -1049,7 +1032,7 @@
               "http://127.0.0.1:8123/storage/products/33ghQTfgYvweacmeZQ63l0nwrgkkGqnNRBixGfNS.webp"
             ],
             "manage_stock": true,
-            "stock": 497,
+            "stock": 494,
             "in_stock": true,
             "category": {
               "id": 7,
@@ -1385,7 +1368,7 @@
               "http://127.0.0.1:8123/storage/products/33ghQTfgYvweacmeZQ63l0nwrgkkGqnNRBixGfNS.webp"
             ],
             "manage_stock": true,
-            "stock": 497,
+            "stock": 494,
             "in_stock": true,
             "category": {
               "id": 7,
@@ -1691,17 +1674,7 @@
             "reviews_count": 0
           }
         ],
-        "brands": [
-          {
-            "id": 1,
-            "name": "API Docs Brand",
-            "slug": "api-docs-brand",
-            "logo": "http://127.0.0.1:8123/storage/brands/api-docs-brand.png",
-            "description": "A temporary brand created only to capture its API response for the documentation.",
-            "products_count": 0,
-            "url": "http://127.0.0.1:8123/brand/api-docs-brand"
-          }
-        ],
+        "brands": [],
         "faqs": [],
         "testimonials": []
       },
@@ -1935,7 +1908,7 @@
             "http://127.0.0.1:8123/storage/products/33ghQTfgYvweacmeZQ63l0nwrgkkGqnNRBixGfNS.webp"
           ],
           "manage_stock": true,
-          "stock": 497,
+          "stock": 494,
           "in_stock": true,
           "category": {
             "id": 7,
@@ -2055,7 +2028,7 @@
             "http://127.0.0.1:8123/storage/products/33ghQTfgYvweacmeZQ63l0nwrgkkGqnNRBixGfNS.webp"
           ],
           "manage_stock": true,
-          "stock": 497,
+          "stock": 494,
           "in_stock": true,
           "category": {
             "id": 7,
@@ -2277,7 +2250,7 @@
             "http://127.0.0.1:8123/storage/products/33ghQTfgYvweacmeZQ63l0nwrgkkGqnNRBixGfNS.webp"
           ],
           "manage_stock": true,
-          "stock": 497,
+          "stock": 494,
           "in_stock": true,
           "category": {
             "id": 7,
@@ -2613,16 +2586,16 @@
     "path": "/newsletter",
     "query": null,
     "auth": false,
-    "status": 200,
+    "status": 201,
     "request": {
       "email": "doc-preview@example.com"
     },
     "response": {
       "success": true,
-      "message": "This email is already subscribed to our newsletter.",
+      "message": "Thanks for subscribing to our newsletter.",
       "data": {
         "subscribed": true,
-        "already_subscribed": true
+        "already_subscribed": false
       },
       "meta": {}
     }
@@ -2635,23 +2608,84 @@
     "status": 200,
     "request": null,
     "response": {
-      "success": false,
+      "success": true,
       "data": {
-        "available": false,
+        "available": true,
         "stale": false,
-        "message": "Live rates are temporarily unavailable. Please check back shortly.",
+        "message": null,
         "currency": "INR",
         "currency_symbol": "₹",
         "unit_grams": 10,
         "unit_label": "per 10 gram (1 tola)",
-        "updated_at": null,
-        "updated_at_display": null,
-        "metals": []
+        "updated_at": "2026-10-07T12:32:26+00:00",
+        "updated_at_display": "07 Oct 2026, 12:32 PM",
+        "metals": [
+          {
+            "key": "gold",
+            "name": "Gold",
+            "symbol": "XAU",
+            "price": 127540.95,
+            "price_display": "₹127,541",
+            "change": -1502.85,
+            "change_display": "-₹1,503",
+            "change_percent": -1.16,
+            "change_percent_display": "-1.16%",
+            "high": 129216.23,
+            "low": 127540.95,
+            "open": 129170.16,
+            "direction": "down",
+            "is_up": false,
+            "purity": [
+              {
+                "key": "24k",
+                "label": "24K",
+                "price": 127540.95,
+                "price_display": "₹127,541"
+              },
+              {
+                "key": "22k",
+                "label": "22K",
+                "price": 116912.54,
+                "price_display": "₹116,913"
+              },
+              {
+                "key": "18k",
+                "label": "18K",
+                "price": 95655.71,
+                "price_display": "₹95,656"
+              }
+            ]
+          },
+          {
+            "key": "silver",
+            "name": "Silver",
+            "symbol": "XAG",
+            "price": 1860.24,
+            "price_display": "₹1,860",
+            "change": -40.54,
+            "change_display": "-₹41",
+            "change_percent": -2.13,
+            "change_percent_display": "-2.13%",
+            "high": 1902.91,
+            "low": 1860.24,
+            "open": 1902.65,
+            "direction": "down",
+            "is_up": false,
+            "purity": [
+              {
+                "key": "24k",
+                "label": "999",
+                "price": 1860.24,
+                "price_display": "₹1,860"
+              }
+            ]
+          }
+        ]
       },
       "meta": {
         "source": "goldapi.io",
         "cache_ttl": 900,
-        "generated_at": "2026-09-26T11:06:46+00:00"
+        "generated_at": "2026-10-07T12:32:26+00:00"
       }
     }
   },
@@ -2660,20 +2694,13 @@
     "path": "/brands/api-docs-brand",
     "query": null,
     "auth": false,
-    "status": 200,
+    "status": 404,
     "request": null,
     "response": {
-      "success": true,
-      "message": "OK",
-      "data": {
-        "id": 1,
-        "name": "API Docs Brand",
-        "slug": "api-docs-brand",
-        "logo": "http://127.0.0.1:8123/storage/brands/api-docs-brand.png",
-        "description": "A temporary brand created only to capture its API response for the documentation.",
-        "products_count": 0,
-        "url": "http://127.0.0.1:8123/brand/api-docs-brand"
-      },
+      "success": false,
+      "message": "Brand not found.",
+      "data": null,
+      "errors": {},
       "meta": {}
     }
   },
@@ -2684,25 +2711,14 @@
       "per_page": "2"
     },
     "auth": false,
-    "status": 200,
+    "status": 404,
     "request": null,
     "response": {
-      "success": true,
-      "data": [],
-      "brand": {
-        "id": 1,
-        "name": "API Docs Brand",
-        "slug": "api-docs-brand",
-        "logo": "http://127.0.0.1:8123/storage/brands/api-docs-brand.png",
-        "description": "A temporary brand created only to capture its API response for the documentation.",
-        "url": "http://127.0.0.1:8123/brand/api-docs-brand"
-      },
-      "meta": {
-        "current_page": 1,
-        "last_page": 1,
-        "per_page": 2,
-        "total": 0
-      }
+      "success": false,
+      "message": "Brand not found.",
+      "data": null,
+      "errors": {},
+      "meta": {}
     }
   },
   "combos.show": {
@@ -2860,7 +2876,7 @@
               "http://127.0.0.1:8123/storage/products/33ghQTfgYvweacmeZQ63l0nwrgkkGqnNRBixGfNS.webp"
             ],
             "manage_stock": true,
-            "stock": 497,
+            "stock": 494,
             "in_stock": true,
             "variations": []
           }
@@ -2875,22 +2891,13 @@
     "path": "/pages/api-docs-page",
     "query": null,
     "auth": false,
-    "status": 200,
+    "status": 404,
     "request": null,
     "response": {
-      "success": true,
-      "message": "OK",
-      "data": {
-        "id": 1,
-        "title": "API Docs Page",
-        "slug": "api-docs-page",
-        "content": "<h2>Temporary page</h2><p>Created only to capture its API response for the documentation.</p>",
-        "meta_title": "API Docs Page",
-        "meta_description": "Temporary page for API documentation capture.",
-        "meta_keywords": "api, docs, temporary",
-        "url": "http://127.0.0.1:8123/pages/api-docs-page",
-        "updated_at": "2026-09-26T10:47:59+00:00"
-      },
+      "success": false,
+      "message": "Page not found.",
+      "data": null,
+      "errors": {},
       "meta": {}
     }
   },
@@ -2957,10 +2964,10 @@
     "status": 201,
     "request": {
       "name": "Doc Preview",
-      "email": "api.doc.1790420810069@example.com",
+      "email": "api.doc.1791376349540@example.com",
       "password": "Password123!",
       "password_confirmation": "Password123!",
-      "phone": "9420810069"
+      "phone": "9376349540"
     },
     "response": {
       "success": true,
@@ -2969,15 +2976,15 @@
         "token": "<token>",
         "token_type": "Bearer",
         "user": {
-          "id": 19,
+          "id": 20,
           "name": "Doc Preview",
-          "email": "api.doc.1790420810069@example.com",
-          "phone": "9420810069",
+          "email": "api.doc.1791376349540@example.com",
+          "phone": "9376349540",
           "gehna_coins": 0,
           "roles": [],
           "is_admin": false,
           "email_verified_at": null,
-          "created_at": "2026-09-26T11:06:50+00:00"
+          "created_at": "2026-10-07T12:32:30+00:00"
         }
       },
       "meta": {}
@@ -2990,7 +2997,7 @@
     "auth": false,
     "status": 200,
     "request": {
-      "email": "api.doc.1790420810069@example.com",
+      "email": "api.doc.1791376349540@example.com",
       "password": "Password123!"
     },
     "response": {
@@ -3000,15 +3007,15 @@
         "token": "<token>",
         "token_type": "Bearer",
         "user": {
-          "id": 19,
+          "id": 20,
           "name": "Doc Preview",
-          "email": "api.doc.1790420810069@example.com",
-          "phone": "9420810069",
+          "email": "api.doc.1791376349540@example.com",
+          "phone": "9376349540",
           "gehna_coins": 0,
           "roles": [],
           "is_admin": false,
           "email_verified_at": null,
-          "created_at": "2026-09-26T11:06:50+00:00"
+          "created_at": "2026-10-07T12:32:30+00:00"
         }
       },
       "meta": {}
@@ -3025,15 +3032,15 @@
       "success": true,
       "message": "OK",
       "data": {
-        "id": 19,
+        "id": 20,
         "name": "Doc Preview",
-        "email": "api.doc.1790420810069@example.com",
-        "phone": "9420810069",
+        "email": "api.doc.1791376349540@example.com",
+        "phone": "9376349540",
         "gehna_coins": 0,
         "roles": [],
         "is_admin": false,
         "email_verified_at": null,
-        "created_at": "2026-09-26T11:06:50+00:00"
+        "created_at": "2026-10-07T12:32:30+00:00"
       },
       "meta": {}
     }
@@ -3052,15 +3059,15 @@
       "success": true,
       "message": "Profile updated",
       "data": {
-        "id": 19,
+        "id": 20,
         "name": "Doc Preview",
-        "email": "api.doc.1790420810069@example.com",
+        "email": "api.doc.1791376349540@example.com",
         "phone": null,
         "gehna_coins": 0,
         "roles": [],
         "is_admin": false,
         "email_verified_at": null,
-        "created_at": "2026-09-26T11:06:50+00:00"
+        "created_at": "2026-10-07T12:32:30+00:00"
       },
       "meta": {}
     }
@@ -3078,6 +3085,7 @@
       "data": [],
       "meta": {
         "subtotal": 0,
+        "combo_discount": 0,
         "total": 0,
         "count": 0
       }
@@ -3098,7 +3106,7 @@
       "message": "Added to cart",
       "data": [
         {
-          "id": 114,
+          "id": 121,
           "product_id": 9,
           "product_variation_id": null,
           "combo_id": null,
@@ -3109,13 +3117,19 @@
           "options": [],
           "price": 2999.5,
           "quantity": 2,
+          "is_combo": false,
+          "combo": null,
+          "combo_units": 0,
+          "combo_names": [],
+          "regular_unit_price": 2999.5,
           "line_total": 5999,
-          "available_stock": 497,
+          "available_stock": 494,
           "url": "http://127.0.0.1:8123/product/silver-elegant-butterflies-bracelet"
         }
       ],
       "meta": {
         "subtotal": 5999,
+        "combo_discount": 0,
         "total": 5999,
         "count": 2
       }
@@ -3123,7 +3137,7 @@
   },
   "cart.update": {
     "method": "PATCH",
-    "path": "/cart/114",
+    "path": "/cart/121",
     "query": null,
     "auth": true,
     "status": 200,
@@ -3135,7 +3149,7 @@
       "message": "Cart updated",
       "data": [
         {
-          "id": 114,
+          "id": 121,
           "product_id": 9,
           "product_variation_id": null,
           "combo_id": null,
@@ -3146,13 +3160,19 @@
           "options": [],
           "price": 2999.5,
           "quantity": 3,
+          "is_combo": false,
+          "combo": null,
+          "combo_units": 0,
+          "combo_names": [],
+          "regular_unit_price": 2999.5,
           "line_total": 8998.5,
-          "available_stock": 497,
+          "available_stock": 494,
           "url": "http://127.0.0.1:8123/product/silver-elegant-butterflies-bracelet"
         }
       ],
       "meta": {
         "subtotal": 8998.5,
+        "combo_discount": 0,
         "total": 8998.5,
         "count": 3
       }
@@ -3170,7 +3190,7 @@
       "message": "OK",
       "data": [
         {
-          "id": 114,
+          "id": 121,
           "product_id": 9,
           "product_variation_id": null,
           "combo_id": null,
@@ -3181,13 +3201,19 @@
           "options": [],
           "price": 2999.5,
           "quantity": 3,
+          "is_combo": false,
+          "combo": null,
+          "combo_units": 0,
+          "combo_names": [],
+          "regular_unit_price": 2999.5,
           "line_total": 8998.5,
-          "available_stock": 497,
+          "available_stock": 494,
           "url": "http://127.0.0.1:8123/product/silver-elegant-butterflies-bracelet"
         }
       ],
       "meta": {
         "subtotal": 8998.5,
+        "combo_discount": 0,
         "total": 8998.5,
         "count": 3
       }
@@ -3195,7 +3221,7 @@
   },
   "cart.remove": {
     "method": "DELETE",
-    "path": "/cart/114",
+    "path": "/cart/121",
     "query": null,
     "auth": true,
     "status": 200,
@@ -3206,6 +3232,7 @@
       "data": [],
       "meta": {
         "subtotal": 0,
+        "combo_discount": 0,
         "total": 0,
         "count": 0
       }
@@ -3224,6 +3251,7 @@
       "data": [],
       "meta": {
         "subtotal": 0,
+        "combo_discount": 0,
         "total": 0,
         "count": 0
       }
@@ -3288,7 +3316,7 @@
             "http://127.0.0.1:8123/storage/products/33ghQTfgYvweacmeZQ63l0nwrgkkGqnNRBixGfNS.webp"
           ],
           "manage_stock": true,
-          "stock": 497,
+          "stock": 494,
           "in_stock": true,
           "category": {
             "id": 7,
@@ -3343,6 +3371,476 @@
         "per_page": 10,
         "total": 0
       }
+    }
+  },
+  "checkout.cart.refill": {
+    "method": "POST",
+    "path": "/cart",
+    "query": null,
+    "auth": true,
+    "status": 201,
+    "request": {
+      "product_id": 9,
+      "quantity": 1
+    },
+    "response": {
+      "success": true,
+      "message": "Added to cart",
+      "data": [
+        {
+          "id": 123,
+          "product_id": 9,
+          "product_variation_id": null,
+          "combo_id": null,
+          "name": "Silver Elegant Butterflies Bracelet",
+          "slug": "silver-elegant-butterflies-bracelet",
+          "sku": null,
+          "image": "http://127.0.0.1:8123/storage/products/JZBDIxaCw2LrKudyhdATWUjMKIHiRtHPMNwoSypB.png",
+          "options": [],
+          "price": 2999.5,
+          "quantity": 1,
+          "is_combo": false,
+          "combo": null,
+          "combo_units": 0,
+          "combo_names": [],
+          "regular_unit_price": 2999.5,
+          "line_total": 2999.5,
+          "available_stock": 494,
+          "url": "http://127.0.0.1:8123/product/silver-elegant-butterflies-bracelet"
+        }
+      ],
+      "meta": {
+        "subtotal": 2999.5,
+        "combo_discount": 0,
+        "total": 2999.5,
+        "count": 1
+      }
+    }
+  },
+  "checkout.summary": {
+    "method": "GET",
+    "path": "/checkout/summary",
+    "query": null,
+    "auth": true,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "OK",
+      "data": {
+        "pricing": {
+          "subtotal": 5999,
+          "total_quantity": 2,
+          "combo_discount": 0,
+          "coupon_discount": 0,
+          "coins_discount": 0,
+          "coins_used": 0,
+          "shipping_charge": 0,
+          "grand_total": 5999
+        },
+        "combo_summary": {
+          "has_applied_combo": false,
+          "discount": 0
+        },
+        "applied_coupon": null,
+        "applied_coins": {
+          "requested": 0,
+          "coins": 0,
+          "discount": 0,
+          "balance": 0,
+          "balance_after": 0
+        },
+        "user_coins": {
+          "balance": 0,
+          "balance_after": 0
+        },
+        "available_coupons": [
+          {
+            "id": 5,
+            "code": "Diwali",
+            "type": "percent",
+            "amount": 10,
+            "buy_quantity": 0,
+            "get_quantity": 0,
+            "reward_coins": 0,
+            "min_order_amount": 5000,
+            "validity_text": "From 22 Sep 2026, 04:32 PM",
+            "is_applicable": true,
+            "ineligible_reason": null
+          }
+        ],
+        "payment_providers": {
+          "cod": {
+            "enabled": true,
+            "name": "Cash on Delivery"
+          },
+          "razorpay": {
+            "enabled": true,
+            "name": "Razorpay",
+            "key": "rzp_test_TkujmCnZM9yg11"
+          }
+        },
+        "checkout_token": "b33e3972-6e77-438a-9ae4-e88314514350"
+      },
+      "meta": {}
+    }
+  },
+  "checkout.applyCoupon": {
+    "method": "POST",
+    "path": "/checkout/apply-coupon",
+    "query": null,
+    "auth": true,
+    "status": 200,
+    "request": {
+      "coupon_code": "Diwali"
+    },
+    "response": {
+      "success": true,
+      "message": "Coupon applied successfully.",
+      "data": {
+        "coupon": {
+          "id": 5,
+          "code": "Diwali",
+          "type": "percent",
+          "amount": 10,
+          "discount": 599.9,
+          "free_items": []
+        }
+      },
+      "meta": {}
+    }
+  },
+  "checkout.removeCoupon": {
+    "method": "POST",
+    "path": "/checkout/remove-coupon",
+    "query": null,
+    "auth": true,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "Coupon removed.",
+      "data": null,
+      "meta": {}
+    }
+  },
+  "checkout.applyCoins": {
+    "method": "POST",
+    "path": "/checkout/apply-coins",
+    "query": null,
+    "auth": true,
+    "status": 422,
+    "request": {
+      "coins": 5
+    },
+    "response": {
+      "success": false,
+      "message": "You do not have any Gehna Coins to redeem yet.",
+      "data": null,
+      "errors": {},
+      "meta": {}
+    }
+  },
+  "checkout.removeCoins": {
+    "method": "POST",
+    "path": "/checkout/remove-coins",
+    "query": null,
+    "auth": true,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "Gehna Coins removed.",
+      "data": null,
+      "meta": {}
+    }
+  },
+  "checkout.placeOrder.cod": {
+    "method": "POST",
+    "path": "/checkout/place-order",
+    "query": null,
+    "auth": true,
+    "status": 201,
+    "request": {
+      "payment_method": "cod",
+      "checkout_token": "9eb39c4c-28a2-49d0-9cec-2217fc185221",
+      "billing_name": "Doc Preview",
+      "billing_email": "api.doc.1791376349540@example.com",
+      "billing_phone": "9812345678",
+      "billing_line1": "12 Museum Road",
+      "billing_city": "Bengaluru",
+      "billing_state": "Karnataka",
+      "billing_zip": "560001",
+      "billing_country": "India",
+      "shipping_same_as_billing": true
+    },
+    "response": {
+      "success": true,
+      "message": "Order placed successfully with Cash on Delivery.",
+      "data": {
+        "order": {
+          "id": 47,
+          "order_number": 47,
+          "status": "pending",
+          "payment_status": "pending",
+          "payment_method": "cod",
+          "paid_at": null,
+          "cancelled_at": null,
+          "cancel_reason": null,
+          "subtotal": 5999,
+          "total": 5999,
+          "refunded_total": 0,
+          "refund_status": "none",
+          "shipping_address": {
+            "name": "Doc Preview",
+            "email": "api.doc.1791376349540@example.com",
+            "phone": "9812345678",
+            "line1": "12 Museum Road",
+            "city": "Bengaluru",
+            "state": "Karnataka",
+            "zip": "560001",
+            "country": "India"
+          },
+          "billing_address": {
+            "name": "Doc Preview",
+            "email": "api.doc.1791376349540@example.com",
+            "phone": "9812345678",
+            "line1": "12 Museum Road",
+            "city": "Bengaluru",
+            "state": "Karnataka",
+            "zip": "560001",
+            "country": "India"
+          },
+          "created_at": "2026-10-07T12:32:40+00:00",
+          "updated_at": "2026-10-07T12:32:40+00:00"
+        },
+        "payment_method": "cod",
+        "is_paid": false
+      },
+      "meta": {}
+    }
+  },
+  "checkout.paymentStatus.cod": {
+    "method": "GET",
+    "path": "/checkout/payment-status/47",
+    "query": null,
+    "auth": true,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "Order confirmed. Payment is due on delivery.",
+      "data": {
+        "order_id": 47,
+        "state": "cod_confirmed",
+        "payment_status": "pending",
+        "transaction_status": "pending"
+      },
+      "meta": {}
+    }
+  },
+  "orders.show": {
+    "method": "GET",
+    "path": "/orders/47",
+    "query": null,
+    "auth": true,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "OK",
+      "data": {
+        "id": 47,
+        "order_number": 47,
+        "status": "pending",
+        "payment_status": "pending",
+        "payment_method": "cod",
+        "paid_at": null,
+        "cancelled_at": null,
+        "cancel_reason": null,
+        "subtotal": 5999,
+        "total": 5999,
+        "refunded_total": 0,
+        "refund_status": "none",
+        "shipping_address": {
+          "name": "Doc Preview",
+          "email": "api.doc.1791376349540@example.com",
+          "phone": "9812345678",
+          "line1": "12 Museum Road",
+          "city": "Bengaluru",
+          "state": "Karnataka",
+          "zip": "560001",
+          "country": "India"
+        },
+        "billing_address": {
+          "name": "Doc Preview",
+          "email": "api.doc.1791376349540@example.com",
+          "phone": "9812345678",
+          "line1": "12 Museum Road",
+          "city": "Bengaluru",
+          "state": "Karnataka",
+          "zip": "560001",
+          "country": "India"
+        },
+        "items": [
+          {
+            "id": 83,
+            "product_id": 9,
+            "product_variation_id": null,
+            "product_name": "Silver Elegant Butterflies Bracelet",
+            "sku": null,
+            "image": "http://127.0.0.1:8123/storage/products/JZBDIxaCw2LrKudyhdATWUjMKIHiRtHPMNwoSypB.png",
+            "unit_price": 2999.5,
+            "quantity": 2,
+            "line_total": 5999,
+            "meta": {
+              "from_cart_id": 122,
+              "variation_attributes": null
+            },
+            "url": "http://127.0.0.1:8123/product/silver-elegant-butterflies-bracelet"
+          }
+        ],
+        "items_count": 1,
+        "created_at": "2026-10-07T12:32:40+00:00",
+        "updated_at": "2026-10-07T12:32:40+00:00"
+      },
+      "meta": {}
+    }
+  },
+  "checkout.placeOrder.razorpay": {
+    "method": "POST",
+    "path": "/checkout/place-order",
+    "query": null,
+    "auth": true,
+    "status": 201,
+    "request": {
+      "payment_method": "razorpay",
+      "checkout_token": "5584a74c-3b3f-4350-b8f7-a8f5f7cebf42",
+      "billing_name": "Doc Preview",
+      "billing_email": "api.doc.1791376349540@example.com",
+      "billing_phone": "9812345678",
+      "billing_line1": "12 Museum Road",
+      "billing_city": "Bengaluru",
+      "billing_state": "Karnataka",
+      "billing_zip": "560001",
+      "billing_country": "India",
+      "shipping_same_as_billing": true
+    },
+    "response": {
+      "success": true,
+      "message": "Order created. Please complete Razorpay payment.",
+      "data": {
+        "order": {
+          "id": 48,
+          "order_number": 48,
+          "status": "pending",
+          "payment_status": "initiated",
+          "payment_method": "razorpay",
+          "paid_at": null,
+          "cancelled_at": null,
+          "cancel_reason": null,
+          "subtotal": 3199,
+          "total": 3199,
+          "refunded_total": 0,
+          "refund_status": "none",
+          "shipping_address": {
+            "name": "Doc Preview",
+            "email": "api.doc.1791376349540@example.com",
+            "phone": "9812345678",
+            "line1": "12 Museum Road",
+            "city": "Bengaluru",
+            "state": "Karnataka",
+            "zip": "560001",
+            "country": "India"
+          },
+          "billing_address": {
+            "name": "Doc Preview",
+            "email": "api.doc.1791376349540@example.com",
+            "phone": "9812345678",
+            "line1": "12 Museum Road",
+            "city": "Bengaluru",
+            "state": "Karnataka",
+            "zip": "560001",
+            "country": "India"
+          },
+          "created_at": "2026-10-07T12:32:42+00:00",
+          "updated_at": "2026-10-07T12:32:42+00:00"
+        },
+        "payment_method": "razorpay",
+        "is_paid": false,
+        "razorpay": {
+          "key": "rzp_test_TkujmCnZM9yg11",
+          "order_id": "order_Tl1GfwQwFH2nAN",
+          "amount": 319900,
+          "currency": "INR",
+          "name": "Gehna",
+          "description": "Order #48",
+          "prefill": {
+            "name": "Doc Preview",
+            "email": "api.doc.1791376349540@example.com",
+            "contact": "9812345678"
+          }
+        }
+      },
+      "meta": {}
+    }
+  },
+  "checkout.paymentStatus.processing": {
+    "method": "GET",
+    "path": "/checkout/payment-status/48",
+    "query": null,
+    "auth": true,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "Payment is being confirmed. Please wait.",
+      "data": {
+        "order_id": 48,
+        "state": "processing",
+        "payment_status": "initiated",
+        "transaction_status": "initiated"
+      },
+      "meta": {}
+    }
+  },
+  "checkout.verifyRazorpay.bad": {
+    "method": "POST",
+    "path": "/checkout/verify-razorpay",
+    "query": null,
+    "auth": true,
+    "status": 422,
+    "request": {
+      "order_id": 48,
+      "razorpay_order_id": "order_Tl1GfwQwFH2nAN",
+      "razorpay_payment_id": "pay_documentation",
+      "razorpay_signature": "forged-signature"
+    },
+    "response": {
+      "success": false,
+      "message": "Payment verification failed. Signature mismatch.",
+      "data": null,
+      "errors": {},
+      "meta": {}
+    }
+  },
+  "checkout.paymentStatus.failed": {
+    "method": "GET",
+    "path": "/checkout/payment-status/48",
+    "query": null,
+    "auth": true,
+    "status": 200,
+    "request": null,
+    "response": {
+      "success": true,
+      "message": "Payment was not completed. You can safely retry this order.",
+      "data": {
+        "order_id": 48,
+        "state": "failed",
+        "payment_status": "failed",
+        "transaction_status": "failed"
+      },
+      "meta": {}
     }
   },
   "auth.logout": {

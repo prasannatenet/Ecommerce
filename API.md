@@ -22,8 +22,9 @@ https://astroemerging.com/gehna/api/v1/products
 | | |
 | --- | --- |
 | React client | `public/js/gehna-api.js` - copy to `src/api/gehnaApi.js` |
+| React checkout example | `docs/react/CheckoutPage.jsx` - full COD + Razorpay flow (see `docs/react/README.md`) |
 | Live demo | `https://astroemerging.com/gehna/api-demo` |
-| Tests | `php artisan test --filter=ApiStorefrontTest` |
+| Tests | `php artisan test --filter="Api(Storefront|Checkout)Test"` |
 
 The client is dependency-free (plain `fetch`) and already wraps every endpoint
 below, including token storage and error handling. You can use it as-is or call
@@ -152,7 +153,7 @@ Creates the account and signs in. `password_confirmation` is required.
         "token": "<token>",
         "token_type": "Bearer",
         "user": {
-            "id": 19,
+            "id": 20,
             "name": "Doc Preview",
             "email": "you@example.com",
             "phone": "9812345678",
@@ -160,7 +161,7 @@ Creates the account and signs in. `password_confirmation` is required.
             "roles": [],
             "is_admin": false,
             "email_verified_at": null,
-            "created_at": "2026-09-26T11:06:50+00:00"
+            "created_at": "2026-10-07T12:32:30+00:00"
         }
     },
     "meta": {}
@@ -191,7 +192,7 @@ Returns a bearer token. Rate limited to 10 requests per minute and sharing the s
         "token": "<token>",
         "token_type": "Bearer",
         "user": {
-            "id": 19,
+            "id": 20,
             "name": "Doc Preview",
             "email": "you@example.com",
             "phone": "9812345678",
@@ -199,7 +200,7 @@ Returns a bearer token. Rate limited to 10 requests per minute and sharing the s
             "roles": [],
             "is_admin": false,
             "email_verified_at": null,
-            "created_at": "2026-09-26T11:06:50+00:00"
+            "created_at": "2026-10-07T12:32:30+00:00"
         }
     },
     "meta": {}
@@ -218,7 +219,7 @@ Called on app boot to restore a session. The client turns a 401 here into "signe
     "success": true,
     "message": "OK",
     "data": {
-        "id": 19,
+        "id": 20,
         "name": "Doc Preview",
         "email": "you@example.com",
         "phone": "9812345678",
@@ -226,7 +227,7 @@ Called on app boot to restore a session. The client turns a 401 here into "signe
         "roles": [],
         "is_admin": false,
         "email_verified_at": null,
-        "created_at": "2026-09-26T11:06:50+00:00"
+        "created_at": "2026-10-07T12:32:30+00:00"
     },
     "meta": {}
 }
@@ -253,7 +254,7 @@ Name and phone only.
     "success": true,
     "message": "Profile updated",
     "data": {
-        "id": 19,
+        "id": 20,
         "name": "Doc Preview",
         "email": "you@example.com",
         "phone": null,
@@ -261,7 +262,7 @@ Name and phone only.
         "roles": [],
         "is_admin": false,
         "email_verified_at": null,
-        "created_at": "2026-09-26T11:06:50+00:00"
+        "created_at": "2026-10-07T12:32:30+00:00"
     },
     "meta": {}
 }
@@ -304,7 +305,7 @@ Revokes every token for the account.
 ### `GET /products`
 
 **Product list**  
-The main grid. Accepts every filter in section 8. Inactive products are never returned.
+The main grid. Accepts every filter in section 9. Inactive products are never returned.
 
 **Response `200`**
 
@@ -341,7 +342,7 @@ The main grid. Accepts every filter in section 8. Inactive products are never re
                 "... 1 more, 3 total"
             ],
             "manage_stock": true,
-            "stock": 497,
+            "stock": 494,
             "in_stock": true,
             "category": {
                 "id": 7,
@@ -478,7 +479,7 @@ Returns `{ product, reviews }` in one request so the page never has to fan out i
                 "... 1 more, 3 total"
             ],
             "manage_stock": true,
-            "stock": 497,
+            "stock": 494,
             "in_stock": true,
             "category": {
                 "id": 7,
@@ -758,7 +759,7 @@ Also includes products filed under the category's children. `meta.included` list
                 "... 1 more, 3 total"
             ],
             "manage_stock": true,
-            "stock": 497,
+            "stock": 494,
             "in_stock": true,
             "category": {
                 "id": 7,
@@ -810,19 +811,9 @@ Also includes products filed under the category's children. `meta.included` list
 {
     "success": true,
     "message": "OK",
-    "data": [
-        {
-            "id": 1,
-            "name": "API Docs Brand",
-            "slug": "api-docs-brand",
-            "logo": "https://astroemerging.com/gehna/storage/brands/api-docs-brand.png",
-            "description": "A temporary brand created only to capture its API response for the documentation.",
-            "products_count": 0,
-            "url": "https://astroemerging.com/gehna/brand/api-docs-brand"
-        }
-    ],
+    "data": [],
     "meta": {
-        "total": 1
+        "total": 0
     }
 }
 ```
@@ -831,21 +822,14 @@ Also includes products filed under the category's children. `meta.included` list
 
 **One brand**
 
-**Response `200`**
+**Response `404`**
 
 ```json
 {
-    "success": true,
-    "message": "OK",
-    "data": {
-        "id": 1,
-        "name": "API Docs Brand",
-        "slug": "api-docs-brand",
-        "logo": "https://astroemerging.com/gehna/storage/brands/api-docs-brand.png",
-        "description": "A temporary brand created only to capture its API response for the documentation.",
-        "products_count": 0,
-        "url": "https://astroemerging.com/gehna/brand/api-docs-brand"
-    },
+    "success": false,
+    "message": "Brand not found.",
+    "data": null,
+    "errors": {},
     "meta": {}
 }
 ```
@@ -855,26 +839,15 @@ Also includes products filed under the category's children. `meta.included` list
 **Products for a brand**  
 Accepts the same filters as the product list.
 
-**Response `200`**
+**Response `404`**
 
 ```json
 {
-    "success": true,
-    "data": [],
-    "brand": {
-        "id": 1,
-        "name": "API Docs Brand",
-        "slug": "api-docs-brand",
-        "logo": "https://astroemerging.com/gehna/storage/brands/api-docs-brand.png",
-        "description": "A temporary brand created only to capture its API response for the documentation.",
-        "url": "https://astroemerging.com/gehna/brand/api-docs-brand"
-    },
-    "meta": {
-        "current_page": 1,
-        "last_page": 1,
-        "per_page": 2,
-        "total": 0
-    }
+    "success": false,
+    "message": "Brand not found.",
+    "data": null,
+    "errors": {},
+    "meta": {}
 }
 ```
 
@@ -1100,6 +1073,7 @@ Pricing is computed server-side, so a bundle can never be quoted at a different 
     "data": [],
     "meta": {
         "subtotal": 0,
+        "combo_discount": 0,
         "total": 0,
         "count": 0
     }
@@ -1130,7 +1104,7 @@ Sending the same product twice tops up the existing line. `product_variation_id`
     "message": "Added to cart",
     "data": [
         {
-            "id": 114,
+            "id": 121,
             "product_id": 9,
             "product_variation_id": null,
             "combo_id": null,
@@ -1141,13 +1115,19 @@ Sending the same product twice tops up the existing line. `product_variation_id`
             "options": [],
             "price": 2999.5,
             "quantity": 2,
+            "is_combo": false,
+            "combo": null,
+            "combo_units": 0,
+            "combo_names": [],
+            "regular_unit_price": 2999.5,
             "line_total": 5999,
-            "available_stock": 497,
+            "available_stock": 494,
             "url": "https://astroemerging.com/gehna/product/silver-elegant-butterflies-bracelet"
         }
     ],
     "meta": {
         "subtotal": 5999,
+        "combo_discount": 0,
         "total": 5999,
         "count": 2
     }
@@ -1175,7 +1155,7 @@ Quantity `0` removes the line, so the drawer can drop a row without a second cal
     "message": "Cart updated",
     "data": [
         {
-            "id": 114,
+            "id": 121,
             "product_id": 9,
             "product_variation_id": null,
             "combo_id": null,
@@ -1186,13 +1166,19 @@ Quantity `0` removes the line, so the drawer can drop a row without a second cal
             "options": [],
             "price": 2999.5,
             "quantity": 3,
+            "is_combo": false,
+            "combo": null,
+            "combo_units": 0,
+            "combo_names": [],
+            "regular_unit_price": 2999.5,
             "line_total": 8998.5,
-            "available_stock": 497,
+            "available_stock": 494,
             "url": "https://astroemerging.com/gehna/product/silver-elegant-butterflies-bracelet"
         }
     ],
     "meta": {
         "subtotal": 8998.5,
+        "combo_discount": 0,
         "total": 8998.5,
         "count": 3
     }
@@ -1211,7 +1197,7 @@ Quantity `0` removes the line, so the drawer can drop a row without a second cal
     "message": "OK",
     "data": [
         {
-            "id": 114,
+            "id": 121,
             "product_id": 9,
             "product_variation_id": null,
             "combo_id": null,
@@ -1222,13 +1208,19 @@ Quantity `0` removes the line, so the drawer can drop a row without a second cal
             "options": [],
             "price": 2999.5,
             "quantity": 3,
+            "is_combo": false,
+            "combo": null,
+            "combo_units": 0,
+            "combo_names": [],
+            "regular_unit_price": 2999.5,
             "line_total": 8998.5,
-            "available_stock": 497,
+            "available_stock": 494,
             "url": "https://astroemerging.com/gehna/product/silver-elegant-butterflies-bracelet"
         }
     ],
     "meta": {
         "subtotal": 8998.5,
+        "combo_discount": 0,
         "total": 8998.5,
         "count": 3
     }
@@ -1248,6 +1240,7 @@ Quantity `0` removes the line, so the drawer can drop a row without a second cal
     "data": [],
     "meta": {
         "subtotal": 0,
+        "combo_discount": 0,
         "total": 0,
         "count": 0
     }
@@ -1267,6 +1260,7 @@ Quantity `0` removes the line, so the drawer can drop a row without a second cal
     "data": [],
     "meta": {
         "subtotal": 0,
+        "combo_discount": 0,
         "total": 0,
         "count": 0
     }
@@ -1341,7 +1335,7 @@ Full product objects, ready to render as cards.
                 "... 1 more, 3 total"
             ],
             "manage_stock": true,
-            "stock": 497,
+            "stock": 494,
             "in_stock": true,
             "category": {
                 "id": 7,
@@ -1402,7 +1396,503 @@ Read-only. `?status=` and `?payment_status=` filter the list.
 }
 ```
 
-## 6. Search and site content
+### `GET /orders/{id}` &nbsp;`Bearer token required`
+
+**Order detail**  
+The one call that returns an order with its `items` and `items_count` filled in - use it for the order confirmation and history detail views.
+
+**Response `200`**
+
+```json
+{
+    "success": true,
+    "message": "OK",
+    "data": {
+        "id": 47,
+        "order_number": 47,
+        "status": "pending",
+        "payment_status": "pending",
+        "payment_method": "cod",
+        "paid_at": null,
+        "cancelled_at": null,
+        "cancel_reason": null,
+        "subtotal": 5999,
+        "total": 5999,
+        "refunded_total": 0,
+        "refund_status": "none",
+        "shipping_address": {
+            "name": "Doc Preview",
+            "email": "you@example.com",
+            "phone": "9812345678",
+            "line1": "12 Museum Road",
+            "city": "Bengaluru",
+            "state": "Karnataka",
+            "zip": "560001",
+            "country": "India"
+        },
+        "billing_address": {
+            "name": "Doc Preview",
+            "email": "you@example.com",
+            "phone": "9812345678",
+            "line1": "12 Museum Road",
+            "city": "Bengaluru",
+            "state": "Karnataka",
+            "zip": "560001",
+            "country": "India"
+        },
+        "items": [
+            {
+                "id": 83,
+                "product_id": 9,
+                "product_variation_id": null,
+                "product_name": "Silver Elegant Butterflies Bracelet",
+                "sku": null,
+                "image": "https://astroemerging.com/gehna/storage/products/JZBDIxaCw2LrKudyhdATWUjMKIHiRtHPMNwoSypB.png",
+                "unit_price": 2999.5,
+                "quantity": 2,
+                "line_total": 5999,
+                "meta": {
+                    "from_cart_id": 122,
+                    "variation_attributes": null
+                },
+                "url": "https://astroemerging.com/gehna/product/silver-elegant-butterflies-bracelet"
+            }
+        ],
+        "items_count": 1,
+        "created_at": "2026-10-07T12:32:40+00:00",
+        "updated_at": "2026-10-07T12:32:40+00:00"
+    },
+    "meta": {}
+}
+```
+
+## 6. Checkout and payments
+
+### `GET /checkout/summary` &nbsp;`Bearer token required`
+
+**Checkout summary**  
+Prices the cart on the server: combo and coupon discounts, Gehna Coins, shipping (free when the subtotal is ₹5,000 or more, otherwise ₹199) and the grand total. Also returns which payment providers are active, every eligible coupon, and a `checkout_token`.
+
+**Send that `checkout_token` back with `place-order`.** It makes retries idempotent: a double-tapped button or a network retry returns the order that already exists instead of creating a second one.
+
+**Response `200`**
+
+```json
+{
+    "success": true,
+    "message": "OK",
+    "data": {
+        "pricing": {
+            "subtotal": 5999,
+            "total_quantity": 2,
+            "combo_discount": 0,
+            "coupon_discount": 0,
+            "coins_discount": 0,
+            "coins_used": 0,
+            "shipping_charge": 0,
+            "grand_total": 5999
+        },
+        "combo_summary": {
+            "has_applied_combo": false,
+            "discount": 0
+        },
+        "applied_coupon": null,
+        "applied_coins": {
+            "requested": 0,
+            "coins": 0,
+            "discount": 0,
+            "balance": 0,
+            "balance_after": 0
+        },
+        "user_coins": {
+            "balance": 0,
+            "balance_after": 0
+        },
+        "available_coupons": [
+            {
+                "id": 5,
+                "code": "Diwali",
+                "type": "percent",
+                "amount": 10,
+                "buy_quantity": 0,
+                "get_quantity": 0,
+                "reward_coins": 0,
+                "min_order_amount": 5000,
+                "validity_text": "From 22 Sep 2026, 04:32 PM",
+                "is_applicable": true,
+                "ineligible_reason": null
+            }
+        ],
+        "payment_providers": {
+            "cod": {
+                "enabled": true,
+                "name": "Cash on Delivery"
+            },
+            "razorpay": {
+                "enabled": true,
+                "name": "Razorpay",
+                "key": "rzp_test_TkujmCnZM9yg11"
+            }
+        },
+        "checkout_token": "b33e3972-6e77-438a-9ae4-e88314514350"
+    },
+    "meta": {}
+}
+```
+
+### `POST /checkout/apply-coupon` &nbsp;`Bearer token required`
+
+**Apply a coupon**  
+The discount is recomputed server-side from the coupon rules - never trust a discount sent by the client. Coupons cannot be combined with an active combo offer.
+
+**Request body**
+
+```json
+{
+    "coupon_code": "Diwali"
+}
+```
+
+**Response `200`**
+
+```json
+{
+    "success": true,
+    "message": "Coupon applied successfully.",
+    "data": {
+        "coupon": {
+            "id": 5,
+            "code": "Diwali",
+            "type": "percent",
+            "amount": 10,
+            "discount": 599.9,
+            "free_items": []
+        }
+    },
+    "meta": {}
+}
+```
+
+### `POST /checkout/remove-coupon` &nbsp;`Bearer token required`
+
+**Remove the coupon**
+
+**Response `200`**
+
+```json
+{
+    "success": true,
+    "message": "Coupon removed.",
+    "data": null,
+    "meta": {}
+}
+```
+
+### `POST /checkout/apply-coins` &nbsp;`Bearer token required`
+
+**Redeem Gehna Coins**  
+Success returns `{ coins_used, discount, balance, balance_after }`, clamped to the balance and the order total. The capture shows the zero-balance rejection a freshly registered account gets; the applied figure always also appears in `summary.data.applied_coins`.
+
+**Request body**
+
+```json
+{
+    "coins": 5
+}
+```
+
+**Response `422`**
+
+```json
+{
+    "success": false,
+    "message": "You do not have any Gehna Coins to redeem yet.",
+    "data": null,
+    "errors": {},
+    "meta": {}
+}
+```
+
+### `POST /checkout/remove-coins` &nbsp;`Bearer token required`
+
+**Remove redeemed coins**
+
+**Response `200`**
+
+```json
+{
+    "success": true,
+    "message": "Gehna Coins removed.",
+    "data": null,
+    "meta": {}
+}
+```
+
+### `POST /checkout/place-order` &nbsp;`Bearer token required`
+
+**Place order - Cash on Delivery**  
+Creates the order, moves stock and clears the cart in one transaction. `is_paid` is `false`: payment is collected on delivery.
+
+All `billing_*` fields are required. The `shipping_*` fields fall back to their `billing_*` counterparts, so `shipping_same_as_billing: true` alone is enough.
+
+**Request body**
+
+```json
+{
+    "payment_method": "cod",
+    "checkout_token": "9eb39c4c-28a2-49d0-9cec-2217fc185221",
+    "billing_name": "Doc Preview",
+    "billing_email": "you@example.com",
+    "billing_phone": "9812345678",
+    "billing_line1": "12 Museum Road",
+    "billing_city": "Bengaluru",
+    "billing_state": "Karnataka",
+    "billing_zip": "560001",
+    "billing_country": "India",
+    "shipping_same_as_billing": true
+}
+```
+
+**Response `201`**
+
+```json
+{
+    "success": true,
+    "message": "Order placed successfully with Cash on Delivery.",
+    "data": {
+        "order": {
+            "id": 47,
+            "order_number": 47,
+            "status": "pending",
+            "payment_status": "pending",
+            "payment_method": "cod",
+            "paid_at": null,
+            "cancelled_at": null,
+            "cancel_reason": null,
+            "subtotal": 5999,
+            "total": 5999,
+            "refunded_total": 0,
+            "refund_status": "none",
+            "shipping_address": {
+                "name": "Doc Preview",
+                "email": "you@example.com",
+                "phone": "9812345678",
+                "line1": "12 Museum Road",
+                "city": "Bengaluru",
+                "state": "Karnataka",
+                "zip": "560001",
+                "country": "India"
+            },
+            "billing_address": {
+                "name": "Doc Preview",
+                "email": "you@example.com",
+                "phone": "9812345678",
+                "line1": "12 Museum Road",
+                "city": "Bengaluru",
+                "state": "Karnataka",
+                "zip": "560001",
+                "country": "India"
+            },
+            "created_at": "2026-10-07T12:32:40+00:00",
+            "updated_at": "2026-10-07T12:32:40+00:00"
+        },
+        "payment_method": "cod",
+        "is_paid": false
+    },
+    "meta": {}
+}
+```
+
+### `GET /checkout/payment-status/{order}` &nbsp;`Bearer token required`
+
+**Payment status - COD confirmed**  
+For an order paid on delivery `state` is `cod_confirmed`. The other values you will see are `paid`, `failed` and `processing`.
+
+**Response `200`**
+
+```json
+{
+    "success": true,
+    "message": "Order confirmed. Payment is due on delivery.",
+    "data": {
+        "order_id": 47,
+        "state": "cod_confirmed",
+        "payment_status": "pending",
+        "transaction_status": "pending"
+    },
+    "meta": {}
+}
+```
+
+### `POST /checkout/place-order` &nbsp;`Bearer token required`
+
+**Place order - Razorpay (online payment)**  
+The same request with `payment_method: "razorpay"`. The response carries a `razorpay` object - hand it straight to the Razorpay popup:
+
+```js
+const rzp = new Razorpay({
+    ...data.razorpay,
+    handler: (res) => api.verifyRazorpay({ order_id: data.order.id, ...res }),
+});
+rzp.open();
+```
+
+`amount` is in paise (₹ × 100). The order is created locally first, so if the customer abandons the popup the order simply stays `processing`.
+
+**Request body**
+
+```json
+{
+    "payment_method": "razorpay",
+    "checkout_token": "5584a74c-3b3f-4350-b8f7-a8f5f7cebf42",
+    "billing_name": "Doc Preview",
+    "billing_email": "you@example.com",
+    "billing_phone": "9812345678",
+    "billing_line1": "12 Museum Road",
+    "billing_city": "Bengaluru",
+    "billing_state": "Karnataka",
+    "billing_zip": "560001",
+    "billing_country": "India",
+    "shipping_same_as_billing": true
+}
+```
+
+**Response `201`**
+
+```json
+{
+    "success": true,
+    "message": "Order created. Please complete Razorpay payment.",
+    "data": {
+        "order": {
+            "id": 48,
+            "order_number": 48,
+            "status": "pending",
+            "payment_status": "initiated",
+            "payment_method": "razorpay",
+            "paid_at": null,
+            "cancelled_at": null,
+            "cancel_reason": null,
+            "subtotal": 3199,
+            "total": 3199,
+            "refunded_total": 0,
+            "refund_status": "none",
+            "shipping_address": {
+                "name": "Doc Preview",
+                "email": "you@example.com",
+                "phone": "9812345678",
+                "line1": "12 Museum Road",
+                "city": "Bengaluru",
+                "state": "Karnataka",
+                "zip": "560001",
+                "country": "India"
+            },
+            "billing_address": {
+                "name": "Doc Preview",
+                "email": "you@example.com",
+                "phone": "9812345678",
+                "line1": "12 Museum Road",
+                "city": "Bengaluru",
+                "state": "Karnataka",
+                "zip": "560001",
+                "country": "India"
+            },
+            "created_at": "2026-10-07T12:32:42+00:00",
+            "updated_at": "2026-10-07T12:32:42+00:00"
+        },
+        "payment_method": "razorpay",
+        "is_paid": false,
+        "razorpay": {
+            "key": "rzp_test_TkujmCnZM9yg11",
+            "order_id": "order_Tl1GfwQwFH2nAN",
+            "amount": 319900,
+            "currency": "INR",
+            "name": "Gehna",
+            "description": "Order #48",
+            "prefill": {
+                "name": "Doc Preview",
+                "email": "you@example.com",
+                "contact": "9812345678"
+            }
+        }
+    },
+    "meta": {}
+}
+```
+
+### `GET /checkout/payment-status/{order}` &nbsp;`Bearer token required`
+
+**Payment status - awaiting payment**  
+Poll this while the popup outcome is unknown. `state: "processing"` means neither a success nor a failure has been recorded yet.
+
+**Response `200`**
+
+```json
+{
+    "success": true,
+    "message": "Payment is being confirmed. Please wait.",
+    "data": {
+        "order_id": 48,
+        "state": "processing",
+        "payment_status": "initiated",
+        "transaction_status": "initiated"
+    },
+    "meta": {}
+}
+```
+
+### `POST /checkout/verify-razorpay` &nbsp;`Bearer token required`
+
+**Verify the Razorpay signature (forged)**  
+The popup's `handler` gives you `razorpay_order_id`, `razorpay_payment_id` and `razorpay_signature`; send them with the local `order_id`. The server recomputes `HMAC_SHA256(order_id|payment_id, secret)` - here the forged signature is rejected and the order flips to `failed`.
+
+On success the response is `200 { order, payment_status: "paid" }`, the cart is cleared and the invoice mail is queued. Verifying an already-paid order is safe: it returns success again instead of an error.
+
+**Request body**
+
+```json
+{
+    "order_id": 48,
+    "razorpay_order_id": "order_Tl1GfwQwFH2nAN",
+    "razorpay_payment_id": "pay_documentation",
+    "razorpay_signature": "forged-signature"
+}
+```
+
+**Response `422`**
+
+```json
+{
+    "success": false,
+    "message": "Payment verification failed. Signature mismatch.",
+    "data": null,
+    "errors": {},
+    "meta": {}
+}
+```
+
+### `GET /checkout/payment-status/{order}` &nbsp;`Bearer token required`
+
+**Payment status - failed**  
+The customer can safely retry `place-order` **with the same `checkout_token`**: an unpaid order is reused rather than duplicated.
+
+**Response `200`**
+
+```json
+{
+    "success": true,
+    "message": "Payment was not completed. You can safely retry this order.",
+    "data": {
+        "order_id": 48,
+        "state": "failed",
+        "payment_status": "failed",
+        "transaction_status": "failed"
+    },
+    "meta": {}
+}
+```
+
+## 7. Search and site content
 
 ### `GET /search?q=bracelet`
 
@@ -1444,7 +1934,7 @@ Returns products plus the categories that matched and the customer recent search
                 "... 1 more, 3 total"
             ],
             "manage_stock": true,
-            "stock": 497,
+            "stock": 494,
             "in_stock": true,
             "category": {
                 "id": 7,
@@ -1554,7 +2044,7 @@ Sliders, categories, new arrivals, featured, on sale, brands, FAQs and testimoni
                     "... 1 more, 3 total"
                 ],
                 "manage_stock": true,
-                "stock": 497,
+                "stock": 494,
                 "in_stock": true,
                 "category": {
                     "id": 7,
@@ -1598,7 +2088,7 @@ Sliders, categories, new arrivals, featured, on sale, brands, FAQs and testimoni
                     "... 1 more, 3 total"
                 ],
                 "manage_stock": true,
-                "stock": 497,
+                "stock": 494,
                 "in_stock": true,
                 "category": {
                     "id": 7,
@@ -1642,7 +2132,7 @@ Sliders, categories, new arrivals, featured, on sale, brands, FAQs and testimoni
                     "... 1 more, 3 total"
                 ],
                 "manage_stock": true,
-                "stock": 497,
+                "stock": 494,
                 "in_stock": true,
                 "category": {
                     "id": 7,
@@ -1656,17 +2146,7 @@ Sliders, categories, new arrivals, featured, on sale, brands, FAQs and testimoni
                 "0": "... 7 more item(s) in the real response, 8 total"
             }
         ],
-        "brands": [
-            {
-                "id": 1,
-                "name": "API Docs Brand",
-                "slug": "api-docs-brand",
-                "logo": "https://astroemerging.com/gehna/storage/brands/api-docs-brand.png",
-                "description": "A temporary brand created only to capture its API response for the documentation.",
-                "products_count": 0,
-                "url": "https://astroemerging.com/gehna/brand/api-docs-brand"
-            }
-        ],
+        "brands": [],
         "faqs": [],
         "testimonials": []
     },
@@ -1741,14 +2221,7 @@ Titles and slugs only; the body is on the detail call.
 {
     "success": true,
     "message": "OK",
-    "data": [
-        {
-            "id": 1,
-            "title": "API Docs Page",
-            "slug": "api-docs-page",
-            "url": "https://astroemerging.com/gehna/pages/api-docs-page"
-        }
-    ],
+    "data": [],
     "meta": {}
 }
 ```
@@ -1758,23 +2231,14 @@ Titles and slugs only; the body is on the detail call.
 **One CMS page**  
 Full HTML content plus meta fields.
 
-**Response `200`**
+**Response `404`**
 
 ```json
 {
-    "success": true,
-    "message": "OK",
-    "data": {
-        "id": 1,
-        "title": "API Docs Page",
-        "slug": "api-docs-page",
-        "content": "<h2>Temporary page</h2><p>Created only to capture its API response for the documentation.</p>",
-        "meta_title": "API Docs Page",
-        "meta_description": "Temporary page for API documentation capture.",
-        "meta_keywords": "api, docs, temporary",
-        "url": "https://astroemerging.com/gehna/pages/api-docs-page",
-        "updated_at": "2026-09-26T10:47:59+00:00"
-    },
+    "success": false,
+    "message": "Page not found.",
+    "data": null,
+    "errors": {},
     "meta": {}
 }
 ```
@@ -1821,15 +2285,15 @@ An address that is already subscribed returns 200 rather than an error.
 }
 ```
 
-**Response `200`**
+**Response `201`**
 
 ```json
 {
     "success": true,
-    "message": "This email is already subscribed to our newsletter.",
+    "message": "Thanks for subscribing to our newsletter.",
     "data": {
         "subscribed": true,
-        "already_subscribed": true
+        "already_subscribed": false
     },
     "meta": {}
 }
@@ -1844,28 +2308,55 @@ Live gold and silver prices, cached server-side.
 
 ```json
 {
-    "success": false,
+    "success": true,
     "data": {
-        "available": false,
+        "available": true,
         "stale": false,
-        "message": "Live rates are temporarily unavailable. Please check back shortly.",
+        "message": null,
         "currency": "INR",
         "currency_symbol": "₹",
         "unit_grams": 10,
         "unit_label": "per 10 gram (1 tola)",
-        "updated_at": null,
-        "updated_at_display": null,
-        "metals": []
+        "updated_at": "2026-10-07T12:32:26+00:00",
+        "updated_at_display": "07 Oct 2026, 12:32 PM",
+        "metals": [
+            {
+                "key": "gold",
+                "name": "Gold",
+                "symbol": "XAU",
+                "price": 127540.95,
+                "price_display": "₹127,541",
+                "change": -1502.85,
+                "change_display": "-₹1,503",
+                "change_percent": -1.16,
+                "change_percent_display": "-1.16%",
+                "high": 129216.23,
+                "low": 127540.95,
+                "open": 129170.16,
+                "direction": "down",
+                "is_up": false,
+                "purity": [
+                    {
+                        "key": "24k",
+                        "label": "24K",
+                        "price": 127540.95,
+                        "price_display": "₹127,541",
+                        "0": "... 2 more item(s) in the real response, 3 total"
+                    }
+                ],
+                "0": "... 1 more item(s) in the real response, 2 total"
+            }
+        ]
     },
     "meta": {
         "source": "goldapi.io",
         "cache_ttl": 900,
-        "generated_at": "2026-09-26T11:06:46+00:00"
+        "generated_at": "2026-10-07T12:32:26+00:00"
     }
 }
 ```
 
-## 7. Errors you must handle
+## 8. Errors you must handle
 
 ### `GET /cart (no token)`
 
@@ -1937,7 +2428,7 @@ Also what an **inactive** product returns, so a draft is not discoverable. There
 
 ---
 
-# 8. Product filters
+# 9. Product filters
 
 Accepted by `GET /products`, `GET /categories/{slug}/products`,
 `GET /brands/{slug}/products` and `GET /search`.
@@ -1962,7 +2453,7 @@ bookmarked URL with an old value still renders.
 
 ---
 
-# 9. Object reference
+# 10. Object reference
 
 Field-by-field meaning of the objects the endpoints return. Types are as they
 actually arrive, so you can write the TypeScript interfaces straight from this.
@@ -2049,9 +2540,34 @@ interface CartLine {
     options: Record<string, string>;   // variation attributes, e.g. { "Size": "18" }
     price: number;                      // unit price, resolved server-side
     quantity: number;
-    line_total: number;                 // price * quantity
+    is_combo: boolean;                  // true when this line is part of a bundle
+    combo: {
+        id: number;
+        name: string;
+        slug: string;
+        combo_price: number;            // the whole bundle, not this line
+    } | null;
+    combo_units: number;                // units of this line covered by a detected bundle
+    combo_names: string[];              // names of the bundles applying to this line
+    regular_unit_price: number;         // pre-combo price, for the struck-through figure
+    line_total: number;                 // what the customer is charged (price * quantity)
     available_stock: number;
     url: string | null;
+}
+```
+
+`line_total` is not always `price * quantity`. When a bundle applies, it is the
+discounted amount, so render `regular_unit_price` struck through next to it to
+show the saving. `combo_units` is `0` for a line added through
+`POST /cart/combo` (its discount is already inside `price`) and greater than `0`
+when `ComboService` detected a bundle from ordinary product lines.
+
+```ts
+interface CartMeta {
+    subtotal: number;      // sum of line prices
+    combo_discount: number;// bundle saving taken off by an auto-detected bundle
+    total: number;         // subtotal - combo_discount (shipping/tax are added at checkout)
+    count: number;         // total units, drives the header badge
 }
 ```
 
@@ -2160,7 +2676,7 @@ card always matches what the category page will actually show.
 
 ---
 
-# 10. Integration notes
+# 11. Integration notes
 
 Things that will save you debugging time.
 
@@ -2186,10 +2702,13 @@ times.
 tells you which in `data.in_wishlist`. Drive the heart icon from that value
 rather than assuming the click always adds.
 
-**Checkout is deliberately not on this API.** Placing an order moves stock,
-calls the payment gateway and books a delivery partner. That stays on the
-server-rendered checkout. `/orders` is read-only, for showing the customer what
-already happened.
+**Checkout runs over this API with the same guardrails as the Blade checkout.**
+`GET /checkout/summary` prices the cart and hands you a `checkout_token`;
+`POST /checkout/place-order` then moves stock, calls Razorpay and records the
+order. Send that token back on every retry: a double-tapped button or a network
+repeat returns the order that already exists instead of creating a second one.
+The gateway webhook (`POST /webhooks/razorpay`) is server-to-server - your
+client never calls it. `/orders` stays read-only history.
 
 **Reviews expose the author's name and initials only.** A review is public, so a
 customer's email or phone never rides along inside a product payload.
@@ -2200,7 +2719,7 @@ browser will block the responses before they reach your code. Local dev origins
 
 ---
 
-# 11. Using the client
+# 12. Using the client
 
 ```js
 import api, { authApi, productApi, ApiError } from './api/gehnaApi';
@@ -2228,6 +2747,26 @@ const { meta: cartMeta } = await api.getCart();
 console.log(cartMeta.count, cartMeta.subtotal);
 await api.toggleWishlist({ product_id: 7 });
 
+// Checkout: price the cart, then place the order.
+const { data: summary } = await api.getCheckoutSummary();
+console.log(summary.pricing.grand_total, summary.payment_providers);
+await api.applyCoupon('SAVE10');                       // optional
+const placed = await api.placeOrder({
+    payment_method: 'razorpay',                        // or 'cod'
+    checkout_token: summary.checkout_token,            // idempotent retry
+    billing_name: 'Ravi Kumar',
+    billing_email: 'you@example.com',
+    billing_phone: '9812345678',
+    billing_line1: '12 MG Road',
+    billing_city: 'Bengaluru',
+    billing_state: 'Karnataka',
+    billing_zip: '560001',
+    billing_country: 'India',
+    shipping_same_as_billing: true,
+});
+// placed.data.razorpay feeds the Razorpay popup; the popup handler then calls
+// api.verifyRazorpay({ order_id: placed.data.order.id, ...paymentResponse }).
+
 // Errors: one type, one check.
 try {
     await api.getCart();
@@ -2245,7 +2784,7 @@ await api.logout();
 
 ---
 
-# 12. Server configuration
+# 13. Server configuration
 
 ```dotenv
 # Public base URL including the install folder. Leave empty to auto-detect.
@@ -2286,3 +2825,13 @@ php artisan test --filter=ApiStorefrontTest
 23 tests cover the envelope, catalogue filters, product detail pricing, token
 auth, cart/wishlist/orders isolation, and the guarantee that mail credentials
 never leave the server.
+
+Checkout, coupons, Gehna Coins, order placement and the Razorpay signature
+verification are covered separately:
+
+```bash
+php artisan test --filter=ApiCheckoutTest
+```
+
+A complete React checkout page built on the same client is included at
+`docs/react/CheckoutPage.jsx`.

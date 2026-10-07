@@ -584,6 +584,89 @@ export const orderApi = {
   },
 };
 
+/**
+ *  GET  /checkout/summary            POST /checkout/apply-coupon
+ *  POST /checkout/remove-coupon       POST /checkout/apply-coins
+ *  POST /checkout/remove-coins        POST /checkout/place-order
+ *  POST /checkout/verify-razorpay    GET  /checkout/payment-status/{order}
+ */
+export const checkoutApi = {
+  /** Fetch cart totals, available coupons, user coins & active payment providers. */
+  summary(params = {}) {
+    return request('/checkout/summary', { params });
+  },
+
+  /** Apply a coupon code. */
+  applyCoupon(couponCode) {
+    return request('/checkout/apply-coupon', { method: 'POST', body: { coupon_code: couponCode } });
+  },
+
+  /** Remove current coupon. */
+  removeCoupon() {
+    return request('/checkout/remove-coupon', { method: 'POST' });
+  },
+
+  /** Apply Gehna Coins. */
+  applyCoins(coins) {
+    return request('/checkout/apply-coins', { method: 'POST', body: { coins } });
+  },
+
+  /** Remove Gehna Coins. */
+  removeCoins() {
+    return request('/checkout/remove-coins', { method: 'POST' });
+  },
+
+  /**
+   * Place an order (COD or Razorpay).
+   *
+   * @param {{
+   *   payment_method: 'cod'|'razorpay',
+   *   checkout_token?: string,
+   *   coupon_code?: string,
+   *   coins?: number,
+   *   billing_name: string,
+   *   billing_email: string,
+   *   billing_phone: string,
+   *   billing_line1: string,
+   *   billing_city: string,
+   *   billing_state: string,
+   *   billing_zip: string,
+   *   billing_country: string,
+   *   shipping_same_as_billing?: boolean,
+   *   shipping_name?: string,
+   *   shipping_phone?: string,
+   *   shipping_line1?: string,
+   *   shipping_city?: string,
+   *   shipping_state?: string,
+   *   shipping_zip?: string,
+   *   shipping_country?: string
+   * }} payload
+   */
+  placeOrder(payload) {
+    return request('/checkout/place-order', { method: 'POST', body: payload });
+  },
+
+  /**
+   * Verify Razorpay payment signature after customer pays in the Razorpay popup.
+   *
+   * @param {{
+   *   order_id: number,
+   *   razorpay_order_id: string,
+   *   razorpay_payment_id: string,
+   *   razorpay_signature: string
+   * }} payload
+   */
+  verifyRazorpay(payload) {
+    return request('/checkout/verify-razorpay', { method: 'POST', body: payload });
+  },
+
+  /** Get current payment status of an order. */
+  getPaymentStatus(orderId) {
+    return request(`/checkout/payment-status/${orderId}`);
+  },
+};
+
+
 
 /* -------------------------------------------------------------------------- */
 /*  SITE CONTENT                                                              */
@@ -706,6 +789,16 @@ const gehnaApi = {
   clearWishlist: wishlistApi.clear,
   getOrders: orderApi.list,
   getOrder: orderApi.get,
+
+  // checkout & payment
+  getCheckoutSummary: checkoutApi.summary,
+  applyCoupon: checkoutApi.applyCoupon,
+  removeCoupon: checkoutApi.removeCoupon,
+  applyCoins: checkoutApi.applyCoins,
+  removeCoins: checkoutApi.removeCoins,
+  placeOrder: checkoutApi.placeOrder,
+  verifyRazorpay: checkoutApi.verifyRazorpay,
+  getPaymentStatus: checkoutApi.getPaymentStatus,
 
   // content
   getHome: contentApi.home,

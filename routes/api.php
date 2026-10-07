@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\ComboController;
 use App\Http\Controllers\Api\ContentController;
 use App\Http\Controllers\Api\MetalPriceController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\WishlistController;
+use App\Http\Controllers\Frontend\FrontendCheckoutController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -130,5 +132,19 @@ Route::prefix('v1')->name('api.')->group(function () {
 
         Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('orders/{id}', [OrderController::class, 'show'])->name('orders.show');
+
+        // ── Checkout & Payments ────────────────────────────────────────
+        Route::get('checkout/summary', [CheckoutController::class, 'summary'])->name('checkout.summary');
+        Route::post('checkout/apply-coupon', [CheckoutController::class, 'applyCoupon'])->name('checkout.apply-coupon');
+        Route::post('checkout/remove-coupon', [CheckoutController::class, 'removeCoupon'])->name('checkout.remove-coupon');
+        Route::post('checkout/apply-coins', [CheckoutController::class, 'applyCoins'])->name('checkout.apply-coins');
+        Route::post('checkout/remove-coins', [CheckoutController::class, 'removeCoins'])->name('checkout.remove-coins');
+        Route::post('checkout/place-order', [CheckoutController::class, 'placeOrder'])->name('checkout.place-order');
+        Route::post('checkout/verify-razorpay', [CheckoutController::class, 'verifyRazorpay'])->name('checkout.verify-razorpay');
+        Route::get('checkout/payment-status/{order}', [CheckoutController::class, 'paymentStatus'])->name('checkout.payment-status');
     });
+
+    // ── Public Payment Webhooks ─────────────────────────────────────
+    Route::post('webhooks/razorpay', [FrontendCheckoutController::class, 'razorpayWebhook'])->name('webhooks.razorpay');
 });
+

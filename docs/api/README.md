@@ -24,10 +24,17 @@ GEHNA_API_BASE=https://staging.example.com/api/v1 node docs/api/capture.mjs
 
 | File | Role |
 | --- | --- |
-| `capture.mjs` | Calls all 43 endpoints (registering a throwaway account for the authenticated ones) and writes `captured.json`. Tokens and throwaway emails/phones are scrubbed. |
+| `capture.mjs` | Calls all 56 endpoints (registering a throwaway account for the authenticated ones) and writes `captured.json`. Tokens and throwaway emails/phones are scrubbed. |
 | `render.php` | Formats `captured.json` into `endpoints.md`, rewriting the local origin to the production domain and shortening long text and image arrays. |
 | `assemble.php` | Concatenates `prose/*.md` and `endpoints.md` into `API.md`. |
 | `prose/*.md` | The hand-written parts: base URL, auth flow, envelope, status codes, filters, TypeScript interfaces, integration notes. |
+
+The authenticated pass also walks the whole checkout: it refills the cart,
+applies a coupon, places a Cash-on-Delivery order, then places a **test-mode
+Razorpay order** (a gateway order is created - no money moves) and finally
+forges a bad signature to show verification failing. A real card payment cannot
+be scripted, so the verify **success** response is described in the endpoint
+note instead of being captured.
 
 ## Two things it deliberately corrects
 
