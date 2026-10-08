@@ -34,7 +34,7 @@ class OrderInventoryService
 
             if (! empty($item->product_id)) {
                 $product = Product::find($item->product_id);
-                if ($product && $product->manage_stock) {
+                if ($product) {
                     $product->stock = max(0, (int) $product->stock - $qty);
                     $product->save();
                 }
@@ -70,7 +70,7 @@ class OrderInventoryService
 
             if (! empty($item->product_id)) {
                 $product = Product::find($item->product_id);
-                if ($product && $product->manage_stock) {
+                if ($product) {
                     $product->stock = (int) $product->stock + $qty;
                     $product->save();
                 }

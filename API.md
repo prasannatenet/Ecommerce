@@ -26,6 +26,16 @@ https://astroemerging.com/gehna/api/v1/products
 | Live demo | `https://astroemerging.com/gehna/api-demo` |
 | Tests | `php artisan test --filter="Api(Storefront|Checkout)Test"` |
 
+## Other places to look
+
+| | |
+| --- | --- |
+| Browser reference | `docs/api/index.html` - all 52 routes in a table |
+| Generator notes | `docs/api/README.md` - how to (re)capture the responses from a live server |
+| React client | `public/js/gehna-api.js` - copy to `src/api/gehnaApi.js` |
+
+Note: `docs/api/routes.json` is generated from `php artisan route:list --path=api`, so it reflects the current route definitions exactly.
+
 The client is dependency-free (plain `fetch`) and already wraps every endpoint
 below, including token storage and error handling. You can use it as-is or call
 the API directly.

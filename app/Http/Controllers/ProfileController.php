@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\PasswordVerificationCode;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,8 +17,16 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        // An open 6-digit challenge means the page should render step 2 (the
+        // code form) instead of step 1 (the password form), even across a
+        // refresh, until the code expires or is used.
+        $pendingCode = PasswordVerificationCode::activeFor($request->user()->id)
+            ->latest('id')
+            ->first();
+
         return view('profile.edit', [
             'user' => $request->user(),
+            'passwordChangePending' => $pendingCode,
         ]);
     }
 

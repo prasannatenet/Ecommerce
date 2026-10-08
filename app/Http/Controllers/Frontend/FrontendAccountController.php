@@ -64,6 +64,16 @@ class FrontendAccountController extends Controller
 
     public function updatePassword(Request $request): RedirectResponse
     {
+        // Same guard as PasswordController: an admin's password may only move
+        // through the emailed 6-digit code flow on /profile, never directly.
+        $user = $request->user();
+
+        if ($user && ($user->hasRole('admin') || $user->can('access admin'))) {
+            return redirect()
+                ->route('profile.edit')
+                ->with('error', 'Admin passwords can only be changed after the 6-digit code sent to your email is verified.');
+        }
+
         $validated = $request->validate([
             'current_password' => ['required', 'current_password'],
             'password' => ['required', 'confirmed', Password::defaults()],

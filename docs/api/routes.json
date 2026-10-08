@@ -1,0 +1,633 @@
+[
+    {
+        "uri": "api/v1/auth/login",
+        "methods": [
+            "POST"
+        ],
+        "name": "api.auth.login",
+        "action": "App\\Http\\Controllers\\Api\\AuthController@login",
+        "middleware": [
+            "api",
+            "Illuminate\\Routing\\Middleware\\ThrottleRequests:10,1"
+        ]
+    },
+    {
+        "uri": "api/v1/auth/logout",
+        "methods": [
+            "POST"
+        ],
+        "name": "api.auth.logout",
+        "action": "App\\Http\\Controllers\\Api\\AuthController@logout",
+        "middleware": [
+            "api",
+            "Illuminate\\Auth\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "uri": "api/v1/auth/logout-all",
+        "methods": [
+            "POST"
+        ],
+        "name": "api.auth.logout-all",
+        "action": "App\\Http\\Controllers\\Api\\AuthController@logoutAll",
+        "middleware": [
+            "api",
+            "Illuminate\\Auth\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "uri": "api/v1/auth/me",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.auth.me",
+        "action": "App\\Http\\Controllers\\Api\\AuthController@me",
+        "middleware": [
+            "api",
+            "Illuminate\\Auth\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "uri": "api/v1/auth/password",
+        "methods": [
+            "PUT"
+        ],
+        "name": "api.auth.password",
+        "action": "App\\Http\\Controllers\\Api\\AuthController@updatePassword",
+        "middleware": [
+            "api",
+            "Illuminate\\Auth\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "uri": "api/v1/auth/profile",
+        "methods": [
+            "PUT"
+        ],
+        "name": "api.auth.profile",
+        "action": "App\\Http\\Controllers\\Api\\AuthController@updateProfile",
+        "middleware": [
+            "api",
+            "Illuminate\\Auth\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "uri": "api/v1/auth/register",
+        "methods": [
+            "POST"
+        ],
+        "name": "api.auth.register",
+        "action": "App\\Http\\Controllers\\Api\\AuthController@register",
+        "middleware": [
+            "api",
+            "Illuminate\\Routing\\Middleware\\ThrottleRequests:10,1"
+        ]
+    },
+    {
+        "uri": "api/v1/brands",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.brands.index",
+        "action": "App\\Http\\Controllers\\Api\\BrandController@index",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "uri": "api/v1/brands/{slug}",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.brands.show",
+        "action": "App\\Http\\Controllers\\Api\\BrandController@show",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "uri": "api/v1/brands/{slug}/products",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.brands.products",
+        "action": "App\\Http\\Controllers\\Api\\BrandController@products",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "uri": "api/v1/cart",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.cart.index",
+        "action": "App\\Http\\Controllers\\Api\\CartController@index",
+        "middleware": [
+            "api",
+            "Illuminate\\Auth\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "uri": "api/v1/cart",
+        "methods": [
+            "POST"
+        ],
+        "name": "api.cart.store",
+        "action": "App\\Http\\Controllers\\Api\\CartController@store",
+        "middleware": [
+            "api",
+            "Illuminate\\Auth\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "uri": "api/v1/cart",
+        "methods": [
+            "DELETE"
+        ],
+        "name": "api.cart.clear",
+        "action": "App\\Http\\Controllers\\Api\\CartController@clear",
+        "middleware": [
+            "api",
+            "Illuminate\\Auth\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "uri": "api/v1/cart/combo",
+        "methods": [
+            "POST"
+        ],
+        "name": "api.cart.combo.store",
+        "action": "App\\Http\\Controllers\\Api\\CartController@storeCombo",
+        "middleware": [
+            "api",
+            "Illuminate\\Auth\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "uri": "api/v1/cart/{cart}",
+        "methods": [
+            "PATCH"
+        ],
+        "name": "api.cart.update",
+        "action": "App\\Http\\Controllers\\Api\\CartController@update",
+        "middleware": [
+            "api",
+            "Illuminate\\Auth\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "uri": "api/v1/cart/{cart}",
+        "methods": [
+            "DELETE"
+        ],
+        "name": "api.cart.destroy",
+        "action": "App\\Http\\Controllers\\Api\\CartController@destroy",
+        "middleware": [
+            "api",
+            "Illuminate\\Auth\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "uri": "api/v1/categories",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.categories.index",
+        "action": "App\\Http\\Controllers\\Api\\CategoryController@index",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "uri": "api/v1/categories/tree",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.categories.tree",
+        "action": "App\\Http\\Controllers\\Api\\CategoryController@index",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "uri": "api/v1/categories/{slug}",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.categories.show",
+        "action": "App\\Http\\Controllers\\Api\\CategoryController@show",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "uri": "api/v1/categories/{slug}/products",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.categories.products",
+        "action": "App\\Http\\Controllers\\Api\\CategoryController@products",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "uri": "api/v1/checkout/apply-coins",
+        "methods": [
+            "POST"
+        ],
+        "name": "api.checkout.apply-coins",
+        "action": "App\\Http\\Controllers\\Api\\CheckoutController@applyCoins",
+        "middleware": [
+            "api",
+            "Illuminate\\Auth\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "uri": "api/v1/checkout/apply-coupon",
+        "methods": [
+            "POST"
+        ],
+        "name": "api.checkout.apply-coupon",
+        "action": "App\\Http\\Controllers\\Api\\CheckoutController@applyCoupon",
+        "middleware": [
+            "api",
+            "Illuminate\\Auth\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "uri": "api/v1/checkout/payment-status/{order}",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.checkout.payment-status",
+        "action": "App\\Http\\Controllers\\Api\\CheckoutController@paymentStatus",
+        "middleware": [
+            "api",
+            "Illuminate\\Auth\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "uri": "api/v1/checkout/place-order",
+        "methods": [
+            "POST"
+        ],
+        "name": "api.checkout.place-order",
+        "action": "App\\Http\\Controllers\\Api\\CheckoutController@placeOrder",
+        "middleware": [
+            "api",
+            "Illuminate\\Auth\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "uri": "api/v1/checkout/remove-coins",
+        "methods": [
+            "POST"
+        ],
+        "name": "api.checkout.remove-coins",
+        "action": "App\\Http\\Controllers\\Api\\CheckoutController@removeCoins",
+        "middleware": [
+            "api",
+            "Illuminate\\Auth\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "uri": "api/v1/checkout/remove-coupon",
+        "methods": [
+            "POST"
+        ],
+        "name": "api.checkout.remove-coupon",
+        "action": "App\\Http\\Controllers\\Api\\CheckoutController@removeCoupon",
+        "middleware": [
+            "api",
+            "Illuminate\\Auth\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "uri": "api/v1/checkout/summary",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.checkout.summary",
+        "action": "App\\Http\\Controllers\\Api\\CheckoutController@summary",
+        "middleware": [
+            "api",
+            "Illuminate\\Auth\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "uri": "api/v1/checkout/verify-razorpay",
+        "methods": [
+            "POST"
+        ],
+        "name": "api.checkout.verify-razorpay",
+        "action": "App\\Http\\Controllers\\Api\\CheckoutController@verifyRazorpay",
+        "middleware": [
+            "api",
+            "Illuminate\\Auth\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "uri": "api/v1/combos",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.combos.index",
+        "action": "App\\Http\\Controllers\\Api\\ComboController@index",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "uri": "api/v1/combos/{slug}",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.combos.show",
+        "action": "App\\Http\\Controllers\\Api\\ComboController@show",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "uri": "api/v1/faqs",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.faqs.index",
+        "action": "App\\Http\\Controllers\\Api\\ContentController@faqs",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "uri": "api/v1/home",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.home",
+        "action": "App\\Http\\Controllers\\Api\\ContentController@home",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "uri": "api/v1/metal-prices",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.metal-prices.index",
+        "action": "App\\Http\\Controllers\\Api\\MetalPriceController@index",
+        "middleware": [
+            "api",
+            "Illuminate\\Routing\\Middleware\\ThrottleRequests:60,1"
+        ]
+    },
+    {
+        "uri": "api/v1/metal-prices/{metal}",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.metal-prices.show",
+        "action": "App\\Http\\Controllers\\Api\\MetalPriceController@show",
+        "middleware": [
+            "api",
+            "Illuminate\\Routing\\Middleware\\ThrottleRequests:60,1"
+        ]
+    },
+    {
+        "uri": "api/v1/newsletter",
+        "methods": [
+            "POST"
+        ],
+        "name": "api.newsletter",
+        "action": "App\\Http\\Controllers\\Api\\ContentController@newsletter",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "uri": "api/v1/orders",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.orders.index",
+        "action": "App\\Http\\Controllers\\Api\\OrderController@index",
+        "middleware": [
+            "api",
+            "Illuminate\\Auth\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "uri": "api/v1/orders/{id}",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.orders.show",
+        "action": "App\\Http\\Controllers\\Api\\OrderController@show",
+        "middleware": [
+            "api",
+            "Illuminate\\Auth\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "uri": "api/v1/pages",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.pages.index",
+        "action": "App\\Http\\Controllers\\Api\\ContentController@pages",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "uri": "api/v1/pages/{slug}",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.pages.show",
+        "action": "App\\Http\\Controllers\\Api\\ContentController@page",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "uri": "api/v1/products",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.products.index",
+        "action": "App\\Http\\Controllers\\Api\\ProductController@index",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "uri": "api/v1/products/{slug}",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.products.show",
+        "action": "App\\Http\\Controllers\\Api\\ProductController@show",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "uri": "api/v1/products/{slug}/related",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.products.related",
+        "action": "App\\Http\\Controllers\\Api\\ProductController@related",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "uri": "api/v1/products/{slug}/reviews",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.products.reviews",
+        "action": "App\\Http\\Controllers\\Api\\ProductController@reviews",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "uri": "api/v1/search",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.search",
+        "action": "App\\Http\\Controllers\\Api\\SearchController",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "uri": "api/v1/settings",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.settings",
+        "action": "App\\Http\\Controllers\\Api\\ContentController@settings",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "uri": "api/v1/sliders",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.sliders.index",
+        "action": "App\\Http\\Controllers\\Api\\ContentController@sliders",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "uri": "api/v1/testimonials",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.testimonials.index",
+        "action": "App\\Http\\Controllers\\Api\\ContentController@testimonials",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "uri": "api/v1/webhooks/razorpay",
+        "methods": [
+            "POST"
+        ],
+        "name": "api.webhooks.razorpay",
+        "action": "App\\Http\\Controllers\\Frontend\\FrontendCheckoutController@razorpayWebhook",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "uri": "api/v1/wishlist",
+        "methods": [
+            "GET",
+            "HEAD"
+        ],
+        "name": "api.wishlist.index",
+        "action": "App\\Http\\Controllers\\Api\\WishlistController@index",
+        "middleware": [
+            "api",
+            "Illuminate\\Auth\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "uri": "api/v1/wishlist",
+        "methods": [
+            "DELETE"
+        ],
+        "name": "api.wishlist.clear",
+        "action": "App\\Http\\Controllers\\Api\\WishlistController@clear",
+        "middleware": [
+            "api",
+            "Illuminate\\Auth\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "uri": "api/v1/wishlist/toggle",
+        "methods": [
+            "POST"
+        ],
+        "name": "api.wishlist.toggle",
+        "action": "App\\Http\\Controllers\\Api\\WishlistController@toggle",
+        "middleware": [
+            "api",
+            "Illuminate\\Auth\\Middleware\\Authenticate:sanctum"
+        ]
+    },
+    {
+        "uri": "api/v1/wishlist/{productId}",
+        "methods": [
+            "DELETE"
+        ],
+        "name": "api.wishlist.destroy",
+        "action": "App\\Http\\Controllers\\Api\\WishlistController@destroy",
+        "middleware": [
+            "api",
+            "Illuminate\\Auth\\Middleware\\Authenticate:sanctum"
+        ]
+    }
+]

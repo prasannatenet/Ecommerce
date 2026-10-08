@@ -510,6 +510,7 @@ class FrontendCheckoutController extends Controller
     {
         if ($order->payment_method === 'cod') {
             $this->queueInvoiceMail($order);
+            $this->inventoryService->deductForOrder($order);
             Cart::where('user_id', $order->user_id)->delete();
             session()->forget(['checkout_coupon', 'checkout_coins', 'checkout_token']);
 

@@ -33,7 +33,7 @@
         </div>
     </div>
 
-    <div class="col-12 mt-4">
+    {{-- <div class="col-12 mt-4">
         <div class="df-card" style="border-color:var(--df-danger); border-left:4px solid var(--df-danger);">
             <div class="df-card-header">
                 <h5 class="df-card-title text-danger"><i class="bi bi-exclamation-triangle"></i> Danger Zone</h5>
@@ -42,7 +42,7 @@
                 @include('profile.partials.delete-user-form')
             </div>
         </div>
-    </div>
+    </div> --}}
 </div>
 
 @endsection

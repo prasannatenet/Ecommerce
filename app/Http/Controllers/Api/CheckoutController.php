@@ -645,6 +645,7 @@ class CheckoutController extends ApiController
     {
         if ($order->payment_method === 'cod') {
             $this->queueInvoiceMail($order);
+            $this->inventoryService->deductForOrder($order);
             Cart::where('user_id', $user->id)->delete();
             session()->forget(['checkout_coupon', 'checkout_coins']);
 
