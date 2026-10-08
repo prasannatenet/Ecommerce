@@ -67,6 +67,22 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Admin panel password changes are gated by a 6-digit code emailed to the
+    // account: step 1 sends the code (and stages the new password), step 2
+    // applies it. Throttled so neither step can be used to spam the inbox or
+    // to brute-force the six digits.
+    Route::post('/profile/password/code', [\App\Http\Controllers\AdminPasswordController::class, 'sendCode'])
+        ->middleware('throttle:6,1')
+        ->name('profile.password.code');
+    Route::post('/profile/password/verify', [\App\Http\Controllers\AdminPasswordController::class, 'verify'])
+        ->middleware('throttle:6,1')
+        ->name('profile.password.verify');
+    Route::post('/profile/password/resend', [\App\Http\Controllers\AdminPasswordController::class, 'resend'])
+        ->middleware('throttle:6,1')
+        ->name('profile.password.resend');
+    Route::post('/profile/password/cancel', [\App\Http\Controllers\AdminPasswordController::class, 'cancel'])
+        ->name('profile.password.cancel');
 });
 
 // Public
