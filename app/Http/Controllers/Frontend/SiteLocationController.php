@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
+use App\Services\LocationGeocoder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 
 class SiteLocationController extends Controller
 {
@@ -71,14 +71,14 @@ class SiteLocationController extends Controller
      * Auto-detect the pincode from the browser's GPS coordinates.
      * Frontend sends latitude/longitude obtained via navigator.geolocation.
      */
-    public function detect(Request $request): JsonResponse
+    public function detect(Request $request, LocationGeocoder $geocoder): JsonResponse
     {
         $data = $request->validate([
             'latitude'  => ['required', 'numeric', 'between:-90,90'],
             'longitude' => ['required', 'numeric', 'between:-180,180'],
         ]);
 
-        $place = $this->reverseGeocode((float) $data['latitude'], (float) $data['longitude']);
+        $place = $geocoder->reverse((float) $data['latitude'], (float) $data['longitude']);
 
         if (empty($place['pincode'])) {
             return response()->json([
@@ -96,74 +96,6 @@ class SiteLocationController extends Controller
                 'auto',
             ) + ['success' => true]
         );
-    }
-
-    /**
-     * Look up the pincode for coordinates. Tries BigDataCloud's free endpoint
-     * first (no API key required) and falls back to OpenStreetMap Nominatim.
-     */
-    private function reverseGeocode(float $latitude, float $longitude): array
-    {
-        $place = ['pincode' => null, 'city' => null, 'state' => null];
-
-        try {
-            $response = Http::timeout(8)
-                ->connectTimeout(5)
-                ->get('https://api.bigdatacloud.net/data/reverse-geocode-client', [
-                    'latitude'         => $latitude,
-                    'longitude'        => $longitude,
-                    'localityLanguage' => 'en',
-                ]);
-
-            if ($response->successful()) {
-                $body = $response->json();
-
-                $place['pincode'] = $body['postcode'] ?? null;
-                $place['city']    = $body['city'] ?? $body['locality'] ?? $body['principalSubdivision'] ?? null;
-                $place['state']   = $body['principalSubdivision'] ?? null;
-            }
-        } catch (\Throwable $e) {
-            report($e);
-        }
-
-        if (empty($place['pincode'])) {
-            try {
-                $response = Http::timeout(8)
-                    ->connectTimeout(5)
-                    ->withHeaders(['User-Agent' => 'GEHNA-Ecommerce/1.0 (delivery-pincode-lookup)'])
-                    ->get('https://nominatim.openstreetmap.org/reverse', [
-                        'format'         => 'jsonv2',
-                        'lat'            => $latitude,
-                        'lon'            => $longitude,
-                        'addressdetails' => 1,
-                        'zoom'           => 18,
-                    ]);
-
-                if ($response->successful()) {
-                    $address = $response->json('address', []);
-
-                    $place['pincode'] = $address['postcode'] ?? null;
-                    $place['city']    = $address['city']
-                        ?? $address['town']
-                        ?? $address['village']
-                        ?? $address['suburb']
-                        ?? $address['county']
-                        ?? null;
-                    $place['state'] = $address['state'] ?? null;
-                }
-            } catch (\Throwable $e) {
-                report($e);
-            }
-        }
-
-        // Normalise pincodes such as "110001-2706" or "PIN 110001" down to 6 digits.
-        if (! empty($place['pincode'])) {
-            $place['pincode'] = preg_match('/\b([1-9][0-9]{5})\b/', (string) $place['pincode'], $m)
-                ? $m[1]
-                : null;
-        }
-
-        return $place;
     }
 
     /**

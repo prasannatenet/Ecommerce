@@ -34,6 +34,8 @@ class ProductResource extends JsonResource
             'slug' => $this->slug,
             'sku' => $this->sku,
             'url' => $this->pageUrl('product.show', $this->slug),
+            'created_at' => $this->created_at?->toISOString(),
+            'updated_at' => $this->updated_at?->toISOString(),
 
             'audience' => $this->audience,
             'material_type' => $this->material_type,

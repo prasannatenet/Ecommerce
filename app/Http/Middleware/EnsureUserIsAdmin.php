@@ -16,6 +16,10 @@ class EnsureUserIsAdmin
 
         // allow users with 'admin' role or permission
         if (!Auth::user() || (!Auth::user()->hasRole('admin') && !Auth::user()->can('access admin'))) {
+            if ($request->is('api/*')) {
+                abort(403, 'You do not have access to the admin panel.');
+            }
+
             return redirect()->route('account.index')
                 ->with('error', 'You do not have access to the admin panel.');
         }

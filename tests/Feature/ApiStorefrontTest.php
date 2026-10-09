@@ -55,15 +55,17 @@ function apiOrder(int $userId): Order
 /* -- Envelope and catalogue ---------------------------------------- */
 
 it('returns the standard envelope from the product list', function () {
-    apiProduct('Envelope Ring');
+    $product = apiProduct('Envelope Ring');
 
     get('/api/v1/products')
         ->assertOk()
         ->assertJsonStructure([
             'success',
-            'data' => [['id', 'name', 'slug', 'price', 'regular_price', 'in_stock', 'url']],
+            'data' => [['id', 'name', 'slug', 'price', 'regular_price', 'in_stock', 'url', 'created_at', 'updated_at']],
             'meta' => ['current_page', 'last_page', 'per_page', 'total'],
-        ]);
+        ])
+        ->assertJsonPath('data.0.created_at', $product->created_at->toISOString())
+        ->assertJsonPath('data.0.updated_at', $product->updated_at->toISOString());
 });
 
 it('paginates and caps per_page', function () {
@@ -470,4 +472,3 @@ it('leaves web error handling alone', function () {
     expect($response->headers->get('content-type'))
         ->not->toContain('application/json');
 });
-

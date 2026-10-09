@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AdminSettingController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\CartController;
@@ -7,8 +8,10 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\ComboController;
 use App\Http\Controllers\Api\ContentController;
+use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\MetalPriceController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\OffersController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\WishlistController;
@@ -61,13 +64,33 @@ Route::prefix('v1')->name('api.')->group(function () {
     Route::get('faqs', [ContentController::class, 'faqs'])->name('faqs.index');
     Route::get('testimonials', [ContentController::class, 'testimonials'])->name('testimonials.index');
     Route::get('settings', [ContentController::class, 'settings'])->name('settings');
+    Route::get('coupons', [OffersController::class, 'coupons'])->name('coupons.index');
+    Route::get('offers', [OffersController::class, 'index'])->name('offers.index');
     Route::post('newsletter', [ContentController::class, 'newsletter'])->name('newsletter');
+    Route::post('location/detect', [LocationController::class, 'detect'])
+        ->middleware('throttle:10,1')
+        ->name('location.detect');
+    Route::post('location/detect-by-ip', [LocationController::class, 'detectByIp'])
+        ->middleware('throttle:10,1')
+        ->name('location.detect-by-ip');
+
+    // Store settings are writable only by authenticated administrators.
+    Route::prefix('admin')->name('admin.')->middleware(['auth:sanctum', 'admin'])->group(function () {
+        Route::get('settings', [AdminSettingController::class, 'show'])->name('settings.show');
+        Route::match(['put', 'patch'], 'settings', [AdminSettingController::class, 'update'])->name('settings.update');
+        Route::post('settings/test-email', [AdminSettingController::class, 'testEmail'])->name('settings.test-email');
+    });
 
     // ── Public: catalogue ──────────────────────────────────────────
     Route::get('products', [ProductController::class, 'index'])->name('products.index');
     Route::get('products/{slug}', [ProductController::class, 'show'])->name('products.show');
     Route::get('products/{slug}/related', [ProductController::class, 'related'])->name('products.related');
     Route::get('products/{slug}/reviews', [ProductController::class, 'reviews'])->name('products.reviews');
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('products/{slug}/reviews', [ProductController::class, 'storeReview'])->name('products.reviews.store');
+        Route::match(['put', 'patch'], 'products/{slug}/reviews/{review}', [ProductController::class, 'updateReview'])->name('products.reviews.update');
+        Route::delete('products/{slug}/reviews/{review}', [ProductController::class, 'destroyReview'])->name('products.reviews.destroy');
+    });
 
     Route::get('categories', [CategoryController::class, 'index'])->name('categories.index');
     // Registered before categories/{slug} so "tree" is never swallowed as a slug.
@@ -132,6 +155,8 @@ Route::prefix('v1')->name('api.')->group(function () {
 
         Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('orders/{id}', [OrderController::class, 'show'])->name('orders.show');
+        Route::post('orders/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+        Route::post('orders/{id}/return-requests', [OrderController::class, 'storeReturnRequest'])->name('orders.return-requests.store');
 
         // ── Checkout & Payments ────────────────────────────────────────
         Route::get('checkout/summary', [CheckoutController::class, 'summary'])->name('checkout.summary');
@@ -147,4 +172,3 @@ Route::prefix('v1')->name('api.')->group(function () {
     // ── Public Payment Webhooks ─────────────────────────────────────
     Route::post('webhooks/razorpay', [FrontendCheckoutController::class, 'razorpayWebhook'])->name('webhooks.razorpay');
 });
-

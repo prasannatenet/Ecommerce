@@ -47,6 +47,18 @@ class OrderResource extends JsonResource
             'billing_address' => $this->address($this->billing_address),
             'items' => OrderItemResource::collection($this->whenLoaded('items')),
             'items_count' => $this->whenCounted('items'),
+            'return_requests' => $this->whenLoaded('returnRequests', fn () => $this->returnRequests->map(fn ($returnRequest) => [
+                'id' => $returnRequest->id,
+                'status' => $returnRequest->status,
+                'reason' => $returnRequest->reason,
+                'amount' => (float) $returnRequest->amount,
+                'items' => $returnRequest->items->map(fn ($item) => [
+                    'order_item_id' => $item->order_item_id,
+                    'quantity' => (int) $item->quantity,
+                    'amount' => (float) $item->amount,
+                ])->values(),
+                'created_at' => optional($returnRequest->created_at)->toIso8601String(),
+            ])->values()),
 
             'created_at' => optional($this->created_at)->toIso8601String(),
             'updated_at' => optional($this->updated_at)->toIso8601String(),

@@ -159,7 +159,7 @@ class ContentController extends ApiController
         $setting = Setting::query()->first();
 
         if (! $setting) {
-            return $this->ok([]);
+            return $this->ok([])->header('Cache-Control', 'no-store, private');
         }
 
         $base = $this->storefrontBase();
@@ -183,7 +183,7 @@ class ContentController extends ApiController
                 'youtube' => $setting->youtube_url,
                 'linkedin' => $setting->linkedin_url,
             ]),
-        ]);
+        ])->header('Cache-Control', 'no-store, private');
     }
 
     /**

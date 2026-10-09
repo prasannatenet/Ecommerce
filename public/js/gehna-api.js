@@ -181,27 +181,43 @@ function cleanParams(params = {}) {
  * @param {object}  [options.body]          JSON request body
  * @param {boolean} [options.auth=true]     Send the bearer token
  * @param {AbortSignal} [options.signal]    Cancel the request
+ * @param {RequestCache} [options.cache]    Browser fetch cache policy
  */
 async function request(path, options = {}) {
-  const { method = 'GET', params, body, auth = true, signal } = options;
+  const { method = 'GET', params, body, auth = true, signal, cache = 'default' } = options;
 
   const headers = { Accept: 'application/json' };
+  const isFormData = typeof FormData !== 'undefined' && body instanceof FormData;
+  let requestMethod = method;
+  let requestBody = body;
 
   // The API is stateless: authenticate with a bearer token, never a cookie, so
   // there is no session to expire and no CSRF token to fetch first.
   const token = auth ? tokenStorage.get() : null;
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  if (body !== undefined) headers['Content-Type'] = 'application/json';
+  if (isFormData) {
+    if (method === 'PUT' || method === 'PATCH') {
+      const multipartBody = new FormData();
+      for (const [key, value] of body.entries()) multipartBody.append(key, value);
+      multipartBody.append('_method', method);
+      requestMethod = 'POST';
+      requestBody = multipartBody;
+    }
+  } else if (body !== undefined) {
+    headers['Content-Type'] = 'application/json';
+    requestBody = body === undefined ? undefined : JSON.stringify(body);
+  }
 
   let response;
 
   try {
     response = await fetch(`${GEHNA_API_BASE}${path}${cleanParams(params)}`, {
-      method,
+      method: requestMethod,
       headers,
       signal,
-      body: body === undefined ? undefined : JSON.stringify(body),
+      cache,
+      body: requestBody,
     });
   } catch {
     // fetch only rejects on a transport failure, never on a 4xx/5xx.
@@ -417,7 +433,48 @@ export const productApi = {
   reviews(slug, params = {}) {
     return request(`/products/${encodeURIComponent(slug)}/reviews`, { params });
   },
+
+  /** Submit a review with optional image files. Only verified buyers may review. */
+  submitReview(slug, payload) {
+    return request(`/products/${encodeURIComponent(slug)}/reviews`, {
+      method: 'POST',
+      body: reviewFormData(payload),
+    });
+  },
+
+  /** Edit your review; include image files and/or remove_image_ids if needed. */
+  updateReview(slug, reviewId, payload) {
+    return request(`/products/${encodeURIComponent(slug)}/reviews/${reviewId}`, {
+      method: 'PUT',
+      body: reviewFormData(payload),
+    });
+  },
+
+  deleteReview(slug, reviewId) {
+    return request(`/products/${encodeURIComponent(slug)}/reviews/${reviewId}`, {
+      method: 'DELETE',
+    });
+  },
 };
+
+function reviewFormData(payload) {
+  if (typeof FormData !== 'undefined' && payload instanceof FormData) return payload;
+  if (typeof FormData === 'undefined') return payload;
+
+  const form = new FormData();
+
+  for (const [key, value] of Object.entries(payload)) {
+    if (value === null || value === undefined) continue;
+
+    if (Array.isArray(value)) {
+      value.forEach((item) => form.append(`${key}[]`, item));
+    } else {
+      form.append(key, value);
+    }
+  }
+
+  return form;
+}
 
 /**
  *  GET /categories   GET /categories/tree
@@ -571,8 +628,7 @@ export const wishlistApi = {
 /**
  *  GET /orders   GET /orders/{id}
  *
- * Read-only. Placing an order stays on the server-rendered checkout, because
- * it moves stock, calls the payment gateway and books a delivery partner.
+ * Order history, customer cancellation and return requests.
  */
 export const orderApi = {
   /** `params` accepts `status` and `payment_status`. */
@@ -581,6 +637,12 @@ export const orderApi = {
   },
   get(id) {
     return request(`/orders/${id}`);
+  },
+  cancel(id, reason = '') {
+    return request(`/orders/${id}/cancel`, { method: 'POST', body: { reason } });
+  },
+  requestReturn(id, payload) {
+    return request(`/orders/${id}/return-requests`, { method: 'POST', body: payload });
   },
 };
 
@@ -703,7 +765,7 @@ export const contentApi = {
 
   /** Public store settings: name, contact details, address, social links. */
   settings() {
-    return request('/settings');
+    return request('/settings', { cache: 'no-store' });
   },
 
   /** CMS pages (About Us, Contact, policies). The index returns titles only. */
@@ -729,6 +791,92 @@ export const contentApi = {
   /** One metal: metalPrice('gold'). */
   metalPrice(metal) {
     return request(`/metal-prices/${encodeURIComponent(metal)}`);
+  },
+};
+
+/**
+ * Public store settings and admin-only settings management.
+ *
+ * Admin writes require the logged-in user's Sanctum token and admin permission.
+ * Image fields are sent as multipart FormData by the shared request helper.
+ */
+export const settingsApi = {
+  /** Current public-facing website settings. No token required. */
+  getPublic() {
+    return request('/settings', { auth: false, cache: 'no-store' });
+  },
+
+  /** Full editable settings. Requires an authenticated administrator. */
+  getAdmin() {
+    return request('/admin/settings', { cache: 'no-store' });
+  },
+
+  /** Update store fields and optionally upload logo / favicon files. */
+  updateAdmin(payload) {
+    const body = typeof FormData !== 'undefined' && payload instanceof FormData
+      ? payload
+      : settingsFormData(payload);
+
+    return request('/admin/settings', {
+      method: 'PUT',
+      body,
+      cache: 'no-store',
+    });
+  },
+};
+
+function settingsFormData(payload) {
+  const form = new FormData();
+
+  for (const [key, value] of Object.entries(payload)) {
+    if (value === null || value === undefined) continue;
+    form.append(key, typeof value === 'boolean' ? (value ? '1' : '0') : value);
+  }
+
+  return form;
+}
+
+/**
+ *  GET /offers
+ *
+ * Public customer-facing coupon, combo and discounted-product offers.
+ */
+export const offersApi = {
+  /** `meta` includes separate coupon and sale-product pagination. */
+  list(params = {}) {
+    return request('/offers', { params });
+  },
+};
+
+/**
+ *  GET /coupons
+ *
+ * Public, currently running coupon offers for the storefront.
+ */
+export const couponApi = {
+  list(params = {}) {
+    return request('/coupons', { params });
+  },
+};
+
+/**
+ * Public delivery-location lookup. GPS requires browser permission; IP results
+ * are approximate and can be inaccurate for VPNs, mobile networks, and proxies.
+ */
+export const locationApi = {
+  detectGps({ latitude, longitude }) {
+    return request('/location/detect', {
+      method: 'POST',
+      auth: false,
+      body: { latitude, longitude },
+    });
+  },
+
+  detectByIp() {
+    return request('/location/detect-by-ip', {
+      method: 'POST',
+      auth: false,
+    });
   },
 };
 
@@ -766,6 +914,9 @@ const gehnaApi = {
   getProduct: productApi.get,
   getRelatedProducts: productApi.related,
   getProductReviews: productApi.reviews,
+  submitProductReview: productApi.submitReview,
+  updateProductReview: productApi.updateReview,
+  deleteProductReview: productApi.deleteReview,
   getCategories: categoryApi.list,
   getCategoryTree: categoryApi.tree,
   getCategory: categoryApi.get,
@@ -789,6 +940,8 @@ const gehnaApi = {
   clearWishlist: wishlistApi.clear,
   getOrders: orderApi.list,
   getOrder: orderApi.get,
+  cancelOrder: orderApi.cancel,
+  requestOrderReturn: orderApi.requestReturn,
 
   // checkout & payment
   getCheckoutSummary: checkoutApi.summary,
@@ -806,11 +959,17 @@ const gehnaApi = {
   getFaqs: contentApi.faqs,
   getTestimonials: contentApi.testimonials,
   getSettings: contentApi.settings,
+  getAdminSettings: settingsApi.getAdmin,
+  updateAdminSettings: settingsApi.updateAdmin,
   getPages: contentApi.pages,
   getPage: contentApi.page,
   subscribeNewsletter: contentApi.subscribe,
   getMetalPrices: contentApi.metalPrices,
   getMetalPrice: contentApi.metalPrice,
+  getOffers: offersApi.list,
+  getCoupons: couponApi.list,
+  detectLocation: locationApi.detectGps,
+  detectLocationByIp: locationApi.detectByIp,
 
   // escape hatch for an endpoint this file does not wrap yet
   request,

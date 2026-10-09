@@ -54,7 +54,12 @@ class CouponService
     /**
      * Return why a coupon cannot be used, or null when it is eligible.
      */
-    public function ineligibilityReason(Coupon $coupon, float $subtotal, bool $hasAppliedCombo = false): ?string
+    public function ineligibilityReason(
+        Coupon $coupon,
+        float $subtotal,
+        bool $hasAppliedCombo = false,
+        ?int $userId = null,
+    ): ?string
     {
         if ($hasAppliedCombo) {
             return 'Coupons cannot be combined with combo offers.';
@@ -81,7 +86,7 @@ class CouponService
         // Checked after the global limits so a dead coupon still explains itself
         // to everyone, and a live one the customer has already spent tells them
         // personally.
-        if ($this->hasRedeemed($coupon)) {
+        if ($this->hasRedeemed($coupon, $userId)) {
             return 'You have already used this coupon.';
         }
 
@@ -111,7 +116,7 @@ class CouponService
      *
      * @return Collection<int, array<string, mixed>>
      */
-    public function offerSummaries(int $limit = 12): Collection
+    public function offerSummaries(int $limit = 12, int $offset = 0, ?int $userId = null): Collection
     {
         $now = now();
 
@@ -122,8 +127,9 @@ class CouponService
             })
             ->orderByDesc('id')
             ->limit($limit)
+            ->offset($offset)
             ->get()
-            ->map(function (Coupon $coupon) {
+            ->map(function (Coupon $coupon) use ($userId) {
                 $validityParts = [];
 
                 if ($coupon->starts_at) {
@@ -134,16 +140,24 @@ class CouponService
                     $validityParts[] = 'Till '.$coupon->expires_at->format('d M Y');
                 }
 
-                $reason = $this->ineligibilityReason($coupon, PHP_FLOAT_MAX);
+                $reason = $this->ineligibilityReason($coupon, PHP_FLOAT_MAX, userId: $userId);
 
                 return [
+                    'id' => $coupon->id,
                     'code' => (string) $coupon->code,
+                    'type' => $coupon->type,
+                    'amount' => $coupon->amount !== null ? (float) $coupon->amount : null,
+                    'buy_quantity' => (int) ($coupon->buy_quantity ?? 0),
+                    'get_quantity' => (int) ($coupon->get_quantity ?? 0),
+                    'reward_coins' => (int) ($coupon->reward_coins ?? 0),
                     'offer_text' => $this->offerText($coupon),
                     'min_order_amount' => (float) ($coupon->min_order_amount ?? 0),
+                    'starts_at' => optional($coupon->starts_at)->toIso8601String(),
+                    'expires_at' => optional($coupon->expires_at)->toIso8601String(),
                     'validity_text' => $validityParts !== [] ? implode(' · ', $validityParts) : 'No expiry',
                     'is_available' => $reason === null,
                     'ineligible_reason' => $reason,
-                    'is_redeemed' => $this->hasRedeemed($coupon),
+                    'is_redeemed' => $this->hasRedeemed($coupon, $userId),
                 ];
             });
     }

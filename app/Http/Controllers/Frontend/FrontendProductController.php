@@ -5,21 +5,22 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Combo;
-use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Review;
 use App\Models\Wishlist;
+use App\Services\ProductReviewService;
 use App\Services\ProductRecommendationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 
 class FrontendProductController extends Controller
 {
-    public function __construct(private readonly ProductRecommendationService $recommendations) {}
+    public function __construct(
+        private readonly ProductRecommendationService $recommendations,
+        private readonly ProductReviewService $reviewService,
+    ) {}
 
     public function index(Request $request)
     {
@@ -206,8 +207,7 @@ class FrontendProductController extends Controller
         abort_unless($this->hasUserPurchasedProduct($product), 403, 'You can only review products you have purchased.');
 
         $data = $this->validateReview($request);
-        $review = $product->reviews()->firstOrNew(['user_id' => Auth::id()]);
-        $this->persistReview($review, $request, $data);
+        $this->reviewService->store($product, Auth::user(), $request, $data);
 
         return $this->reviewListResponse($product, $request, 'Thanks! Your review has been posted.');
     }
@@ -218,7 +218,7 @@ class FrontendProductController extends Controller
         abort_unless($review->user_id === Auth::id(), 403, 'You can only edit your own review.');
 
         $data = $this->validateReview($request, $review);
-        $this->persistReview($review, $request, $data, true);
+        $this->reviewService->update($review, $request, $data);
 
         return $this->reviewListResponse($product, $request, 'Your review has been updated.');
     }
@@ -228,7 +228,7 @@ class FrontendProductController extends Controller
         abort_unless($review->product_id === $product->id, 404);
         abort_unless($review->user_id === Auth::id(), 403, 'You can only delete your own review.');
 
-        $review->delete();
+        $this->reviewService->delete($review);
 
         return $this->reviewListResponse($product, $request, 'Your review has been deleted.');
     }
@@ -254,63 +254,6 @@ class FrontendProductController extends Controller
         return $request->validate($rules);
     }
 
-    private function persistReview(Review $review, Request $request, array $data, bool $allowRemoval = false): void
-    {
-        $uploadedFiles = collect($request->file('images', []))
-            ->filter(fn ($file) => $file->isValid())
-            ->values();
-        $removeIds = $allowRemoval
-            ? collect($data['remove_image_ids'] ?? [])->map(fn ($id) => (int) $id)
-            : collect();
-        $remainingCount = $review->exists
-            ? $review->images()->whereNotIn('id', $removeIds)->count()
-            : 0;
-
-        if ($remainingCount + $uploadedFiles->count() > 3) {
-            throw ValidationException::withMessages([
-                'images' => 'A review can contain a maximum of 3 images.',
-            ]);
-        }
-
-        $newPaths = [];
-        $removedPaths = [];
-
-        try {
-            DB::transaction(function () use ($review, $data, $uploadedFiles, $removeIds, &$newPaths, &$removedPaths): void {
-                $review->fill([
-                    'rating' => (int) $data['rating'],
-                    'comment' => trim($data['comment']),
-                ])->save();
-
-                if ($removeIds->isNotEmpty()) {
-                    $images = $review->images()->whereIn('id', $removeIds)->get();
-                    $removedPaths = $images->pluck('path')->all();
-                    $review->images()->whereIn('id', $removeIds)->delete();
-                }
-
-                foreach ($uploadedFiles as $file) {
-                    $path = $file->store('reviews/'.$review->id, 'public');
-                    if ($path === false) {
-                        throw new \RuntimeException('The review image could not be stored.');
-                    }
-
-                    $newPaths[] = $path;
-                    $review->images()->create(['path' => $path]);
-                }
-            });
-        } catch (\Throwable $exception) {
-            if ($newPaths !== []) {
-                Storage::disk('public')->delete($newPaths);
-            }
-
-            throw $exception;
-        }
-
-        if ($removedPaths !== []) {
-            Storage::disk('public')->delete($removedPaths);
-        }
-    }
-
     /**
      * A product may only be reviewed by the customer who bought it — the user
      * must have a live order item for this product. Cancelled, failed and
@@ -322,12 +265,7 @@ class FrontendProductController extends Controller
             return false;
         }
 
-        return OrderItem::where('product_id', $product->id)
-            ->whereHas('order', function ($query) {
-                $query->where('user_id', Auth::id())
-                    ->whereNotIn('status', ['cancelled', 'failed', 'refunded']);
-            })
-            ->exists();
+        return $this->reviewService->canReview($product, Auth::user());
     }
 
     /**

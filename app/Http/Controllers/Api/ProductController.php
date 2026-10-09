@@ -6,9 +6,12 @@ use App\Http\Controllers\Api\Concerns\BuildsProductQuery;
 use App\Http\Resources\ProductResource;
 use App\Http\Resources\ReviewResource;
 use App\Models\Product;
+use App\Models\Review;
 use App\Services\ProductRecommendationService;
+use App\Services\ProductReviewService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -29,6 +32,7 @@ class ProductController extends ApiController
 
     public function __construct(
         private readonly ProductRecommendationService $recommendations,
+        private readonly ProductReviewService $reviewService,
     ) {
     }
 
@@ -184,5 +188,102 @@ class ProductController extends ApiController
                 'average' => round((float) $product->reviews()->avg('rating'), 2),
             ],
         ]);
+    }
+
+    public function storeReview(Request $request, string $slug): JsonResponse
+    {
+        $product = $this->reviewableProduct($slug);
+        $user = $request->user();
+
+        abort_unless($this->reviewService->canReview($product, $user), Response::HTTP_FORBIDDEN, 'You can only review products you have purchased.');
+
+        $data = $this->validateReview($request);
+        $existing = $product->reviews()->where('user_id', $user->id)->exists();
+        $review = $this->reviewService->store($product, $user, $request, $data);
+
+        return $this->reviewResponse(
+            $product,
+            $review,
+            $existing ? 'Your review has been updated.' : 'Thanks! Your review has been posted.',
+            $existing ? Response::HTTP_OK : Response::HTTP_CREATED,
+        );
+    }
+
+    public function updateReview(Request $request, string $slug, Review $review): JsonResponse
+    {
+        $product = $this->reviewableProduct($slug);
+
+        abort_unless($review->product_id === $product->id, Response::HTTP_NOT_FOUND, 'Review not found.');
+        abort_unless($review->user_id === $request->user()->id, Response::HTTP_FORBIDDEN, 'You can only edit your own review.');
+
+        $data = $this->validateReview($request, $review);
+        $review = $this->reviewService->update($review, $request, $data);
+
+        return $this->reviewResponse($product, $review, 'Your review has been updated.');
+    }
+
+    public function destroyReview(Request $request, string $slug, Review $review): JsonResponse
+    {
+        $product = $this->reviewableProduct($slug);
+
+        abort_unless($review->product_id === $product->id, Response::HTTP_NOT_FOUND, 'Review not found.');
+        abort_unless($review->user_id === $request->user()->id, Response::HTTP_FORBIDDEN, 'You can only delete your own review.');
+
+        $this->reviewService->delete($review);
+        $average = (float) $product->reviews()->avg('rating');
+
+        return $this->ok([
+            'review' => null,
+            'summary' => [
+                'average' => round($average, 2),
+                'count' => $product->reviews()->count(),
+            ],
+        ], message: 'Your review has been deleted.');
+    }
+
+    private function reviewableProduct(string $slug): Product
+    {
+        return Product::query()
+            ->where('slug', $slug)
+            ->where('is_active', true)
+            ->firstOrFail();
+    }
+
+    private function validateReview(Request $request, ?Review $review = null): array
+    {
+        $rules = [
+            'rating' => ['required', 'integer', 'min:1', 'max:5'],
+            'comment' => ['required', 'string', 'max:2000'],
+            'images' => ['nullable', 'array', 'max:3'],
+            'images.*' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        ];
+
+        if ($review) {
+            $rules['remove_image_ids'] = ['nullable', 'array', 'max:3'];
+            $rules['remove_image_ids.*'] = [
+                'integer',
+                'distinct',
+                Rule::exists('review_images', 'id')->where('review_id', $review->id),
+            ];
+        }
+
+        return $request->validate($rules);
+    }
+
+    private function reviewResponse(
+        Product $product,
+        Review $review,
+        string $message,
+        int $status = Response::HTTP_OK,
+    ): JsonResponse {
+        $query = $product->reviews();
+
+        return $this->ok([
+            'review' => (new ReviewResource($review))->resolve(),
+            'summary' => [
+                'average' => round((float) $query->avg('rating'), 2),
+                'count' => $query->count(),
+            ],
+        ], message: $message, status: $status);
     }
 }
